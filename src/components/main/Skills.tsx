@@ -24,9 +24,9 @@ const CATEGORIES = [
   },
   {
     id: "data",
-    label: "Données & sécurité",
+    label: "Données & infrastructure",
     accent: "var(--text)",
-    items: ["PostgreSQL", "SQL Server", "Keycloak"],
+    items: ["PostgreSQL", "SQL Server", "Redis", "RabbitMQ", "Keycloak"],
   },
   {
     id: "devops",

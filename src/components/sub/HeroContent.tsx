@@ -17,7 +17,7 @@ const STACK = [
   { group: "Back-end",  items: ".NET · C# · FastAPI" },
   { group: "Front-end", items: "Angular · Next.js" },
   { group: "Langages",  items: "TypeScript · Python" },
-  { group: "Données",   items: "PostgreSQL · SQL Server" },
+  { group: "Données",   items: "PostgreSQL · Redis · RabbitMQ" },
   { group: "DevOps",    items: "Docker · GitLab CI/CD" },
   { group: "Méthode",   items: "Agile Scrum" },
 ];
