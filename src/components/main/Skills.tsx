@@ -14,7 +14,7 @@ const CATEGORIES = [
     id: "backend",
     label: "Back-end",
     accent: "var(--flag-red)",
-    items: [".NET", "C#", "FastAPI"],
+    items: [".NET", "FastAPI"],
   },
   {
     id: "frontend",
@@ -32,7 +32,7 @@ const CATEGORIES = [
     id: "devops",
     label: "DevOps & qualité",
     accent: "var(--muted)",
-    items: ["Docker", "GitLab", "CI/CD", "SonarQube", "GitHub", "Bitbucket"],
+    items: ["Docker", "GitLab", "CI/CD", "SonarQube"],
   },
 ] as const;
 

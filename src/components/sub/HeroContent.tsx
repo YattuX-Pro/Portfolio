@@ -14,7 +14,7 @@ const STATS = [
 
 /* Colonne « index » — sidebar éditoriale, purement typographique. */
 const STACK = [
-  { group: "Back-end",  items: ".NET · C# · FastAPI" },
+  { group: "Back-end",  items: ".NET · FastAPI" },
   { group: "Front-end", items: "Angular · Next.js" },
   { group: "Langages",  items: "TypeScript · Python" },
   { group: "Données",   items: "PostgreSQL · Redis · RabbitMQ" },
