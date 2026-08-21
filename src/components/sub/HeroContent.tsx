@@ -14,11 +14,12 @@ const STATS = [
 
 /* Colonne « index » — sidebar éditoriale, purement typographique. */
 const STACK = [
-  { group: "Back-end",  items: ".NET · C#" },
+  { group: "Back-end",  items: ".NET · C# · FastAPI" },
   { group: "Front-end", items: "Angular · Next.js" },
   { group: "Langages",  items: "TypeScript · Python" },
   { group: "Données",   items: "PostgreSQL · SQL Server" },
-  { group: "Outils",    items: "Docker · Git" },
+  { group: "DevOps",    items: "Docker · GitLab CI/CD" },
+  { group: "Méthode",   items: "Agile Scrum" },
 ];
 
 const SOCIALS = [

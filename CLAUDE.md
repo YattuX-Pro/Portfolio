@@ -53,7 +53,7 @@ The palette is a warm off-white neutral plus **one** interactive accent (`--acce
 **Contrast is load-bearing here, not decorative.** The flag's yellow (`#FCD116`) measures **1.41:1** on the cream background and the official green (`#009460`) measures **3.72:1**. Consequences, already enforced in the code:
 
 - Yellow appears **only** inside `FlagRule`, which is `aria-hidden` and conveys nothing. It must never carry text, an icon, or an informative graphic.
-- Green passes the 3:1 bar for graphics (the skill bars) but **fails** the 4.5:1 bar for text. `--flag-green-ink` (`#00713F`, 5.85:1) exists for green text.
+- Green **fails** the 4.5:1 bar for text (it clears 3:1, so it is fine for graphics). `--flag-green-ink` (`#00713F`, 5.85:1) exists for green text.
 - `--muted` was deliberately darkened to `#55524C` (7.45:1) after the first pass read as too faint. Don't lighten it back.
 
 If a request would put yellow on text, say so rather than shipping it.
@@ -86,7 +86,9 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
 
 ## Content location
 
-Section content is hardcoded **inside its component**, not in a shared data file: `PROJECTS` in `main/Projects.tsx`, `CATEGORIES` (skills with levels) in `main/Skills.tsx`, `STATS`/`STACK`/`SOCIALS` in `sub/HeroContent.tsx`, `EMAIL`/`LINKS` in `main/Footer.tsx`. The old `src/constants/index.ts` and `utils/motion.ts` were deleted along with the components that used them.
+Skills carry **no self-rated percentage** — that system was removed deliberately, so adding a competency never requires inventing a number. Don't reintroduce it.
+
+Section content is hardcoded **inside its component**, not in a shared data file: `PROJECTS` in `main/Projects.tsx`, `CATEGORIES` in `main/Skills.tsx`, `STATS`/`STACK`/`SOCIALS` in `sub/HeroContent.tsx`, `EMAIL`/`LINKS` in `main/Footer.tsx`. The old `src/constants/index.ts` and `utils/motion.ts` were deleted along with the components that used them.
 
 Images and the CV live in `public/` and are referenced by absolute path (`/next.png`, `/cv/CV_Yattara_Aboubacar.pdf`). Note the mixed-case extensions on project screenshots (`.PNG`) — they matter on case-sensitive filesystems.
 
@@ -94,4 +96,4 @@ Images and the CV live in `public/` and are referenced by absolute path (`/next.
 
 - **`react-icons` v5 mixes Heroicons generations.** `react-icons/hi` is v1 (`HiMail`, `HiExternalLink`), `react-icons/hi2` is v2 (`HiEnvelope`, `HiArrowUpRight`). A wrong-generation name imports as `undefined` and fails at render, not at typecheck. Verify with `node -e 'console.log(typeof require("react-icons/hi2").HiEnvelope)'`.
 - **Framer Motion v12 types `ease` as a tuple.** Import `EASE` from `Reveal.tsx` rather than writing a bare array literal, which fails typecheck under `strict`.
-- **`scaleX` animations need `origin-left`**, otherwise bars grow from the center. Both `FlagRule` and the skill bars in `Skills.tsx` depend on this.
+- **`scaleX` animations need `origin-left`**, otherwise bars grow from the center. `FlagRule` depends on this.
