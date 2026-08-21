@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design tokens ────────────────────────────────────────────────────────
+   Un seul accent. Le neutre chaud fait tout le travail.
+   Contrastes vérifiés : muted 5.2:1, accent 6.4:1, blanc/accent 6.7:1.
+   -------------------------------------------------------------------------- */
+:root {
+  --bg:            #FAFAF8;
+  --surface:       #FFFFFF;
+  --text:          #1A1A18;
+  --muted:         #55524C;
+  --line:          #E7E5E0;
+  --line-strong:   #D8D5CE;
+  /* Drapeau de la Guinée — ordre officiel : rouge, jaune, vert. */
+  --flag-red:    #CE1126;
+  --flag-yellow: #FCD116;
+  --flag-green:  #009460;
+  /* Variante assombrie du vert : le vert officiel n'atteint que 3.72:1,
+     insuffisant pour du texte courant. Celle-ci monte à 5.85:1. */
+  --flag-green-ink: #00713F;
+
+  /* Accent interactif = rouge du drapeau (5.38:1 sur --bg). */
+  --accent:        #CE1126;
+  --accent-hover:  #A50E1F;
+  --accent-soft:   #FCF0F1;
+
+  /* Le rôle « display » existe toujours, mais il est servi par Plex Sans :
+     la hiérarchie vient de la graisse et de l'approche, pas d'une 2e fonte. */
+  --font-display: var(--font-sans);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-feature-settings: "kern", "liga";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus visible cohérent sur tout le site (a11y) */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
+}
+
+@layer components {
+  /* Label mono : numéros de section, tags de stack, métadonnées.
+     C'est ce détail qui porte le signal « tech » — à garder rare. */
+  .meta {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+}
+
+/* ─── Accessibilité : mouvement réduit ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
