@@ -46,6 +46,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
             id="heroRole"
             name="heroRole"
             required
+            placeholder="Analyste Développeur"
             defaultValue={settings?.heroRole ?? ""}
           />
         </Field>
@@ -68,13 +69,19 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
             name="heroBio"
             required
             rows={4}
+            placeholder="Une ou deux phrases sur ce que vous faites."
             defaultValue={settings?.heroBio ?? ""}
           />
         </Field>
 
         <Field>
           <FieldLabel htmlFor="method">Méthode</FieldLabel>
-          <Input id="method" name="method" defaultValue={settings?.method ?? ""} />
+          <Input
+            id="method"
+            name="method"
+            placeholder="Agile Scrum"
+            defaultValue={settings?.method ?? ""}
+          />
           <FieldDescription>
             Affichée sous la grille des compétences. Vide = ligne masquée.
           </FieldDescription>
@@ -89,6 +96,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
             name="email"
             type="email"
             required
+            placeholder="vous@exemple.com"
             defaultValue={settings?.email ?? ""}
           />
         </Field>
@@ -99,6 +107,7 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
             id="githubUrl"
             name="githubUrl"
             type="url"
+            placeholder="https://github.com/…"
             defaultValue={settings?.githubUrl ?? ""}
           />
         </Field>
@@ -109,13 +118,19 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
             id="linkedinUrl"
             name="linkedinUrl"
             type="url"
+            placeholder="https://www.linkedin.com/in/…"
             defaultValue={settings?.linkedinUrl ?? ""}
           />
         </Field>
 
         <Field>
           <FieldLabel htmlFor="cvUrl">CV</FieldLabel>
-          <Input id="cvUrl" name="cvUrl" defaultValue={settings?.cvUrl ?? ""} />
+          <Input
+            id="cvUrl"
+            name="cvUrl"
+            placeholder="/cv/CV_Yattara_Aboubacar.pdf"
+            defaultValue={settings?.cvUrl ?? ""}
+          />
           <FieldDescription>
             Chemin interne (/cv/CV_Yattara_Aboubacar.pdf) ou URL complète.
           </FieldDescription>

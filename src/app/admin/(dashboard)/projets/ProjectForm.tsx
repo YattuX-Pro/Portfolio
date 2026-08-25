@@ -57,7 +57,13 @@ export default function ProjectForm({
 
         <Field data-invalid={state.error ? true : undefined}>
           <FieldLabel htmlFor="title">Titre</FieldLabel>
-          <Input id="title" name="title" required defaultValue={project?.title} />
+          <Input
+            id="title"
+            name="title"
+            required
+            placeholder="Ex. Rental Car"
+            defaultValue={project?.title}
+          />
         </Field>
 
         <Field>
@@ -67,13 +73,19 @@ export default function ProjectForm({
             name="description"
             required
             rows={4}
+            placeholder="Ce que fait le projet, en deux ou trois phrases."
             defaultValue={project?.description}
           />
         </Field>
 
         <Field>
           <FieldLabel htmlFor="stack">Stack</FieldLabel>
-          <Input id="stack" name="stack" defaultValue={project?.stack.join(", ")} />
+          <Input
+            id="stack"
+            name="stack"
+            placeholder="Next.js, ASP.NET, Docker"
+            defaultValue={project?.stack.join(", ")}
+          />
           <FieldDescription>
             Séparée par des virgules. Exemple : Next.js, ASP.NET, Docker
           </FieldDescription>
@@ -98,6 +110,7 @@ export default function ProjectForm({
           <Input
             id="imageUrl"
             name="imageUrl"
+            placeholder="/carties.PNG"
             defaultValue={project?.imageUrl ?? ""}
           />
           <FieldDescription>
@@ -113,6 +126,7 @@ export default function ProjectForm({
             id="githubUrl"
             name="githubUrl"
             type="url"
+            placeholder="https://github.com/…"
             defaultValue={project?.githubUrl ?? ""}
           />
         </Field>
@@ -123,13 +137,19 @@ export default function ProjectForm({
             id="demoUrl"
             name="demoUrl"
             type="url"
+            placeholder="https://…"
             defaultValue={project?.demoUrl ?? ""}
           />
         </Field>
 
         <Field>
           <FieldLabel htmlFor="slug">Adresse (slug)</FieldLabel>
-          <Input id="slug" name="slug" defaultValue={project?.slug} />
+          <Input
+            id="slug"
+            name="slug"
+            placeholder="rental-car"
+            defaultValue={project?.slug}
+          />
           <FieldDescription>
             Vide pour la déduire du titre.
           </FieldDescription>

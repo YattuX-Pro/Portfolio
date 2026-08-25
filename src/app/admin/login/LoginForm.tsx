@@ -13,7 +13,7 @@ function SubmitButton() {
      composant qui le rend — d'où ce sous-composant. */
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full" disabled={pending}>
+    <Button type="submit" size="lg" className="mt-2 h-12 w-full" disabled={pending}>
       {pending ? <Spinner data-icon="inline-start" /> : null}
       {pending ? "Connexion…" : "Se connecter"}
     </Button>
@@ -35,7 +35,9 @@ export default function LoginForm() {
             name="email"
             type="email"
             autoComplete="username"
+            placeholder="vous@exemple.com"
             required
+            className="h-12"
             aria-invalid={state.error ? true : undefined}
           />
         </Field>
@@ -47,7 +49,9 @@ export default function LoginForm() {
             name="password"
             type="password"
             autoComplete="current-password"
+            placeholder="••••••••••••"
             required
+            className="h-12"
             aria-invalid={state.error ? true : undefined}
           />
         </Field>
