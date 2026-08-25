@@ -1,4 +1,11 @@
 import { getSettings, getHeroStats, getHeroStack } from "@/lib/db/queries";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import SettingsForm from "./SettingsForm";
 import ListEditor from "./ListEditor";
 import { addStat, deleteStat, addStackRow, deleteStackRow } from "./actions";
@@ -6,7 +13,7 @@ import { addStat, deleteStat, addStackRow, deleteStackRow } from "./actions";
 export const dynamic = "force-dynamic";
 
 export default async function AdminProfilePage() {
-  /* Trois lectures indépendantes : en parallèle plutôt qu'en cascade. */
+  /* Trois lectures indépendantes : en parallèle, jamais en cascade. */
   const [settings, stats, stack] = await Promise.all([
     getSettings(),
     getHeroStats(),
@@ -14,24 +21,25 @@ export default async function AdminProfilePage() {
   ]);
 
   return (
-    <div className="flex flex-col gap-14">
-      <section>
-        <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-ink pb-3 border-b-2 border-ink">
-          Identité & contact
-        </h2>
-        <div className="mt-6">
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Identité & contact</CardTitle>
+          <CardDescription>
+            Ce qui s&apos;affiche dans le hero et la section contact.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <SettingsForm settings={settings} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section>
-        <div className="flex items-baseline justify-between gap-4 pb-3 border-b-2 border-ink">
-          <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-ink">
-            Chiffres du hero
-          </h2>
-          <span className="meta">{stats.length} entrées</span>
-        </div>
-        <div className="mt-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Chiffres du hero</CardTitle>
+          <CardDescription>{stats.length} entrées affichées sous la bio.</CardDescription>
+        </CardHeader>
+        <CardContent>
           <ListEditor
             rows={stats.map((s) => ({ id: s.id, left: s.value, right: s.label }))}
             fields={{
@@ -42,37 +50,30 @@ export default async function AdminProfilePage() {
             deleteAction={deleteStat}
             emptyLabel="Aucun chiffre affiché dans le hero."
           />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section>
-        <div className="flex items-baseline justify-between gap-4 pb-3 border-b-2 border-ink">
-          <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-ink">
-            Colonne « Stack principale »
-          </h2>
-          <span className="meta">{stack.length} lignes</span>
-        </div>
-        <p className="mt-4 text-[13px] leading-[1.6] text-ink-muted">
-          Visible uniquement à partir de 1024&nbsp;px, dans la colonne de droite du
-          hero. Vide, la colonne disparaît entièrement.
-        </p>
-        <div className="mt-5">
+      <Card>
+        <CardHeader>
+          <CardTitle>Colonne « Stack principale »</CardTitle>
+          <CardDescription>
+            Visible à partir de 1024 px, dans la colonne droite du hero. Vide, la
+            colonne disparaît.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <ListEditor
             rows={stack.map((s) => ({ id: s.id, left: s.groupLabel, right: s.items }))}
             fields={{
               left: { name: "groupLabel", label: "Groupe", placeholder: "Back-end" },
-              right: {
-                name: "items",
-                label: "Contenu",
-                placeholder: ".NET · FastAPI",
-              },
+              right: { name: "items", label: "Contenu", placeholder: ".NET · FastAPI" },
             }}
             addAction={addStackRow}
             deleteAction={deleteStackRow}
             emptyLabel="Aucune ligne : la colonne est masquée sur le site."
           />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
     </div>
   );
 }

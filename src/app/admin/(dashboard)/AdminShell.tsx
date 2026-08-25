@@ -1,11 +1,54 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import AdminNav, { useCurrentSection } from "./AdminNav";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboardIcon,
+  FolderKanbanIcon,
+  LayersIcon,
+  UserIcon,
+  ExternalLinkIcon,
+  LogOutIcon,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { signOutAction } from "@/app/admin/login/actions";
 
-const SIDEBAR_ID = "admin-sidebar";
+const SECTIONS = [
+  { href: "/admin", label: "Tableau de bord", icon: LayoutDashboardIcon },
+  { href: "/admin/projets", label: "Projets", icon: FolderKanbanIcon },
+  { href: "/admin/competences", label: "Compétences", icon: LayersIcon },
+  { href: "/admin/profil", label: "Profil", icon: UserIcon },
+] as const;
+
+/* /admin préfixe toutes les autres routes : sans égalité stricte pour la
+   racine, « Tableau de bord » resterait actif partout. */
+function isActive(pathname: string, href: string) {
+  return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+}
 
 export default function AdminShell({
   email,
@@ -14,137 +57,110 @@ export default function AdminShell({
   email: string;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
-  const section = useCurrentSection();
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  /* Fermeture à la navigation : passée à AdminNav, qui l'appelle au clic.
-     Un effet sur pathname ferait la même chose, mais changer l'état depuis
-     un effet est un anti-patron — et ici c'est inutile. */
-  const close = useCallback(() => setOpen(false), []);
-
-  /* Repasse en desktop : le tiroir doit se refermer, sinon il garde le
-     verrou de défilement alors qu'il n'est plus visible. */
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const onChange = () => mq.matches && setOpen(false);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  /* Tiroir ouvert : Échap ferme et le défilement du corps est verrouillé. */
-  useEffect(() => {
-    if (!open) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
-    };
-  }, [open]);
+  const pathname = usePathname();
+  const current = SECTIONS.find((s) => isActive(pathname, s.href)) ?? SECTIONS[0];
 
   return (
-    <div className="min-h-svh bg-bg">
-      {/* ── Voile, sous lg uniquement ────────────────────────────────── */}
-      {open ? (
-        <div
-          aria-hidden
-          onClick={close}
-          className="lg:hidden fixed inset-0 z-40 bg-ink/30 backdrop-blur-[2px]"
-        />
-      ) : null}
+    <SidebarProvider>
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <span className="font-mono text-[13px] tracking-[0.14em] group-data-[collapsible=icon]:hidden">
+              ADMIN
+            </span>
+            {/* Filet tricolore guinéen, comme sur le site public. */}
+            <span aria-hidden className="flex items-center gap-1">
+              <span className="block h-1.5 w-3 bg-flag-red" />
+              <span className="block h-1.5 w-3 bg-flag-yellow" />
+              <span className="block h-1.5 w-3 bg-flag-green" />
+            </span>
+          </div>
+        </SidebarHeader>
 
-      {/* ── Colonne latérale ─────────────────────────────────────────── */}
-      <aside
-        id={SIDEBAR_ID}
-        className={`fixed inset-y-0 left-0 z-50 w-[264px] bg-surface border-r border-line flex flex-col transition-transform duration-300 ease-soft lg:translate-x-0 ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="h-16 flex items-center gap-3 px-6 border-b border-line shrink-0">
-          <span className="font-mono text-[13px] tracking-[0.14em] text-ink">ADMIN</span>
-          <span aria-hidden className="flex items-center gap-1">
-            <span className="block h-1.5 w-4 bg-flag-red" />
-            <span className="block h-1.5 w-4 bg-flag-yellow" />
-            <span className="block h-1.5 w-4 bg-flag-green" />
-          </span>
-        </div>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {SECTIONS.map((s) => (
+                  <SidebarMenuItem key={s.href}>
+                    <SidebarMenuButton
+                      isActive={isActive(pathname, s.href)}
+                      tooltip={s.label}
+                      render={
+                        <Link href={s.href}>
+                          <s.icon />
+                          <span>{s.label}</span>
+                        </Link>
+                      }
+                    />
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
 
-        <div className="flex-1 overflow-y-auto py-3">
-          <AdminNav onNavigate={close} />
-        </div>
-
-        <div className="border-t border-line p-3 shrink-0">
-          <p className="meta px-3 truncate" title={email}>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Voir le site"
+                render={
+                  <Link href="/" target="_blank">
+                    <ExternalLinkIcon />
+                    <span>Voir le site</span>
+                  </Link>
+                }
+              />
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <form action={signOutAction}>
+                <SidebarMenuButton type="submit" tooltip="Déconnexion" className="w-full">
+                  <LogOutIcon />
+                  <span>Déconnexion</span>
+                </SidebarMenuButton>
+              </form>
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <p
+            className="px-2 pb-1 text-xs text-sidebar-foreground/60 truncate group-data-[collapsible=icon]:hidden"
+            title={email}
+          >
             {email}
           </p>
-          <div className="mt-1 flex flex-col">
-            <Link
-              href="/"
-              target="_blank"
-              className="flex items-center h-11 px-3 rounded-md text-[14px] text-ink-muted hover:text-ink hover:bg-bg transition-colors duration-200"
-            >
-              Voir le site
-            </Link>
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="flex items-center h-11 w-full px-3 rounded-md text-[14px] text-ink-muted hover:text-brand hover:bg-bg transition-colors duration-200 cursor-pointer"
-              >
-                Déconnexion
-              </button>
-            </form>
-          </div>
-        </div>
-      </aside>
+        </SidebarFooter>
 
-      {/* ── Zone de contenu ──────────────────────────────────────────── */}
-      <div className="lg:pl-[264px] min-h-svh flex flex-col">
-        <header className="sticky top-0 z-30 h-16 shrink-0 bg-bg/90 backdrop-blur-md border-b border-line">
-          <div className="h-full px-4 sm:px-6 lg:px-8 flex items-center gap-3">
-            <button
-              ref={triggerRef}
-              onClick={() => setOpen((v) => !v)}
-              aria-expanded={open}
-              aria-controls={SIDEBAR_ID}
-              aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-              className="lg:hidden -ml-2 h-11 w-11 flex flex-col items-center justify-center gap-[5px] rounded-md hover:bg-surface transition-colors duration-200 cursor-pointer"
-            >
-              <span aria-hidden className="block h-[1.5px] w-5 bg-ink" />
-              <span aria-hidden className="block h-[1.5px] w-5 bg-ink" />
-              <span aria-hidden className="block h-[1.5px] w-5 bg-ink" />
-            </button>
+        <SidebarRail />
+      </Sidebar>
 
-            <div className="min-w-0">
-              <p className="meta leading-none">{section.hint}</p>
-              <h1 className="mt-1 text-[15px] font-semibold tracking-[-0.01em] text-ink truncate leading-none">
-                {section.label}
-              </h1>
-            </div>
-          </div>
+      <SidebarInset>
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden sm:block">
+                <BreadcrumbLink render={<Link href="/admin">Administration</Link>} />
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden sm:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{current.label}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </header>
 
-        {/* Pleine largeur : un back-office n'est pas une page de lecture,
-            aucune raison de brider le contenu à une colonne centrée. */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+        {/* Pleine largeur : un back-office n'est pas une page de lecture. */}
+        <main className="flex-1 p-4 md:p-6">{children}</main>
 
-        <footer className="shrink-0 border-t border-line px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-            <p className="meta">
-              © {new Date().getFullYear()} Aboubacar Tidiane Yattara
-            </p>
-            <p className="meta">Neon Postgres · eu-central-1</p>
+        <footer className="border-t px-4 py-4 md:px-6">
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-xs text-muted-foreground">
+            <p>© {new Date().getFullYear()} Aboubacar Tidiane Yattara</p>
+            <p>Neon Postgres · eu-central-1</p>
           </div>
         </footer>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

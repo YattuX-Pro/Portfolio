@@ -1,168 +1,141 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import type { Project } from "@/lib/db/schema";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { createProject, updateProject, type ActionState } from "./actions";
-
-const FIELD =
-  "w-full rounded-md border border-line-strong bg-surface px-3.5 py-3 text-[15px] text-ink placeholder:text-ink-muted/60 focus:border-ink outline-none transition-colors duration-200";
 
 function Submit({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-brand text-white text-[15px] font-medium hover:bg-brand-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
-    >
+    <Button type="submit" disabled={pending}>
+      {pending ? <Spinner data-icon="inline-start" /> : null}
       {pending ? "Enregistrement…" : label}
-    </button>
+    </Button>
   );
 }
 
-function Field({
-  name,
-  label,
-  hint,
-  children,
+export default function ProjectForm({
+  project,
+  onSaved,
 }: {
-  name: string;
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
+  project?: Project;
+  onSaved?: () => void;
 }) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={name} className="meta">
-        {label}
-      </label>
-      {children}
-      {hint ? <p className="text-[13px] text-ink-muted">{hint}</p> : null}
-    </div>
-  );
-}
-
-export default function ProjectForm({ project }: { project?: Project }) {
   const editing = Boolean(project);
   const [state, formAction] = useActionState<ActionState, FormData>(
     editing ? updateProject : createProject,
     { error: null },
   );
 
-  /* Pas d'état local ni de callback de succès : l'action appelle
-     revalidatePath, donc Next re-rend la liste serveur toute seule. */
+  /* Le succès referme le panneau et notifie. Passer par un effet est ici
+     légitime : c'est une réaction à un changement d'état venu du serveur,
+     pas un calcul dérivable pendant le rendu. */
+  useEffect(() => {
+    if (state.ok) {
+      toast.success(editing ? "Projet mis à jour." : "Projet créé.");
+      onSaved?.();
+    }
+  }, [state.ok, editing, onSaved]);
+
   return (
-    <form action={formAction} className="flex flex-col gap-5">
-      {editing ? <input type="hidden" name="id" value={project!.id} /> : null}
+    <form action={formAction}>
+      <FieldGroup>
+        {editing ? <input type="hidden" name="id" value={project!.id} /> : null}
 
-      <Field name="title" label="Titre">
-        <input
-          id="title"
-          name="title"
-          required
-          defaultValue={project?.title}
-          className={FIELD}
-        />
-      </Field>
+        <Field data-invalid={state.error ? true : undefined}>
+          <FieldLabel htmlFor="title">Titre</FieldLabel>
+          <Input id="title" name="title" required defaultValue={project?.title} />
+        </Field>
 
-      <Field name="description" label="Description">
-        <textarea
-          id="description"
-          name="description"
-          required
-          rows={4}
-          defaultValue={project?.description}
-          className={`${FIELD} resize-y`}
-        />
-      </Field>
+        <Field>
+          <FieldLabel htmlFor="description">Description</FieldLabel>
+          <Textarea
+            id="description"
+            name="description"
+            required
+            rows={4}
+            defaultValue={project?.description}
+          />
+        </Field>
 
-      <Field
-        name="stack"
-        label="Stack"
-        hint="Séparée par des virgules. Exemple : Next.js, ASP.NET, Docker"
-      >
-        <input
-          id="stack"
-          name="stack"
-          defaultValue={project?.stack.join(", ")}
-          className={FIELD}
-        />
-      </Field>
+        <Field>
+          <FieldLabel htmlFor="stack">Stack</FieldLabel>
+          <Input id="stack" name="stack" defaultValue={project?.stack.join(", ")} />
+          <FieldDescription>
+            Séparée par des virgules. Exemple : Next.js, ASP.NET, Docker
+          </FieldDescription>
+        </Field>
 
-      <Field
-        name="imageUrl"
-        label="Image"
-        hint="Chemin local (/carties.PNG) ou URL complète. Laisser vide si aucun visuel."
-      >
-        <input
-          id="imageUrl"
-          name="imageUrl"
-          defaultValue={project?.imageUrl ?? ""}
-          className={FIELD}
-        />
-      </Field>
+        <Field>
+          <FieldLabel htmlFor="imageUrl">Image</FieldLabel>
+          <Input
+            id="imageUrl"
+            name="imageUrl"
+            defaultValue={project?.imageUrl ?? ""}
+          />
+          <FieldDescription>
+            Chemin local (/carties.PNG) ou URL complète. Vide = sans visuel.
+          </FieldDescription>
+        </Field>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field name="githubUrl" label="Code source">
-          <input
+        <Field>
+          <FieldLabel htmlFor="githubUrl">Code source</FieldLabel>
+          <Input
             id="githubUrl"
             name="githubUrl"
             type="url"
             defaultValue={project?.githubUrl ?? ""}
-            className={FIELD}
           />
         </Field>
 
-        <Field name="demoUrl" label="Démo">
-          <input
+        <Field>
+          <FieldLabel htmlFor="demoUrl">Démo</FieldLabel>
+          <Input
             id="demoUrl"
             name="demoUrl"
             type="url"
             defaultValue={project?.demoUrl ?? ""}
-            className={FIELD}
           />
         </Field>
-      </div>
 
-      <Field
-        name="slug"
-        label="Adresse (slug)"
-        hint="Laisser vide pour la déduire du titre."
-      >
-        <input
-          id="slug"
-          name="slug"
-          defaultValue={project?.slug}
-          className={FIELD}
-        />
-      </Field>
+        <Field>
+          <FieldLabel htmlFor="slug">Adresse (slug)</FieldLabel>
+          <Input id="slug" name="slug" defaultValue={project?.slug} />
+          <FieldDescription>
+            Vide pour la déduire du titre.
+          </FieldDescription>
+        </Field>
 
-      <label className="flex items-center gap-3 min-h-11 cursor-pointer">
-        <input
-          type="checkbox"
-          name="published"
-          defaultChecked={project?.published ?? true}
-          className="h-5 w-5 accent-[var(--brand)] cursor-pointer"
-        />
-        <span className="text-[15px] text-ink">Visible sur le site</span>
-      </label>
+        <Field orientation="horizontal">
+          <Switch
+            id="published"
+            name="published"
+            defaultChecked={project?.published ?? true}
+          />
+          <FieldLabel htmlFor="published">Visible sur le site</FieldLabel>
+        </Field>
 
-      {state.error ? (
-        <p role="alert" className="text-[14px] text-brand">
-          {state.error}
-        </p>
-      ) : null}
+        {state.error ? (
+          <p role="alert" className="text-sm text-destructive">
+            {state.error}
+          </p>
+        ) : null}
 
-      {state.ok ? (
-        <p role="status" className="text-[14px]" style={{ color: "var(--flag-green-ink)" }}>
-          Enregistré.
-        </p>
-      ) : null}
-
-      <div className="flex items-center gap-3">
         <Submit label={editing ? "Enregistrer" : "Créer le projet"} />
-      </div>
+      </FieldGroup>
     </form>
   );
 }

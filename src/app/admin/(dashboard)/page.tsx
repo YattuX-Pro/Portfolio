@@ -1,28 +1,57 @@
 import Link from "next/link";
+import {
+  FolderKanbanIcon,
+  LayersIcon,
+  CircleCheckIcon,
+  ClockIcon,
+  ArrowRightIcon,
+} from "lucide-react";
 import { getAllProjects, getSkills, getSettings } from "@/lib/db/queries";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const dynamic = "force-dynamic";
 
-function Tile({
+function StatCard({
+  icon: Icon,
   value,
   label,
   hint,
-  accent,
 }: {
+  icon: typeof FolderKanbanIcon;
   value: string | number;
   label: string;
-  hint?: string;
-  accent: string;
+  hint: string;
 }) {
   return (
-    <div className="border border-line rounded-md bg-surface p-5">
-      <div aria-hidden className="h-1 w-10 mb-4" style={{ backgroundColor: accent }} />
-      <p className="text-[32px] font-semibold tracking-[-0.03em] leading-none text-ink tabular-nums">
-        {value}
-      </p>
-      <p className="mt-2 meta">{label}</p>
-      {hint ? <p className="mt-1 text-[13px] text-ink-muted">{hint}</p> : null}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardDescription className="flex items-center gap-2">
+          <Icon className="size-4" />
+          {label}
+        </CardDescription>
+        <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">{hint}</p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -37,127 +66,103 @@ export default async function AdminDashboardPage() {
   const published = projects.filter((p) => p.published);
   const hidden = projects.length - published.length;
   const skillCount = skills.reduce((n, c) => n + c.items.length, 0);
-
   const lastUpdated = projects.reduce<Date | null>(
     (latest, p) => (!latest || p.updatedAt > latest ? p.updatedAt : latest),
     null,
   );
 
   return (
-    <div className="flex flex-col gap-10">
-      {/* Indicateurs */}
-      <section>
-        <h2 className="meta pb-3 border-b border-line">Vue d&apos;ensemble</h2>
-        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <Tile
-            value={published.length}
-            label="Projets publiés"
-            hint={hidden > 0 ? `${hidden} masqué${hidden > 1 ? "s" : ""}` : "Aucun masqué"}
-            accent="var(--flag-red)"
-          />
-          <Tile
-            value={skills.length}
-            label="Catégories"
-            hint={`${skillCount} compétences`}
-            accent="var(--flag-green)"
-          />
-          <Tile
-            value={settings?.heroAvailable ? "Oui" : "Non"}
-            label="Disponible"
-            hint="Affiché dans le hero"
-            accent="var(--text)"
-          />
-          <Tile
-            value={
-              lastUpdated
-                ? lastUpdated.toLocaleDateString("fr-FR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                  })
-                : "—"
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          icon={FolderKanbanIcon}
+          value={published.length}
+          label="Projets publiés"
+          hint={hidden > 0 ? `${hidden} masqué${hidden > 1 ? "s" : ""}` : "Aucun masqué"}
+        />
+        <StatCard
+          icon={LayersIcon}
+          value={skills.length}
+          label="Catégories"
+          hint={`${skillCount} compétences`}
+        />
+        <StatCard
+          icon={CircleCheckIcon}
+          value={settings?.heroAvailable ? "Oui" : "Non"}
+          label="Disponible"
+          hint="Affiché dans le hero"
+        />
+        <StatCard
+          icon={ClockIcon}
+          value={
+            lastUpdated
+              ? lastUpdated.toLocaleDateString("fr-FR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                })
+              : "—"
+          }
+          label="Dernière modif."
+          hint="Projet le plus récent"
+        />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Projets récents</CardTitle>
+          <CardDescription>Les cinq dernières entrées et leur statut.</CardDescription>
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto"
+            render={
+              <Link href="/admin/projets">
+                Tout gérer
+                <ArrowRightIcon data-icon="inline-end" />
+              </Link>
             }
-            label="Dernière modif."
-            hint="Projet le plus récent"
-            accent="var(--ink-muted)"
           />
-        </div>
-      </section>
-
-      {/* Projets récents */}
-      <section>
-        <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-line">
-          <h2 className="meta">Projets</h2>
-          <Link
-            href="/admin/projets"
-            className="text-[14px] text-brand hover:text-brand-hover transition-colors duration-200"
-          >
-            Tout gérer
-          </Link>
-        </div>
-
-        {projects.length === 0 ? (
-          <p className="mt-5 text-[15px] text-ink-muted">
-            Aucun projet.{" "}
-            <Link href="/admin/projets" className="text-brand hover:underline">
-              En créer un
-            </Link>
-            .
-          </p>
-        ) : (
-          <ul className="mt-1">
-            {projects.slice(0, 5).map((p) => (
-              <li
-                key={p.id}
-                className="flex items-center gap-3 py-3 border-b border-line"
-              >
-                <span
-                  aria-hidden
-                  className="block h-2 w-2 rounded-full shrink-0"
-                  style={{
-                    backgroundColor: p.published
-                      ? "var(--flag-green)"
-                      : "var(--line-strong)",
-                  }}
-                />
-                <span className="flex-1 min-w-0">
-                  <span className="block text-[15px] font-medium text-ink truncate">
-                    {p.title}
-                  </span>
-                  <span className="block meta truncate">
-                    {p.stack.join(" · ") || "sans stack"}
-                  </span>
-                </span>
-                {!p.published ? (
-                  <span className="meta text-brand shrink-0">Masqué</span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Raccourcis */}
-      <section>
-        <h2 className="meta pb-3 border-b border-line">Raccourcis</h2>
-        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { href: "/admin/projets", label: "Ajouter un projet", hint: "Titre, stack, liens" },
-            { href: "/admin/competences", label: "Modifier la stack", hint: "Catégories et entrées" },
-            { href: "/admin/profil", label: "Mettre à jour le profil", hint: "Bio, contact, CV" },
-          ].map((s) => (
-            <Link
-              key={s.href}
-              href={s.href}
-              className="border border-line rounded-md bg-surface p-5 hover:border-ink transition-colors duration-200 group"
-            >
-              <p className="text-[15px] font-medium text-ink group-hover:text-brand transition-colors duration-200">
-                {s.label}
-              </p>
-              <p className="mt-1 text-[13px] text-ink-muted">{s.hint}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+        </CardHeader>
+        <CardContent>
+          {projects.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Aucun projet</EmptyTitle>
+                <EmptyDescription>
+                  Créez votre premier projet pour l&apos;afficher sur le portfolio.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Titre</TableHead>
+                  <TableHead className="hidden sm:table-cell">Stack</TableHead>
+                  <TableHead>Statut</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {projects.slice(0, 5).map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium">{p.title}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">
+                      {p.stack.slice(0, 3).join(" · ") || "—"}
+                    </TableCell>
+                    <TableCell>
+                      {p.published ? (
+                        <Badge variant="secondary">Publié</Badge>
+                      ) : (
+                        <Badge variant="outline">Masqué</Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

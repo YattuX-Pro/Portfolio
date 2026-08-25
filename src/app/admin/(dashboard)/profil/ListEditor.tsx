@@ -1,27 +1,26 @@
 "use client";
 
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
+import { useState, useTransition } from "react";
+import { PlusIcon, Trash2Icon } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { ActionState } from "./actions";
 
-const FIELD =
-  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-ink-muted/60 focus:border-ink outline-none transition-colors duration-200";
-
-function Submit() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-brand text-white text-[14px] font-medium hover:bg-brand-hover disabled:opacity-60 transition-colors duration-200 cursor-pointer shrink-0"
-    >
-      {pending ? "…" : "Ajouter"}
-    </button>
-  );
-}
-
 /* Éditeur générique à deux colonnes, partagé par les chiffres du hero
-   (valeur / libellé) et la colonne stack (groupe / contenu). */
+   (valeur / libellé) et la colonne stack (groupe / contenu). Volumes de
+   l'ordre de la poignée de lignes : ni pagination ni filtre ici, ce serait
+   du bruit pour trois entrées. */
 export default function ListEditor({
   rows,
   fields,
@@ -30,78 +29,108 @@ export default function ListEditor({
   emptyLabel,
 }: {
   rows: { id: number; left: string; right: string }[];
-  fields: { left: { name: string; label: string; placeholder: string }; right: { name: string; label: string; placeholder: string } };
+  fields: {
+    left: { name: string; label: string; placeholder: string };
+    right: { name: string; label: string; placeholder: string };
+  };
   addAction: (prev: ActionState, formData: FormData) => Promise<ActionState>;
   deleteAction: (formData: FormData) => Promise<void>;
   emptyLabel: string;
 }) {
-  const [state, action] = useActionState<ActionState, FormData>(addAction, {
-    error: null,
-  });
+  const [left, setLeft] = useState("");
+  const [right, setRight] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       {rows.length === 0 ? (
-        <p className="text-[15px] text-ink-muted">{emptyLabel}</p>
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>{emptyLabel}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
-        <ul className="border-t border-line">
-          {rows.map((row) => (
-            <li
-              key={row.id}
-              className="flex items-center gap-3 py-2 border-b border-line"
-            >
-              <span className="font-mono text-[13px] text-ink shrink-0 min-w-[70px]">
-                {row.left}
-              </span>
-              <span className="flex-1 text-[15px] text-ink-muted truncate">{row.right}</span>
-              <form action={deleteAction}>
-                <input type="hidden" name="id" value={row.id} />
-                <button
-                  type="submit"
-                  aria-label={`Supprimer ${row.left}`}
-                  className="inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-brand transition-colors duration-200 cursor-pointer"
-                >
-                  ×
-                </button>
-              </form>
-            </li>
-          ))}
-        </ul>
+        <div className="rounded-lg border overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{fields.left.label}</TableHead>
+                <TableHead>{fields.right.label}</TableHead>
+                <TableHead className="text-right">
+                  <span className="sr-only">Actions</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell className="font-mono">{row.left}</TableCell>
+                  <TableCell className="text-muted-foreground">{row.right}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Supprimer ${row.left}`}
+                      disabled={isPending}
+                      onClick={() => {
+                        const fd = new FormData();
+                        fd.set("id", String(row.id));
+                        startTransition(async () => {
+                          await deleteAction(fd);
+                          toast.success("Ligne supprimée.");
+                        });
+                      }}
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
-      <form action={action} className="mt-4 flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-2 min-w-[110px]">
-          <label htmlFor={fields.left.name} className="meta">
-            {fields.left.label}
-          </label>
-          <input
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <Field className="sm:max-w-[160px]">
+          <FieldLabel htmlFor={fields.left.name}>{fields.left.label}</FieldLabel>
+          <Input
             id={fields.left.name}
-            name={fields.left.name}
-            required
+            value={left}
+            onChange={(e) => setLeft(e.target.value)}
             placeholder={fields.left.placeholder}
-            className={FIELD}
           />
-        </div>
-        <div className="flex flex-col gap-2 flex-1 min-w-[160px]">
-          <label htmlFor={fields.right.name} className="meta">
-            {fields.right.label}
-          </label>
-          <input
+        </Field>
+        <Field className="flex-1">
+          <FieldLabel htmlFor={fields.right.name}>{fields.right.label}</FieldLabel>
+          <Input
             id={fields.right.name}
-            name={fields.right.name}
-            required
+            value={right}
+            onChange={(e) => setRight(e.target.value)}
             placeholder={fields.right.placeholder}
-            className={FIELD}
           />
-        </div>
-        <Submit />
-      </form>
-
-      {state.error ? (
-        <p role="alert" className="mt-3 text-[14px] text-brand">
-          {state.error}
-        </p>
-      ) : null}
+        </Field>
+        <Button
+          disabled={isPending || !left.trim() || !right.trim()}
+          onClick={() => {
+            const fd = new FormData();
+            fd.set(fields.left.name, left.trim());
+            fd.set(fields.right.name, right.trim());
+            startTransition(async () => {
+              const res = await addAction({ error: null }, fd);
+              if (res.error) toast.error(res.error);
+              else {
+                toast.success("Ligne ajoutée.");
+                setLeft("");
+                setRight("");
+              }
+            });
+          }}
+        >
+          <PlusIcon data-icon="inline-start" />
+          Ajouter
+        </Button>
+      </div>
     </div>
   );
 }

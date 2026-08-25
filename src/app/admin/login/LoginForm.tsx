@@ -2,6 +2,10 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { signInAction, type LoginState } from "./actions";
 
 function SubmitButton() {
@@ -9,18 +13,12 @@ function SubmitButton() {
      composant qui le rend — d'où ce sous-composant. */
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="mt-2 inline-flex items-center justify-center h-12 w-full rounded-md bg-brand text-white text-[15px] font-medium hover:bg-brand-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
-    >
+    <Button type="submit" className="w-full" disabled={pending}>
+      {pending ? <Spinner data-icon="inline-start" /> : null}
       {pending ? "Connexion…" : "Se connecter"}
-    </button>
+    </Button>
   );
 }
-
-const FIELD =
-  "h-12 w-full rounded-md border border-line-strong bg-surface px-3.5 text-[15px] text-ink placeholder:text-ink-muted/70 focus:border-ink outline-none transition-colors duration-200";
 
 export default function LoginForm() {
   const [state, formAction] = useActionState<LoginState, FormData>(signInAction, {
@@ -28,44 +26,41 @@ export default function LoginForm() {
   });
 
   return (
-    <form action={formAction} className="mt-8 flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <label htmlFor="email" className="meta">
-          E-mail
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="username"
-          required
-          className={FIELD}
-        />
-      </div>
+    <form action={formAction} className="mt-8">
+      <FieldGroup>
+        <Field data-invalid={state.error ? true : undefined}>
+          <FieldLabel htmlFor="email">E-mail</FieldLabel>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="username"
+            required
+            aria-invalid={state.error ? true : undefined}
+          />
+        </Field>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor="password" className="meta">
-          Mot de passe
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className={FIELD}
-        />
-      </div>
+        <Field data-invalid={state.error ? true : undefined}>
+          <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            aria-invalid={state.error ? true : undefined}
+          />
+        </Field>
 
-      {state.error ? (
-        /* role=alert : le message est annoncé par les lecteurs d'écran
-           au moment où il apparaît. */
-        <p role="alert" className="text-[14px] text-brand">
-          {state.error}
-        </p>
-      ) : null}
+        {state.error ? (
+          /* role=alert : annoncé par les lecteurs d'écran à l'apparition. */
+          <p role="alert" className="text-sm text-destructive">
+            {state.error}
+          </p>
+        ) : null}
 
-      <SubmitButton />
+        <SubmitButton />
+      </FieldGroup>
     </form>
   );
 }

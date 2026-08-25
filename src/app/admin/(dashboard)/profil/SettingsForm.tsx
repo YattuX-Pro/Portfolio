@@ -1,45 +1,30 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import type { SiteSettings } from "@/lib/db/schema";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Spinner } from "@/components/ui/spinner";
+import { Separator } from "@/components/ui/separator";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { updateSettings, type ActionState } from "./actions";
-
-const FIELD =
-  "w-full rounded-md border border-line-strong bg-surface px-3.5 py-3 text-[15px] text-ink placeholder:text-ink-muted/60 focus:border-ink outline-none transition-colors duration-200";
 
 function Submit() {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-brand text-white text-[15px] font-medium hover:bg-brand-hover disabled:opacity-60 transition-colors duration-200 cursor-pointer"
-    >
+    <Button type="submit" disabled={pending}>
+      {pending ? <Spinner data-icon="inline-start" /> : null}
       {pending ? "Enregistrement…" : "Enregistrer"}
-    </button>
-  );
-}
-
-function Field({
-  name,
-  label,
-  hint,
-  children,
-}: {
-  name: string;
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={name} className="meta">
-        {label}
-      </label>
-      {children}
-      {hint ? <p className="text-[13px] text-ink-muted">{hint}</p> : null}
-    </div>
+    </Button>
   );
 }
 
@@ -48,119 +33,102 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
     error: null,
   });
 
+  useEffect(() => {
+    if (state.ok) toast.success("Profil mis à jour.");
+  }, [state.ok]);
+
   return (
-    <form action={action} className="flex flex-col gap-5">
-      <Field name="heroRole" label="Rôle affiché">
-        <input
-          id="heroRole"
-          name="heroRole"
-          required
-          defaultValue={settings?.heroRole ?? ""}
-          className={FIELD}
-        />
-      </Field>
+    <form action={action}>
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="heroRole">Rôle affiché</FieldLabel>
+          <Input
+            id="heroRole"
+            name="heroRole"
+            required
+            defaultValue={settings?.heroRole ?? ""}
+          />
+        </Field>
 
-      <label className="flex items-center gap-3 min-h-11 cursor-pointer">
-        <input
-          type="checkbox"
-          name="heroAvailable"
-          defaultChecked={settings?.heroAvailable ?? true}
-          className="h-5 w-5 accent-[var(--brand)] cursor-pointer"
-        />
-        <span className="text-[15px] text-ink">
-          Afficher « Disponible » dans le hero
-        </span>
-      </label>
+        <Field orientation="horizontal">
+          <Switch
+            id="heroAvailable"
+            name="heroAvailable"
+            defaultChecked={settings?.heroAvailable ?? true}
+          />
+          <FieldLabel htmlFor="heroAvailable">
+            Afficher « Disponible » dans le hero
+          </FieldLabel>
+        </Field>
 
-      <Field name="heroBio" label="Bio">
-        <textarea
-          id="heroBio"
-          name="heroBio"
-          required
-          rows={4}
-          defaultValue={settings?.heroBio ?? ""}
-          className={`${FIELD} resize-y`}
-        />
-      </Field>
+        <Field>
+          <FieldLabel htmlFor="heroBio">Bio</FieldLabel>
+          <Textarea
+            id="heroBio"
+            name="heroBio"
+            required
+            rows={4}
+            defaultValue={settings?.heroBio ?? ""}
+          />
+        </Field>
 
-      <Field
-        name="method"
-        label="Méthode"
-        hint="Affichée sous la grille des compétences. Vide = ligne masquée."
-      >
-        <input
-          id="method"
-          name="method"
-          defaultValue={settings?.method ?? ""}
-          className={FIELD}
-        />
-      </Field>
+        <Field>
+          <FieldLabel htmlFor="method">Méthode</FieldLabel>
+          <Input id="method" name="method" defaultValue={settings?.method ?? ""} />
+          <FieldDescription>
+            Affichée sous la grille des compétences. Vide = ligne masquée.
+          </FieldDescription>
+        </Field>
 
-      <div className="pt-4 border-t border-line">
-        <p className="meta">Coordonnées</p>
-      </div>
+        <Separator />
 
-      <Field name="email" label="E-mail">
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          defaultValue={settings?.email ?? ""}
-          className={FIELD}
-        />
-      </Field>
+        <Field>
+          <FieldLabel htmlFor="email">E-mail</FieldLabel>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            defaultValue={settings?.email ?? ""}
+          />
+        </Field>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field name="githubUrl" label="GitHub">
-          <input
+        <Field>
+          <FieldLabel htmlFor="githubUrl">GitHub</FieldLabel>
+          <Input
             id="githubUrl"
             name="githubUrl"
             type="url"
             defaultValue={settings?.githubUrl ?? ""}
-            className={FIELD}
           />
         </Field>
 
-        <Field name="linkedinUrl" label="LinkedIn">
-          <input
+        <Field>
+          <FieldLabel htmlFor="linkedinUrl">LinkedIn</FieldLabel>
+          <Input
             id="linkedinUrl"
             name="linkedinUrl"
             type="url"
             defaultValue={settings?.linkedinUrl ?? ""}
-            className={FIELD}
           />
         </Field>
-      </div>
 
-      <Field
-        name="cvUrl"
-        label="CV"
-        hint="Chemin interne (/cv/CV_Yattara_Aboubacar.pdf) ou URL complète."
-      >
-        <input
-          id="cvUrl"
-          name="cvUrl"
-          defaultValue={settings?.cvUrl ?? ""}
-          className={FIELD}
-        />
-      </Field>
+        <Field>
+          <FieldLabel htmlFor="cvUrl">CV</FieldLabel>
+          <Input id="cvUrl" name="cvUrl" defaultValue={settings?.cvUrl ?? ""} />
+          <FieldDescription>
+            Chemin interne (/cv/CV_Yattara_Aboubacar.pdf) ou URL complète.
+          </FieldDescription>
+        </Field>
 
-      {state.error ? (
-        <p role="alert" className="text-[14px] text-brand">
-          {state.error}
-        </p>
-      ) : null}
+        {state.error ? (
+          <p role="alert" className="text-sm text-destructive">
+            {state.error}
+          </p>
+        ) : null}
 
-      {state.ok ? (
-        <p role="status" className="text-[14px]" style={{ color: "var(--flag-green-ink)" }}>
-          Enregistré.
-        </p>
-      ) : null}
-
-      <div>
         <Submit />
-      </div>
+      </FieldGroup>
     </form>
   );
 }
