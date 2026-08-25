@@ -6,6 +6,7 @@ import { PlusIcon, Trash2Icon, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
 import { toast } from "sonner";
 import type { SkillGroup } from "@/lib/db/queries";
 import DataTable from "@/components/admin/DataTable";
+import TabbedPage from "@/components/admin/TabbedPage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -41,7 +42,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldDescription,
+} from "@/components/ui/field";
 import { ACCENT_OPTIONS, ACCENT_VARS } from "./constants";
 import {
   addItem,
@@ -54,13 +60,19 @@ import {
 
 type Row = { id: number; label: string; category: string; accent: string };
 
-export default function SkillsClient({ categories }: { categories: SkillGroup[] }) {
+export default function SkillsClient({
+  categories,
+}: {
+  categories: SkillGroup[];
+}) {
   const [isPending, startTransition] = useTransition();
   const [addingTo, setAddingTo] = useState<string>(
     categories[0] ? String(categories[0].id) : "",
   );
   const [newItem, setNewItem] = useState("");
-  const [categorySheet, setCategorySheet] = useState<SkillGroup | "new" | null>(null);
+  const [categorySheet, setCategorySheet] = useState<SkillGroup | "new" | null>(
+    null,
+  );
   const [pendingDelete, setPendingDelete] = useState<SkillGroup | null>(null);
 
   const rows: Row[] = categories.flatMap((c) =>
@@ -72,7 +84,11 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
     })),
   );
 
-  function run(fn: (fd: FormData) => Promise<void>, fd: FormData, message: string) {
+  function run(
+    fn: (fd: FormData) => Promise<void>,
+    fd: FormData,
+    message: string,
+  ) {
     startTransition(async () => {
       await fn(fd);
       toast.success(message);
@@ -83,7 +99,9 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
     {
       accessorKey: "label",
       header: "Compétence",
-      cell: ({ row }) => <span className="font-medium">{row.original.label}</span>,
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.label}</span>
+      ),
     },
     {
       accessorKey: "category",
@@ -93,7 +111,10 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
           <span
             aria-hidden
             className="block size-2.5 shrink-0 rounded-[2px]"
-            style={{ backgroundColor: ACCENT_VARS[row.original.accent] ?? "var(--text)" }}
+            style={{
+              backgroundColor:
+                ACCENT_VARS[row.original.accent] ?? "var(--text)",
+            }}
           />
           <Badge variant="outline">{row.original.category}</Badge>
         </span>
@@ -124,7 +145,7 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
     },
   ];
 
-  return (
+  const skillsTab = (
     <div className="flex flex-col gap-6">
       <DataTable
         columns={columns}
@@ -140,11 +161,12 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
         emptyDescription="Ajoutez-en une avec le formulaire ci-dessous."
       />
 
-      {/* Ajout rapide */}
       <Card>
         <CardHeader>
           <CardTitle>Ajouter une compétence</CardTitle>
-          <CardDescription>Elle apparaît aussitôt sur le portfolio.</CardDescription>
+          <CardDescription>
+            Elle apparaît aussitôt sur le portfolio.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -199,89 +221,105 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
 
-      {/* Catégories */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Catégories</CardTitle>
-          <CardDescription>
-            Leur ordre est celui des colonnes sur le portfolio.
-          </CardDescription>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto"
-            onClick={() => setCategorySheet("new")}
+  const categoriesTab = (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          Leur ordre est celui des colonnes sur le portfolio.
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCategorySheet("new")}
+        >
+          <PlusIcon data-icon="inline-start" />
+          Nouvelle
+        </Button>
+      </div>
+
+      <ul className="flex flex-col gap-2">
+        {categories.map((c, i) => (
+          <li
+            key={c.id}
+            className="flex items-center gap-3 rounded-lg border p-3"
           >
-            <PlusIcon data-icon="inline-start" />
-            Nouvelle
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <ul className="flex flex-col gap-2">
-            {categories.map((c, i) => (
-              <li
-                key={c.id}
-                className="flex items-center gap-3 rounded-lg border p-3"
-              >
-                <span
-                  aria-hidden
-                  className="block size-3 shrink-0 rounded-[2px]"
-                  style={{ backgroundColor: ACCENT_VARS[c.accent] ?? "var(--text)" }}
-                />
-                <span className="flex-1 min-w-0">
-                  <span className="block font-medium truncate">{c.label}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {c.items.length} compétence{c.items.length > 1 ? "s" : ""}
-                  </span>
-                </span>
+            <span
+              aria-hidden
+              className="block size-3 shrink-0 rounded-[2px]"
+              style={{
+                backgroundColor: ACCENT_VARS[c.accent] ?? "var(--text)",
+              }}
+            />
+            <span className="flex-1 min-w-0">
+              <span className="block font-medium truncate">{c.label}</span>
+              <span className="block text-xs text-muted-foreground">
+                {c.items.length} compétence{c.items.length > 1 ? "s" : ""}
+              </span>
+            </span>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={`Monter ${c.label}`}
-                  disabled={i === 0 || isPending}
-                  onClick={() => {
-                    const fd = new FormData();
-                    fd.set("id", String(c.id));
-                    fd.set("direction", "up");
-                    run(moveCategory, fd, "Ordre mis à jour.");
-                  }}
-                >
-                  <ArrowUpIcon />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={`Descendre ${c.label}`}
-                  disabled={i === categories.length - 1 || isPending}
-                  onClick={() => {
-                    const fd = new FormData();
-                    fd.set("id", String(c.id));
-                    fd.set("direction", "down");
-                    run(moveCategory, fd, "Ordre mis à jour.");
-                  }}
-                >
-                  <ArrowDownIcon />
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setCategorySheet(c)}>
-                  Modifier
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={`Supprimer ${c.label}`}
-                  onClick={() => setPendingDelete(c)}
-                >
-                  <Trash2Icon />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={`Monter ${c.label}`}
+              disabled={i === 0 || isPending}
+              onClick={() => {
+                const fd = new FormData();
+                fd.set("id", String(c.id));
+                fd.set("direction", "up");
+                run(moveCategory, fd, "Ordre mis à jour.");
+              }}
+            >
+              <ArrowUpIcon />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={`Descendre ${c.label}`}
+              disabled={i === categories.length - 1 || isPending}
+              onClick={() => {
+                const fd = new FormData();
+                fd.set("id", String(c.id));
+                fd.set("direction", "down");
+                run(moveCategory, fd, "Ordre mis à jour.");
+              }}
+            >
+              <ArrowDownIcon />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCategorySheet(c)}
+            >
+              Modifier
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={`Supprimer ${c.label}`}
+              onClick={() => setPendingDelete(c)}
+            >
+              <Trash2Icon />
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 
-      {/* Sheet catégorie */}
+  return (
+    <>
+      <TabbedPage
+        title="Compétences"
+        description="Ce qui s'affiche dans la section Compétences du portfolio."
+        tabs={[
+          { value: "competences", label: "Compétences", content: skillsTab },
+          { value: "categories", label: "Catégories", content: categoriesTab },
+        ]}
+      />
+
       <Sheet
         open={categorySheet !== null}
         onOpenChange={(o) => !o && setCategorySheet(null)}
@@ -289,7 +327,9 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
         <SheetContent className="w-full sm:max-w-md">
           <SheetHeader>
             <SheetTitle>
-              {categorySheet === "new" ? "Nouvelle catégorie" : "Modifier la catégorie"}
+              {categorySheet === "new"
+                ? "Nouvelle catégorie"
+                : "Modifier la catégorie"}
             </SheetTitle>
             <SheetDescription>
               La couleur sert de repère visuel sur le portfolio.
@@ -299,14 +339,17 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
             <form
               action={async (fd) => {
                 const isNew = categorySheet === "new";
-                if (!isNew && categorySheet) fd.set("id", String(categorySheet.id));
+                if (!isNew && categorySheet)
+                  fd.set("id", String(categorySheet.id));
                 const res = await (isNew ? createCategory : updateCategory)(
                   { error: null },
                   fd,
                 );
                 if (res.error) toast.error(res.error);
                 else {
-                  toast.success(isNew ? "Catégorie créée." : "Catégorie mise à jour.");
+                  toast.success(
+                    isNew ? "Catégorie créée." : "Catégorie mise à jour.",
+                  );
                   setCategorySheet(null);
                 }
               }}
@@ -319,7 +362,9 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
                     name="label"
                     required
                     defaultValue={
-                      categorySheet && categorySheet !== "new" ? categorySheet.label : ""
+                      categorySheet && categorySheet !== "new"
+                        ? categorySheet.label
+                        : ""
                     }
                   />
                 </Field>
@@ -360,7 +405,6 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
         </SheetContent>
       </Sheet>
 
-      {/* Suppression de catégorie */}
       <AlertDialog
         open={pendingDelete !== null}
         onOpenChange={(o) => !o && setPendingDelete(null)}
@@ -390,6 +434,6 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

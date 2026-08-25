@@ -7,7 +7,8 @@ import {
   FolderKanban,
   House,
   LogOut,
-  SlidersHorizontal,
+  UserRound,
+  Wrench,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,10 +26,6 @@ import {
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/app/admin/login/actions";
 
-/* Compétences et Profil sont regroupés sous « Contenu » : ce sont deux
-   facettes de la même chose — ce que le portfolio raconte — et ils vivent
-   maintenant en onglets sous une route commune. */
-
 type NavItem = {
   title: string;
   url: string;
@@ -41,7 +38,8 @@ type NavItem = {
 const NAV: NavItem[] = [
   { title: "Tableau de bord", url: "/admin", icon: House, exact: true },
   { title: "Projets", url: "/admin/projets", icon: FolderKanban },
-  { title: "Contenu", url: "/admin/contenu", icon: SlidersHorizontal },
+  { title: "Compétences", url: "/admin/competences", icon: Wrench },
+  { title: "Profil", url: "/admin/profil", icon: UserRound },
 ];
 
 function isActive(pathname: string, url: string, exact?: boolean) {
@@ -53,32 +51,34 @@ export default function AppSidebar({ email }: { email: string }) {
 
   return (
     <Sidebar collapsible="icon">
-      {/* Bandeau de marque : le tricolore guinéen, comme sur le site public. */}
-      <SidebarHeader className="h-16 border-b border-sidebar-border p-0 relative overflow-hidden">
-        <div aria-hidden className="absolute inset-0 flex">
-          <span className="flex-1 bg-flag-red" />
-          <span className="flex-1 bg-flag-yellow" />
-          <span className="flex-1 bg-flag-green" />
-        </div>
-        {/* Voile sombre : le jaune est à 1.41:1, illisible sous du texte. */}
-        <div aria-hidden className="absolute inset-0 bg-ink/85" />
-
+      {/* Bandeau de marque.
+          Le tricolore est un LISERÉ de 3px sous l'en-tête, pas un fond : le
+          jaune est à 1.41:1, aucun texte n'est lisible dessus. Poser un voile
+          par-dessus revenait à masquer le drapeau pour le rendre utilisable,
+          ce qui n'avait plus de sens. */}
+      <SidebarHeader className="relative h-16 border-b border-sidebar-border p-0">
         <Link
           href="/admin"
-          className="relative z-10 flex h-full w-full items-center gap-2.5 px-4 group"
+          className="group flex h-full w-full items-center gap-2.5 px-4"
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-white/10 font-mono text-[13px] font-medium text-white">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-[13px] font-medium text-primary-foreground">
             AY
           </span>
-          <span className="flex flex-col gap-0.5 group-data-[state=collapsed]:hidden">
-            <span className="text-sm font-semibold leading-none text-white">
+          <span className="flex min-w-0 flex-col gap-0.5 group-data-[state=collapsed]:hidden">
+            <span className="truncate text-sm font-semibold leading-none">
               Yattara
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
-              Admin
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Administration
             </span>
           </span>
         </Link>
+
+        <span aria-hidden className="absolute inset-x-0 bottom-0 flex h-[3px]">
+          <span className="flex-1 bg-flag-red" />
+          <span className="flex-1 bg-flag-yellow" />
+          <span className="flex-1 bg-flag-green" />
+        </span>
       </SidebarHeader>
 
       <SidebarContent className="py-2">

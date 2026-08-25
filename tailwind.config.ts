@@ -14,6 +14,24 @@ import type { Config } from "tailwindcss";
       tokens du site. L'admin utilise donc les composants shadcn tels quels
       tout en restant dans la charte. */
 
+
+/* Tailwind v3 ne sait pas appliquer un modificateur d'opacité (`bg-x/10`) à
+   une couleur déclarée comme simple `var(--x)` : il lui faut soit un
+   `<alpha-value>`, soit une fonction. Sans cela les classes ne sont pas
+   générées DU TOUT — silencieusement. C'est ce qui faisait disparaître le
+   voile sombre du bandeau tricolore, le fond des entrées actives et tous les
+   textes atténués.
+
+   Cette fabrique renvoie la variable telle quelle sans opacité, et un
+   color-mix quand une opacité est demandée. */
+const v = (name: string) =>
+  /* Le type des couleurs de Tailwind v3 n'inclut pas les fonctions dans ses
+     déclarations, alors que le runtime les accepte : d'où la conversion. */
+  ((({ opacityValue }: { opacityValue?: string }) =>
+    opacityValue === undefined
+      ? `var(${name})`
+      : `color-mix(in oklab, var(${name}) ${Number(opacityValue) * 100}%, transparent)`) as unknown) as string;
+
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -25,84 +43,84 @@ const config: Config = {
     extend: {
       colors: {
         /* ── Site ────────────────────────────────────────────────────── */
-        bg: "var(--bg)",
-        surface: "var(--surface)",
-        ink: "var(--text)",
-        "ink-muted": "var(--ink-muted)",
-        line: "var(--line)",
-        "line-strong": "var(--line-strong)",
+        bg: v("--bg"),
+        surface: v("--surface"),
+        ink: v("--text"),
+        "ink-muted": v("--ink-muted"),
+        line: v("--line"),
+        "line-strong": v("--line-strong"),
         brand: {
-          DEFAULT: "var(--brand)",
-          hover: "var(--brand-hover)",
-          soft: "var(--brand-soft)",
+          DEFAULT: v("--brand"),
+          hover: v("--brand-hover"),
+          soft: v("--brand-soft"),
         },
         flag: {
-          red: "var(--flag-red)",
-          yellow: "var(--flag-yellow)",
-          green: "var(--flag-green)",
-          ink: "var(--flag-green-ink)",
+          red: v("--flag-red"),
+          yellow: v("--flag-yellow"),
+          green: v("--flag-green"),
+          ink: v("--flag-green-ink"),
         },
 
         /* ── shadcn ──────────────────────────────────────────────────── */
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: v("--background"),
+        foreground: v("--foreground"),
         card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
+          DEFAULT: v("--card"),
+          foreground: v("--card-foreground"),
         },
         popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
+          DEFAULT: v("--popover"),
+          foreground: v("--popover-foreground"),
         },
         primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
+          DEFAULT: v("--primary"),
+          foreground: v("--primary-foreground"),
         },
         secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
+          DEFAULT: v("--secondary"),
+          foreground: v("--secondary-foreground"),
         },
         muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
+          DEFAULT: v("--muted"),
+          foreground: v("--muted-foreground"),
         },
         accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-foreground)",
+          DEFAULT: v("--accent"),
+          foreground: v("--accent-foreground"),
         },
         destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--primary-foreground)",
+          DEFAULT: v("--destructive"),
+          foreground: v("--primary-foreground"),
         },
-        border: "var(--border)",
-        input: "var(--input)",
-        ring: "var(--ring)",
+        border: v("--border"),
+        input: v("--input"),
+        ring: v("--ring"),
         chart: {
-          "1": "var(--chart-1)",
-          "2": "var(--chart-2)",
-          "3": "var(--chart-3)",
-          "4": "var(--chart-4)",
-          "5": "var(--chart-5)",
+          "1": v("--chart-1"),
+          "2": v("--chart-2"),
+          "3": v("--chart-3"),
+          "4": v("--chart-4"),
+          "5": v("--chart-5"),
         },
         sidebar: {
-          DEFAULT: "var(--sidebar)",
-          foreground: "var(--sidebar-foreground)",
-          primary: "var(--sidebar-primary)",
-          "primary-foreground": "var(--sidebar-primary-foreground)",
-          accent: "var(--sidebar-accent)",
-          "accent-foreground": "var(--sidebar-accent-foreground)",
-          border: "var(--sidebar-border)",
-          ring: "var(--sidebar-ring)",
+          DEFAULT: v("--sidebar"),
+          foreground: v("--sidebar-foreground"),
+          primary: v("--sidebar-primary"),
+          "primary-foreground": v("--sidebar-primary-foreground"),
+          accent: v("--sidebar-accent"),
+          "accent-foreground": v("--sidebar-accent-foreground"),
+          border: v("--sidebar-border"),
+          ring: v("--sidebar-ring"),
         },
       },
       /* Tailwind v3 donne au ring une couleur par défaut : blue-500 à 50 %.
          Tout `ring-*` sans couleur explicite affichait donc un liseré bleu,
          hors charte. On le ramène sur l'accent rouge. */
       ringColor: {
-        DEFAULT: "var(--ring)",
+        DEFAULT: v("--ring"),
       },
       ringOffsetColor: {
-        DEFAULT: "var(--background)",
+        DEFAULT: v("--background"),
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -123,10 +141,10 @@ const config: Config = {
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+          to: { height: v("--radix-accordion-content-height") },
         },
         "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
+          from: { height: v("--radix-accordion-content-height") },
           to: { height: "0" },
         },
       },

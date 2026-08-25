@@ -10,7 +10,7 @@ export type ActionState = { error: string | null; ok?: boolean };
 
 function refresh() {
   revalidatePath("/");
-  revalidatePath("/admin/contenu/profil");
+  revalidatePath("/admin/profil");
 }
 
 function orNull(v: FormDataEntryValue | null): string | null {

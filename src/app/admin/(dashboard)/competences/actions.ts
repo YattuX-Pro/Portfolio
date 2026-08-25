@@ -15,7 +15,7 @@ export type ActionState = { error: string | null; ok?: boolean };
 
 function refresh() {
   revalidatePath("/");
-  revalidatePath("/admin/contenu/competences");
+  revalidatePath("/admin/competences");
 }
 
 export async function createCategory(
