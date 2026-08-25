@@ -3,40 +3,29 @@
 import { motion } from "framer-motion";
 import Reveal, { EASE } from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
+import type { SkillGroup } from "@/lib/db/queries";
 
-/* Pas de pourcentages : une note auto-attribuée ne dit rien de vérifiable,
-   et elle obligerait à inventer une valeur à chaque nouvelle compétence.
+/* La base stocke un NOM de token, jamais un hexadécimal : la palette reste
+   pilotée par globals.css, et l'admin ne peut pas introduire une couleur
+   hors charte ni un contraste insuffisant.
+   Le jaune du drapeau est volontairement absent : à 1.41:1 il ne franchit
+   pas le seuil de 3:1 exigé pour un élément graphique porteur de sens. */
+const ACCENTS: Record<string, string> = {
+  "flag-red": "var(--flag-red)",
+  "flag-green": "var(--flag-green)",
+  text: "var(--text)",
+  muted: "var(--muted)",
+};
 
-   Marqueurs de catégorie : rouge et vert du drapeau, puis encre et gris.
-   Le jaune est exclu — à 1.41:1 il serait quasi invisible sur le fond crème. */
-const CATEGORIES = [
-  {
-    id: "backend",
-    label: "Back-end",
-    accent: "var(--flag-red)",
-    items: [".NET", "FastAPI"],
-  },
-  {
-    id: "frontend",
-    label: "Front-end",
-    accent: "var(--flag-green)",
-    items: ["Angular", "Next.js", "TypeScript"],
-  },
-  {
-    id: "data",
-    label: "Données & infrastructure",
-    accent: "var(--text)",
-    items: ["PostgreSQL", "SQL Server", "Redis", "RabbitMQ", "Keycloak"],
-  },
-  {
-    id: "devops",
-    label: "DevOps & qualité",
-    accent: "var(--muted)",
-    items: ["Docker", "GitLab", "CI/CD", "SonarQube"],
-  },
-] as const;
+const accentOf = (token: string) => ACCENTS[token] ?? "var(--text)";
 
-export default function Skills() {
+export default function Skills({
+  skills,
+  method,
+}: {
+  skills: SkillGroup[];
+  method: string | null;
+}) {
   return (
     <>
       <SectionHeader
@@ -47,14 +36,14 @@ export default function Skills() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-        {CATEGORIES.map((cat, ci) => (
+        {skills.map((cat, ci) => (
           <div key={cat.id}>
             <Reveal delay={ci * 0.07}>
               <div className="flex items-center gap-2.5 pb-3 border-b-2 border-ink">
                 <span
                   aria-hidden
                   className="block h-2.5 w-2.5 flex-shrink-0"
-                  style={{ backgroundColor: cat.accent }}
+                  style={{ backgroundColor: accentOf(cat.accent) }}
                 />
                 <h3 className="meta text-ink">{cat.label}</h3>
               </div>
@@ -63,18 +52,14 @@ export default function Skills() {
             <ul>
               {cat.items.map((item, i) => (
                 <motion.li
-                  key={item}
+                  key={item.id}
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
-                  transition={{
-                    duration: 0.55,
-                    ease: EASE,
-                    delay: ci * 0.07 + i * 0.05,
-                  }}
+                  transition={{ duration: 0.55, ease: EASE, delay: ci * 0.07 + i * 0.05 }}
                   className="py-3 border-b border-line text-[15px] font-medium text-ink"
                 >
-                  {item}
+                  {item.label}
                 </motion.li>
               ))}
             </ul>
@@ -83,12 +68,14 @@ export default function Skills() {
       </div>
 
       {/* Méthode — hors grille : une méthodologie n'est pas un outil. */}
-      <Reveal delay={0.1}>
-        <div className="mt-14 pt-6 border-t-2 border-ink flex flex-wrap items-baseline gap-x-4 gap-y-2">
-          <h3 className="meta text-ink">Méthode</h3>
-          <p className="text-[15px] font-medium text-ink">Agile Scrum</p>
-        </div>
-      </Reveal>
+      {method ? (
+        <Reveal delay={0.1}>
+          <div className="mt-14 pt-6 border-t-2 border-ink flex flex-wrap items-baseline gap-x-4 gap-y-2">
+            <h3 className="meta text-ink">Méthode</h3>
+            <p className="text-[15px] font-medium text-ink">{method}</p>
+          </div>
+        </Reveal>
+      ) : null}
     </>
   );
 }

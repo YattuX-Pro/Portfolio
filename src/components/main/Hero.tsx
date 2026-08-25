@@ -1,7 +1,14 @@
 "use client";
 
 import HeroContent from "../sub/HeroContent";
+import type { SiteData } from "@/lib/db/queries";
 
-export default function Hero({ onNavigate }: { onNavigate?: (id: string) => void }) {
-  return <HeroContent onNavigate={onNavigate} />;
+export default function Hero({
+  data,
+  onNavigate,
+}: {
+  data: SiteData;
+  onNavigate?: (id: string) => void;
+}) {
+  return <HeroContent data={data} onNavigate={onNavigate} />;
 }

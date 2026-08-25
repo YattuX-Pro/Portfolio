@@ -5,33 +5,28 @@ import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { HiArrowRight, HiDownload } from "react-icons/hi";
 import { EASE, revealGroup, revealItem } from "@/components/Reveal";
 import FlagRule from "@/components/FlagRule";
+import type { SiteData } from "@/lib/db/queries";
 
-const STATS = [
-  { value: "5+", label: "Projets" },
-  { value: "3+", label: "Années"  },
-  { value: "2",  label: "Domaines" },
-];
+type Social = { href: string; label: string; icon: typeof FaGithub };
 
-/* Colonne « index » — sidebar éditoriale, purement typographique. */
-const STACK = [
-  { group: "Back-end",  items: ".NET · FastAPI" },
-  { group: "Front-end", items: "Angular · Next.js" },
-  { group: "Langages",  items: "TypeScript · Python" },
-  { group: "Données",   items: "PostgreSQL · Redis · RabbitMQ" },
-  { group: "DevOps",    items: "Docker · GitLab CI/CD" },
-  { group: "Méthode",   items: "Agile Scrum" },
-];
+export default function HeroContent({
+  data,
+  onNavigate,
+}: {
+  data: SiteData;
+  onNavigate?: (id: string) => void;
+}) {
+  const { settings, stats, stack } = data;
 
-const SOCIALS = [
-  { href: "https://github.com/YattuX-Pro", label: "GitHub", icon: FaGithub },
-  {
-    href: "https://www.linkedin.com/in/aboubacar-tidiane-yattara-5608b6232/",
-    label: "LinkedIn",
-    icon: FaLinkedin,
-  },
-];
+  const socials: Social[] = [
+    settings?.githubUrl && { href: settings.githubUrl, label: "GitHub", icon: FaGithub },
+    settings?.linkedinUrl && {
+      href: settings.linkedinUrl,
+      label: "LinkedIn",
+      icon: FaLinkedin,
+    },
+  ].filter(Boolean) as Social[];
 
-export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) => void }) {
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-16 items-start">
       {/* ── Colonne principale ───────────────────────────────────────── */}
@@ -44,9 +39,15 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
         {/* Eyebrow */}
         <motion.p variants={revealItem} className="meta flex items-center gap-2.5">
           <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-          Analyste Développeur
-          <span aria-hidden className="text-line-strong">/</span>
-          Disponible
+          {settings?.heroRole ?? "Analyste Développeur"}
+          {settings?.heroAvailable ? (
+            <>
+              <span aria-hidden className="text-line-strong">
+                /
+              </span>
+              Disponible
+            </>
+          ) : null}
         </motion.p>
 
         {/* Nom */}
@@ -70,9 +71,7 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
           variants={revealItem}
           className="mt-8 max-w-prose text-[18px] leading-[1.7] text-muted"
         >
-          J&apos;analyse, conçois et déploie des solutions logicielles robustes —
-          en alliant rigueur fonctionnelle, architecture technique maîtrisée et
-          expérience utilisateur soignée.
+          {settings?.heroBio}
         </motion.p>
 
         {/* CTA */}
@@ -89,28 +88,35 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
             />
           </button>
 
-          <a
-            href="/cv/CV_Yattara_Aboubacar.pdf"
-            download
-            className="inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md border border-line-strong text-ink text-[15px] font-medium hover:border-ink hover:bg-surface transition-colors duration-200 cursor-pointer"
-          >
-            <HiDownload size={15} aria-hidden />
-            Télécharger le CV
-          </a>
+          {settings?.cvUrl ? (
+            <a
+              href={settings.cvUrl}
+              download
+              className="inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md border border-line-strong text-ink text-[15px] font-medium hover:border-ink hover:bg-surface transition-colors duration-200 cursor-pointer"
+            >
+              <HiDownload size={15} aria-hidden />
+              Télécharger le CV
+            </a>
+          ) : null}
         </motion.div>
 
         {/* Filet + méta bas de hero */}
-        <motion.div variants={revealItem} className="mt-12 sm:mt-14 pt-6 border-t border-line">
+        <motion.div
+          variants={revealItem}
+          className="mt-12 sm:mt-14 pt-6 border-t border-line"
+        >
           <div className="flex flex-wrap items-center gap-x-8 sm:gap-x-10 gap-y-6">
-            {STATS.map((s) => (
-              <div key={s.label} className="flex items-baseline gap-2">
-                <span className="font-display font-semibold text-[28px] tracking-[-0.02em] leading-none text-ink">{s.value}</span>
+            {stats.map((s) => (
+              <div key={s.id} className="flex items-baseline gap-2">
+                <span className="font-display font-semibold text-[28px] tracking-[-0.02em] leading-none text-ink">
+                  {s.value}
+                </span>
                 <span className="meta">{s.label}</span>
               </div>
             ))}
 
             <div className="flex items-center gap-1 -ml-2.5 w-full sm:w-auto sm:ml-auto">
-              {SOCIALS.map(({ href, label, icon: Icon }) => (
+              {socials.map(({ href, label, icon: Icon }) => (
                 <a
                   key={label}
                   href={href}
@@ -128,26 +134,28 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
       </motion.div>
 
       {/* ── Colonne index — sidebar magazine ─────────────────────────── */}
-      <motion.aside
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: EASE, delay: 0.32 }}
-        className="hidden lg:block lg:col-span-4 lg:col-start-9 lg:pt-3"
-      >
-        <p className="meta">Stack principale</p>
-        <FlagRule className="mt-3 mb-1" thickness={3} width={26} delay={0.4} />
-        <dl>
-          {STACK.map((s) => (
-            <div
-              key={s.group}
-              className="flex items-baseline justify-between gap-4 py-3 border-b border-line"
-            >
-              <dt className="meta">{s.group}</dt>
-              <dd className="text-[14px] text-ink text-right">{s.items}</dd>
-            </div>
-          ))}
-        </dl>
-      </motion.aside>
+      {stack.length > 0 ? (
+        <motion.aside
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: EASE, delay: 0.32 }}
+          className="hidden lg:block lg:col-span-4 lg:col-start-9 lg:pt-3"
+        >
+          <p className="meta">Stack principale</p>
+          <FlagRule className="mt-3 mb-1" thickness={3} width={26} delay={0.4} />
+          <dl>
+            {stack.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-baseline justify-between gap-4 py-3 border-b border-line"
+              >
+                <dt className="meta">{s.groupLabel}</dt>
+                <dd className="text-[14px] text-ink text-right">{s.items}</dd>
+              </div>
+            ))}
+          </dl>
+        </motion.aside>
+      ) : null}
     </div>
   );
 }

@@ -5,19 +5,20 @@ import { HiEnvelope, HiArrowUpRight } from "react-icons/hi2";
 import Reveal from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
 import FlagRule from "@/components/FlagRule";
+import type { SiteSettings } from "@/lib/db/schema";
 
-const EMAIL = "yattara.pro@gmail.com";
+type Link = { href: string; label: string; icon: typeof FaGithub };
 
-const LINKS = [
-  { href: "https://github.com/YattuX-Pro", label: "GitHub", icon: FaGithub },
-  {
-    href: "https://www.linkedin.com/in/aboubacar-tidiane-yattara-5608b6232/",
-    label: "LinkedIn",
-    icon: FaLinkedin,
-  },
-];
+export default function Footer({ settings }: { settings: SiteSettings | null }) {
+  const links: Link[] = [
+    settings?.githubUrl && { href: settings.githubUrl, label: "GitHub", icon: FaGithub },
+    settings?.linkedinUrl && {
+      href: settings.linkedinUrl,
+      label: "LinkedIn",
+      icon: FaLinkedin,
+    },
+  ].filter(Boolean) as Link[];
 
-export default function Footer() {
   return (
     <>
       <SectionHeader
@@ -28,16 +29,21 @@ export default function Footer() {
       />
 
       {/* E-mail — l'élément principal de la section */}
-      <Reveal>
-        <a
-          href={`mailto:${EMAIL}`}
-          className="group inline-flex items-center gap-3 font-semibold tracking-[-0.03em] text-ink hover:text-accent transition-colors duration-200 cursor-pointer break-words"
-          style={{ fontSize: "clamp(20px, 5vw, 44px)" }}
-        >
-          <HiEnvelope className="flex-shrink-0 opacity-40 group-hover:opacity-100 transition-opacity duration-200" aria-hidden />
-          {EMAIL}
-        </a>
-      </Reveal>
+      {settings?.email ? (
+        <Reveal>
+          <a
+            href={`mailto:${settings.email}`}
+            className="group inline-flex items-center gap-3 font-semibold tracking-[-0.03em] text-ink hover:text-accent transition-colors duration-200 cursor-pointer break-words"
+            style={{ fontSize: "clamp(20px, 5vw, 44px)" }}
+          >
+            <HiEnvelope
+              className="flex-shrink-0 opacity-40 group-hover:opacity-100 transition-opacity duration-200"
+              aria-hidden
+            />
+            {settings.email}
+          </a>
+        </Reveal>
+      ) : null}
 
       <Reveal delay={0.06}>
         <FlagRule className="mt-8" thickness={6} width={92} />
@@ -46,7 +52,7 @@ export default function Footer() {
       {/* Liens + CV */}
       <Reveal delay={0.12}>
         <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-          {LINKS.map(({ href, label, icon: Icon }) => (
+          {links.map(({ href, label, icon: Icon }) => (
             <a
               key={label}
               href={href}
@@ -60,13 +66,15 @@ export default function Footer() {
             </a>
           ))}
 
-          <a
-            href="/cv/CV_Yattara_Aboubacar.pdf"
-            download
-            className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
-          >
-            Télécharger le CV
-          </a>
+          {settings?.cvUrl ? (
+            <a
+              href={settings.cvUrl}
+              download
+              className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+            >
+              Télécharger le CV
+            </a>
+          ) : null}
         </div>
       </Reveal>
 

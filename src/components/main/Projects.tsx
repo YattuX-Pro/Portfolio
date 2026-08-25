@@ -5,82 +5,41 @@ import { HiExternalLink } from "react-icons/hi";
 import { FaGithub } from "react-icons/fa";
 import Reveal from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
-
-const PROJECTS = [
-  {
-    title: "Rental Car",
-    description:
-      "Plateforme de réservation de véhicules construite sur une architecture microservices. Consultation, filtrage et réservation de voitures en temps réel.",
-    image: "/carties.PNG",
-    stack: ["Next.js", "ASP.NET", "Microservices", "Docker"],
-    demo: null as string | null,
-    github: "https://github.com/YattuX/car-rental-micorservices-nextJs",
-  },
-  {
-    title: "AlphaX",
-    description:
-      "Plateforme de partage de cours vidéo réservée aux comptes validés. Authentification complète, gestion des rôles et upload de vidéos intégré.",
-    image: "/alphax.PNG",
-    stack: ["Django", "Tailwind CSS", "Python", "PostgreSQL"],
-    demo: "https://www.linkedin.com/posts/aboubacar-tidiane-yattara-5608b6232_linkedin-django-tailwind-activity-7117579562418348032-e__j",
-    github: "https://github.com/YattuX/fx-Alpha",
-  },
-  {
-    title: "Remove BG",
-    description:
-      "Suppression d'arrière-plan par lot grâce à l'IA. Interface simple pour traiter plusieurs images simultanément avec un résultat net et immédiat.",
-    image: "/rm_bg.PNG",
-    stack: ["Django", "Tailwind CSS", "Python", "AI API"],
-    demo: "https://www.linkedin.com/posts/aboubacar-tidiane-yattara-5608b6232_hello-word-ci-dessous-une-id%C3%A9e-dapplication-activity-7117965221771575296-x-v2",
-    github: "https://github.com/YattuX/removebg",
-  },
-  {
-    title: "Digitalize",
-    description:
-      "Dashboard statistique pour la gestion d'une flotte de véhicules. Visualisations interactives des ventes, locations et performances en temps réel.",
-    image: "/digitalise.PNG",
-    stack: ["Django", "Bootstrap", "JavaScript", "Chart.js"],
-    demo: "https://www.linkedin.com/posts/aboubacar-tidiane-yattara-5608b6232_activity-7118265120589258753-ALCl",
-    github: "https://github.com/Affane99/management_rolling_stock",
-  },
-  {
-    title: "My Portfolio",
-    description:
-      "Portfolio personnel. Design éditorial en light mode, animations sobres au scroll et typographie IBM Plex sur toute la ligne.",
-    image: "/portfolio.PNG",
-    stack: ["Next.js", "Framer Motion", "Tailwind CSS", "TypeScript"],
-    demo: "https://yattara.dev/",
-    github: "https://github.com/YattuX/myPorfolio",
-  },
-] as const;
+import type { Project } from "@/lib/db/schema";
 
 const pad = (n: number) => String(n + 1).padStart(2, "0");
 
-export default function Projects() {
+export default function Projects({ projects }: { projects: Project[] }) {
   return (
     <>
       <SectionHeader
         num="02"
         label="Projets"
         title="Une sélection de ce que j'ai livré."
-        intro="Cinq projets, du microservice .NET au dashboard Django. Code source disponible pour chacun."
+        intro="Du microservice .NET au dashboard Django. Code source disponible pour chacun."
       />
 
       <ul className="border-t border-line">
-        {PROJECTS.map((p, i) => (
-          <li key={p.title} className="border-b border-line">
+        {projects.map((p, i) => (
+          <li key={p.id} className="border-b border-line">
             <Reveal>
               <article className="grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-6 py-10 sm:py-12">
                 {/* Visuel */}
                 <div className="lg:col-span-5">
                   <div className="relative aspect-[16/10] w-full overflow-hidden border border-line bg-surface">
-                    <Image
-                      src={p.image}
-                      alt={`Aperçu du projet ${p.title}`}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 40vw"
-                      className="object-cover"
-                    />
+                    {p.imageUrl ? (
+                      <Image
+                        src={p.imageUrl}
+                        alt={`Aperçu du projet ${p.title}`}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 40vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center meta">
+                        Sans visuel
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -113,20 +72,22 @@ export default function Projects() {
 
                   {/* Liens */}
                   <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-x-6 gap-y-1">
-                    <a
-                      href={p.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
-                    >
-                      <FaGithub size={16} aria-hidden />
-                      Code source
-                      <span className="sr-only">de {p.title}</span>
-                    </a>
-
-                    {p.demo && (
+                    {p.githubUrl ? (
                       <a
-                        href={p.demo}
+                        href={p.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+                      >
+                        <FaGithub size={16} aria-hidden />
+                        Code source
+                        <span className="sr-only">de {p.title}</span>
+                      </a>
+                    ) : null}
+
+                    {p.demoUrl ? (
+                      <a
+                        href={p.demoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
@@ -135,7 +96,7 @@ export default function Projects() {
                         Voir la démo
                         <span className="sr-only">de {p.title}</span>
                       </a>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </article>
