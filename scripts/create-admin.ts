@@ -1,17 +1,18 @@
 /* Création du compte administrateur, à lancer UNE fois.
  *
- *   ADMIN_PASSWORD='votre-mot-de-passe' npm run admin:create
+ *   ADMIN_PASSWORD='<votre mot de passe>' npm run admin:create
  *
- * Le mot de passe passe par une variable d'environnement et n'est jamais
- * écrit dans un fichier ni affiché. Utilisez un espace en début de commande
- * si votre shell est configuré pour ne pas historiser ces lignes.
+ * Le mot de passe passe par une variable d'environnement : ne l'écrivez ni
+ * dans ce fichier ni dans un commit. Préfixez la commande d'un espace si
+ * votre shell est configuré pour ne pas historiser ces lignes.
  *
- * Ce script n'importe pas src/lib/auth.ts, qui porte `server-only` et ne
- * peut donc pas être chargé hors du runtime Next. Il recrée une instance.
+ * Pourquoi un appel HTTP direct plutôt que createNeonAuth() :
+ * l'instance de @neondatabase/auth/next/server appelle cookies() de Next en
+ * interne et exige donc un contexte de requête. Hors du runtime Next, elle
+ * échoue avec « `cookies` was called outside a request scope ». On parle
+ * donc directement au point d'entrée Neon Auth, qui est du Better Auth.
  *
  * Lancé via `tsx --env-file=.env`. */
-
-import { createNeonAuth } from "@neondatabase/auth/next/server";
 
 function required(name: string): string {
   const v = process.env[name];
@@ -24,8 +25,7 @@ function required(name: string): string {
 
 async function main() {
   const password = required("ADMIN_PASSWORD");
-  const baseUrl = required("NEON_AUTH_BASE_URL");
-  const secret = required("NEON_AUTH_COOKIE_SECRET");
+  const baseUrl = required("NEON_AUTH_BASE_URL").replace(/\/+$/, "");
 
   const emails = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
@@ -35,7 +35,7 @@ async function main() {
   if (emails.length === 0) {
     console.error(
       "ADMIN_EMAILS est vide. Renseignez-le d'abord : c'est cette liste qui\n" +
-        "autorise l'accès à /admin, un compte non listé sera refusé.",
+        "autorise l'accès à /admin, un compte non listé serait refusé.",
     );
     process.exit(1);
   }
@@ -50,21 +50,36 @@ async function main() {
     process.exit(1);
   }
 
-  if (password.length < 12) {
-    console.error("Mot de passe trop court : 12 caractères minimum.");
-    process.exit(1);
-  }
-
-  const auth = createNeonAuth({ baseUrl, cookies: { secret } });
-
-  const { error } = await auth.signUp.email({
-    email,
-    password,
-    name: process.env.ADMIN_NAME ?? "Aboubacar Tidiane Yattara",
+  const res = await fetch(`${baseUrl}/sign-up/email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      /* Exigé par Neon Auth dès que callbackURL n'est pas absolue. */
+      Origin: process.env.APP_ORIGIN ?? "http://localhost:3000",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+      name: process.env.ADMIN_NAME ?? email,
+    }),
   });
 
-  if (error) {
-    console.error(`Échec de la création : ${error.message ?? String(error)}`);
+  const body = (await res.json().catch(() => ({}))) as {
+    code?: string;
+    message?: string;
+  };
+
+  if (!res.ok) {
+    const hints: Record<string, string> = {
+      PASSWORD_TOO_SHORT: "Mot de passe trop court.",
+      USER_ALREADY_EXISTS:
+        "Ce compte existe déjà. Connectez-vous sur /admin/login.",
+      MISSING_ORIGIN: "Origine manquante — définissez APP_ORIGIN.",
+    };
+    const hint = body.code ? hints[body.code] : undefined;
+    console.error(
+      `Échec (${res.status}) : ${hint ?? body.message ?? "erreur inconnue"}`,
+    );
     process.exit(1);
   }
 
