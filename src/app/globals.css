@@ -109,7 +109,14 @@
     --destructive: var(--brand);
     --border: var(--line);
     --input: var(--line-strong);
-    --ring: var(--brand);
+
+    /* Anneau de focus clavier : gris chaud discret plutôt que le rouge de
+       marque, qui attirait trop l'œil. #8A8680 mesure 3.46:1 sur le fond
+       crème — juste au-dessus du seuil de 3:1 exigé pour un indicateur de
+       focus. Descendre plus bas le rendrait invisible et casserait la
+       navigation au clavier, seul repère de position pour qui n'utilise
+       pas la souris. */
+    --ring: #8A8680;
 
     --chart-1: var(--flag-red);
     --chart-2: var(--flag-green);
@@ -126,7 +133,7 @@
     --sidebar-accent: var(--brand-soft);
     --sidebar-accent-foreground: var(--brand);
     --sidebar-border: var(--line);
-    --sidebar-ring: var(--brand);
+    --sidebar-ring: #8A8680;
   }
   /* Couleur de bordure par défaut, convention shadcn.
      `outline-ring/50` de shadcn est écrit pour Tailwind v4 : en v3 le
