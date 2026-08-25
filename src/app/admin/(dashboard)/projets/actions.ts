@@ -97,7 +97,7 @@ export async function createProject(
   }
 
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/projets");
   return { error: null, ok: true };
 }
 
@@ -127,7 +127,7 @@ export async function updateProject(
   }
 
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/projets");
   return { error: null, ok: true };
 }
 
@@ -139,7 +139,7 @@ export async function deleteProject(formData: FormData) {
 
   await db.delete(projects).where(eq(projects.id, id));
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/projets");
 }
 
 /** Déplace un projet d'un cran en échangeant sa position avec son voisin. */
@@ -173,5 +173,5 @@ export async function moveProject(formData: FormData) {
   );
 
   revalidatePath("/");
-  revalidatePath("/admin");
+  revalidatePath("/admin/projets");
 }

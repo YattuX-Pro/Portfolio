@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { createCategory, ACCENT_OPTIONS, type ActionState } from "./actions";
+import { createCategory, type ActionState } from "./actions";
+import { ACCENT_OPTIONS } from "./constants";
 
 const FIELD =
   "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-[15px] text-ink focus:border-ink outline-none transition-colors duration-200";

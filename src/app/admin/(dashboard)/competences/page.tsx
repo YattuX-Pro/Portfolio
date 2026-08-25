@@ -12,9 +12,9 @@ export default async function AdminSkillsPage() {
     <div className="flex flex-col gap-12">
       <section>
         <div className="flex items-baseline justify-between gap-4 pb-3 border-b-2 border-ink">
-          <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink">
-            Compétences
-          </h1>
+          <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-ink">
+            Catégories
+          </h2>
           <span className="meta">
             {categories.length} catégories · {total} entrées
           </span>

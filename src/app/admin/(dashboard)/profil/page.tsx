@@ -16,9 +16,9 @@ export default async function AdminProfilePage() {
   return (
     <div className="flex flex-col gap-14">
       <section>
-        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink pb-3 border-b-2 border-ink">
-          Profil
-        </h1>
+        <h2 className="text-[18px] font-semibold tracking-[-0.02em] text-ink pb-3 border-b-2 border-ink">
+          Identité & contact
+        </h2>
         <div className="mt-6">
           <SettingsForm settings={settings} />
         </div>
