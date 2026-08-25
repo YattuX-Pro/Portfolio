@@ -33,7 +33,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
         <Reveal>
           <a
             href={`mailto:${settings.email}`}
-            className="group inline-flex items-center gap-3 font-semibold tracking-[-0.03em] text-ink hover:text-accent transition-colors duration-200 cursor-pointer break-words"
+            className="group inline-flex items-center gap-3 font-semibold tracking-[-0.03em] text-ink hover:text-brand transition-colors duration-200 cursor-pointer break-words"
             style={{ fontSize: "clamp(20px, 5vw, 44px)" }}
           >
             <HiEnvelope
@@ -58,7 +58,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+              className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-brand transition-colors duration-200 cursor-pointer"
             >
               <Icon size={17} aria-hidden />
               {label}
@@ -70,7 +70,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
             <a
               href={settings.cvUrl}
               download
-              className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+              className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-brand transition-colors duration-200 cursor-pointer"
             >
               Télécharger le CV
             </a>

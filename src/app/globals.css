@@ -1,3 +1,4 @@
+@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,7 +11,7 @@
   --bg:            #FAFAF8;
   --surface:       #FFFFFF;
   --text:          #1A1A18;
-  --muted:         #55524C;
+  --ink-muted:         #55524C;
   --line:          #E7E5E0;
   --line-strong:   #D8D5CE;
   /* Drapeau de la Guinée — ordre officiel : rouge, jaune, vert. */
@@ -22,9 +23,9 @@
   --flag-green-ink: #00713F;
 
   /* Accent interactif = rouge du drapeau (5.38:1 sur --bg). */
-  --accent:        #CE1126;
-  --accent-hover:  #A50E1F;
-  --accent-soft:   #FCF0F1;
+  --brand:        #CE1126;
+  --brand-hover:  #A50E1F;
+  --brand-soft:   #FCF0F1;
 
   /* Le rôle « display » existe toujours, mais il est servi par Plex Sans :
      la hiérarchie vient de la graisse et de l'approche, pas d'une 2e fonte. */
@@ -35,6 +36,7 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    @apply font-sans;
   }
 
   body {
@@ -43,6 +45,7 @@
     font-feature-settings: "kern", "liga";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    @apply bg-background text-foreground;
   }
 
   /* Filet de sécurité contre le scroll horizontal. Les tailles sont
@@ -63,14 +66,75 @@
 
   /* Focus visible cohérent sur tout le site (a11y) */
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--brand);
     outline-offset: 3px;
     border-radius: 2px;
   }
 
   ::selection {
-    background: var(--accent);
+    background: var(--brand);
     color: #fff;
+  }
+  .theme {
+    --font-heading:            var(--font-sans);
+    --font-sans:            var(--font-sans);
+  }
+  /* Thème shadcn mappé sur la palette du site : même produit, mêmes couleurs.
+     Les valeurs pointent sur mes tokens plutôt que sur les gris oklch par
+     défaut, pour que l'admin ne parte pas en dérive visuelle. */
+  :root {
+    --background: var(--bg);
+    --foreground: var(--text);
+    --card: var(--surface);
+    --card-foreground: var(--text);
+    --popover: var(--surface);
+    --popover-foreground: var(--text);
+
+    /* primary = le rouge du drapeau : boutons pleins, liens, focus. */
+    --primary: var(--brand);
+    --primary-foreground: #ffffff;
+
+    --secondary: #F1EFEA;
+    --secondary-foreground: var(--text);
+
+    /* muted appartient à shadcn : c'est un FOND discret, pas ma couleur de
+       texte secondaire (celle-ci est --ink-muted). Ne pas confondre. */
+    --muted: #F1EFEA;
+    --muted-foreground: var(--ink-muted);
+
+    /* accent appartient à shadcn : fond de survol dans les menus. */
+    --accent: var(--brand-soft);
+    --accent-foreground: var(--brand);
+
+    --destructive: var(--brand);
+    --border: var(--line);
+    --input: var(--line-strong);
+    --ring: var(--brand);
+
+    --chart-1: var(--flag-red);
+    --chart-2: var(--flag-green);
+    --chart-3: var(--text);
+    --chart-4: var(--ink-muted);
+    --chart-5: var(--line-strong);
+
+    --radius: 0.5rem;
+
+    --sidebar: var(--surface);
+    --sidebar-foreground: var(--text);
+    --sidebar-primary: var(--brand);
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: var(--brand-soft);
+    --sidebar-accent-foreground: var(--brand);
+    --sidebar-border: var(--line);
+    --sidebar-ring: var(--brand);
+  }
+  /* Couleur de bordure par défaut, convention shadcn.
+     `outline-ring/50` de shadcn est écrit pour Tailwind v4 : en v3 le
+     modificateur d'opacité ne s'applique pas à une couleur portée par une
+     variable CSS. Écrit en CSS explicite, avec color-mix pour l'alpha. */
+  * {
+    @apply border-border;
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
   }
 }
 
@@ -92,7 +156,7 @@
     font-size: 12px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--ink-muted);
   }
 }
 

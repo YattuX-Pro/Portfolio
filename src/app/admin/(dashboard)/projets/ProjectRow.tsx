@@ -6,7 +6,7 @@ import ProjectForm from "./ProjectForm";
 import { deleteProject, moveProject } from "./actions";
 
 const ICON_BTN =
-  "inline-flex items-center justify-center h-11 w-11 rounded-md text-muted hover:text-ink hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer";
+  "inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-ink hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer";
 
 export default function ProjectRow({
   project,
@@ -58,14 +58,14 @@ export default function ProjectRow({
         </div>
 
         {!project.published ? (
-          <span className="meta text-accent shrink-0">Masqué</span>
+          <span className="meta text-brand shrink-0">Masqué</span>
         ) : null}
 
         <button
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={panelId}
-          className="inline-flex items-center h-11 px-3 text-[14px] text-ink hover:text-accent transition-colors duration-200 cursor-pointer shrink-0"
+          className="inline-flex items-center h-11 px-3 text-[14px] text-ink hover:text-brand transition-colors duration-200 cursor-pointer shrink-0"
         >
           {open ? "Fermer" : "Modifier"}
         </button>
@@ -87,14 +87,14 @@ export default function ProjectRow({
                   <input type="hidden" name="id" value={project.id} />
                   <button
                     type="submit"
-                    className="inline-flex items-center h-11 px-4 rounded-md bg-accent text-white text-[14px] font-medium hover:bg-accent-hover transition-colors duration-200 cursor-pointer"
+                    className="inline-flex items-center h-11 px-4 rounded-md bg-brand text-white text-[14px] font-medium hover:bg-brand-hover transition-colors duration-200 cursor-pointer"
                   >
                     Oui, supprimer
                   </button>
                 </form>
                 <button
                   onClick={() => setConfirming(false)}
-                  className="inline-flex items-center h-11 px-4 text-[14px] text-muted hover:text-ink transition-colors duration-200 cursor-pointer"
+                  className="inline-flex items-center h-11 px-4 text-[14px] text-ink-muted hover:text-ink transition-colors duration-200 cursor-pointer"
                 >
                   Annuler
                 </button>
@@ -102,7 +102,7 @@ export default function ProjectRow({
             ) : (
               <button
                 onClick={() => setConfirming(true)}
-                className="inline-flex items-center h-11 px-4 rounded-md border border-line-strong text-[14px] text-muted hover:text-accent hover:border-accent transition-colors duration-200 cursor-pointer"
+                className="inline-flex items-center h-11 px-4 rounded-md border border-line-strong text-[14px] text-ink-muted hover:text-brand hover:border-brand transition-colors duration-200 cursor-pointer"
               >
                 Supprimer ce projet
               </button>

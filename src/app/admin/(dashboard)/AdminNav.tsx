@@ -38,19 +38,19 @@ export default function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
                 aria-current={active ? "page" : undefined}
                 className={`relative flex items-baseline gap-3 rounded-md px-3 py-2.5 transition-colors duration-200 ${
                   active
-                    ? "bg-accent-soft text-ink"
-                    : "text-muted hover:text-ink hover:bg-bg"
+                    ? "bg-brand-soft text-ink"
+                    : "text-ink-muted hover:text-ink hover:bg-bg"
                 }`}
               >
                 {active ? (
                   <span
                     aria-hidden
-                    className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-accent"
+                    className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-brand"
                   />
                 ) : null}
                 <span
                   className={`font-mono text-[11px] tabular-nums ${
-                    active ? "text-accent" : "text-muted"
+                    active ? "text-brand" : "text-ink-muted"
                   }`}
                 >
                   {s.num}

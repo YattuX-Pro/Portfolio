@@ -20,7 +20,7 @@ export default async function AdminProjectsPage() {
         </div>
 
         {list.length === 0 ? (
-          <p className="mt-6 text-[15px] text-muted">
+          <p className="mt-6 text-[15px] text-ink-muted">
             Aucun projet pour l&apos;instant. Utilisez le formulaire ci-dessous.
           </p>
         ) : (

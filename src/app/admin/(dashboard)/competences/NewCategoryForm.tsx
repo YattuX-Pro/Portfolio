@@ -14,7 +14,7 @@ function Submit() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center justify-center h-11 px-5 rounded-md bg-accent text-white text-[14px] font-medium hover:bg-accent-hover disabled:opacity-60 transition-colors duration-200 cursor-pointer shrink-0"
+      className="inline-flex items-center justify-center h-11 px-5 rounded-md bg-brand text-white text-[14px] font-medium hover:bg-brand-hover disabled:opacity-60 transition-colors duration-200 cursor-pointer shrink-0"
     >
       {pending ? "Création…" : "Créer"}
     </button>
@@ -59,12 +59,12 @@ export default function NewCategoryForm() {
       </form>
 
       {state.error ? (
-        <p role="alert" className="mt-3 text-[14px] text-accent">
+        <p role="alert" className="mt-3 text-[14px] text-brand">
           {state.error}
         </p>
       ) : null}
 
-      <p className="mt-4 text-[13px] leading-[1.6] text-muted">
+      <p className="mt-4 text-[13px] leading-[1.6] text-ink-muted">
         Le jaune du drapeau n&apos;est pas proposé : à 1,41:1 sur le fond crème,
         il ne franchit pas le seuil de contraste de 3:1 exigé pour un élément
         graphique porteur d&apos;information.

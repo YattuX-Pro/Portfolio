@@ -12,7 +12,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-2 inline-flex items-center justify-center h-12 w-full rounded-md bg-accent text-white text-[15px] font-medium hover:bg-accent-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
+      className="mt-2 inline-flex items-center justify-center h-12 w-full rounded-md bg-brand text-white text-[15px] font-medium hover:bg-brand-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
     >
       {pending ? "Connexion…" : "Se connecter"}
     </button>
@@ -20,7 +20,7 @@ function SubmitButton() {
 }
 
 const FIELD =
-  "h-12 w-full rounded-md border border-line-strong bg-surface px-3.5 text-[15px] text-ink placeholder:text-muted/70 focus:border-ink outline-none transition-colors duration-200";
+  "h-12 w-full rounded-md border border-line-strong bg-surface px-3.5 text-[15px] text-ink placeholder:text-ink-muted/70 focus:border-ink outline-none transition-colors duration-200";
 
 export default function LoginForm() {
   const [state, formAction] = useActionState<LoginState, FormData>(signInAction, {
@@ -60,7 +60,7 @@ export default function LoginForm() {
       {state.error ? (
         /* role=alert : le message est annoncé par les lecteurs d'écran
            au moment où il apparaît. */
-        <p role="alert" className="text-[14px] text-accent">
+        <p role="alert" className="text-[14px] text-brand">
           {state.error}
         </p>
       ) : null}

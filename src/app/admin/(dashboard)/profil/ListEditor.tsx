@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 import type { ActionState } from "./actions";
 
 const FIELD =
-  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-muted/60 focus:border-ink outline-none transition-colors duration-200";
+  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-ink-muted/60 focus:border-ink outline-none transition-colors duration-200";
 
 function Submit() {
   const { pending } = useFormStatus();
@@ -13,7 +13,7 @@ function Submit() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-accent text-white text-[14px] font-medium hover:bg-accent-hover disabled:opacity-60 transition-colors duration-200 cursor-pointer shrink-0"
+      className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-brand text-white text-[14px] font-medium hover:bg-brand-hover disabled:opacity-60 transition-colors duration-200 cursor-pointer shrink-0"
     >
       {pending ? "…" : "Ajouter"}
     </button>
@@ -42,7 +42,7 @@ export default function ListEditor({
   return (
     <div>
       {rows.length === 0 ? (
-        <p className="text-[15px] text-muted">{emptyLabel}</p>
+        <p className="text-[15px] text-ink-muted">{emptyLabel}</p>
       ) : (
         <ul className="border-t border-line">
           {rows.map((row) => (
@@ -53,13 +53,13 @@ export default function ListEditor({
               <span className="font-mono text-[13px] text-ink shrink-0 min-w-[70px]">
                 {row.left}
               </span>
-              <span className="flex-1 text-[15px] text-muted truncate">{row.right}</span>
+              <span className="flex-1 text-[15px] text-ink-muted truncate">{row.right}</span>
               <form action={deleteAction}>
                 <input type="hidden" name="id" value={row.id} />
                 <button
                   type="submit"
                   aria-label={`Supprimer ${row.left}`}
-                  className="inline-flex items-center justify-center h-11 w-11 rounded-md text-muted hover:text-accent transition-colors duration-200 cursor-pointer"
+                  className="inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-brand transition-colors duration-200 cursor-pointer"
                 >
                   ×
                 </button>
@@ -98,7 +98,7 @@ export default function ListEditor({
       </form>
 
       {state.error ? (
-        <p role="alert" className="mt-3 text-[14px] text-accent">
+        <p role="alert" className="mt-3 text-[14px] text-brand">
           {state.error}
         </p>
       ) : null}

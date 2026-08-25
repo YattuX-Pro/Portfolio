@@ -52,7 +52,7 @@ export default async function AdminProfilePage() {
           </h2>
           <span className="meta">{stack.length} lignes</span>
         </div>
-        <p className="mt-4 text-[13px] leading-[1.6] text-muted">
+        <p className="mt-4 text-[13px] leading-[1.6] text-ink-muted">
           Visible uniquement à partir de 1024&nbsp;px, dans la colonne de droite du
           hero. Vide, la colonne disparaît entièrement.
         </p>

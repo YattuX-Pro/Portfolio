@@ -90,14 +90,14 @@ export default function AdminShell({
             <Link
               href="/"
               target="_blank"
-              className="flex items-center h-11 px-3 rounded-md text-[14px] text-muted hover:text-ink hover:bg-bg transition-colors duration-200"
+              className="flex items-center h-11 px-3 rounded-md text-[14px] text-ink-muted hover:text-ink hover:bg-bg transition-colors duration-200"
             >
               Voir le site
             </Link>
             <form action={signOutAction}>
               <button
                 type="submit"
-                className="flex items-center h-11 w-full px-3 rounded-md text-[14px] text-muted hover:text-accent hover:bg-bg transition-colors duration-200 cursor-pointer"
+                className="flex items-center h-11 w-full px-3 rounded-md text-[14px] text-ink-muted hover:text-brand hover:bg-bg transition-colors duration-200 cursor-pointer"
               >
                 Déconnexion
               </button>

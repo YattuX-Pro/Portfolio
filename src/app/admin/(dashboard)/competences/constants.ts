@@ -22,5 +22,5 @@ export const ACCENT_VARS: Record<string, string> = {
   "flag-red": "var(--flag-red)",
   "flag-green": "var(--flag-green)",
   text: "var(--text)",
-  muted: "var(--muted)",
+  muted: "var(--ink-muted)",
 };

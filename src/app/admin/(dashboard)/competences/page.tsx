@@ -21,7 +21,7 @@ export default async function AdminSkillsPage() {
         </div>
 
         {categories.length === 0 ? (
-          <p className="mt-6 text-[15px] text-muted">
+          <p className="mt-6 text-[15px] text-ink-muted">
             Aucune catégorie. Créez-en une ci-dessous.
           </p>
         ) : (

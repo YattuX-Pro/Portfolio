@@ -21,7 +21,7 @@ function Tile({
         {value}
       </p>
       <p className="mt-2 meta">{label}</p>
-      {hint ? <p className="mt-1 text-[13px] text-muted">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-[13px] text-ink-muted">{hint}</p> : null}
     </div>
   );
 }
@@ -78,7 +78,7 @@ export default async function AdminDashboardPage() {
             }
             label="Dernière modif."
             hint="Projet le plus récent"
-            accent="var(--muted)"
+            accent="var(--ink-muted)"
           />
         </div>
       </section>
@@ -89,16 +89,16 @@ export default async function AdminDashboardPage() {
           <h2 className="meta">Projets</h2>
           <Link
             href="/admin/projets"
-            className="text-[14px] text-accent hover:text-accent-hover transition-colors duration-200"
+            className="text-[14px] text-brand hover:text-brand-hover transition-colors duration-200"
           >
             Tout gérer
           </Link>
         </div>
 
         {projects.length === 0 ? (
-          <p className="mt-5 text-[15px] text-muted">
+          <p className="mt-5 text-[15px] text-ink-muted">
             Aucun projet.{" "}
-            <Link href="/admin/projets" className="text-accent hover:underline">
+            <Link href="/admin/projets" className="text-brand hover:underline">
               En créer un
             </Link>
             .
@@ -128,7 +128,7 @@ export default async function AdminDashboardPage() {
                   </span>
                 </span>
                 {!p.published ? (
-                  <span className="meta text-accent shrink-0">Masqué</span>
+                  <span className="meta text-brand shrink-0">Masqué</span>
                 ) : null}
               </li>
             ))}
@@ -150,10 +150,10 @@ export default async function AdminDashboardPage() {
               href={s.href}
               className="border border-line rounded-md bg-surface p-5 hover:border-ink transition-colors duration-200 group"
             >
-              <p className="text-[15px] font-medium text-ink group-hover:text-accent transition-colors duration-200">
+              <p className="text-[15px] font-medium text-ink group-hover:text-brand transition-colors duration-200">
                 {s.label}
               </p>
-              <p className="mt-1 text-[13px] text-muted">{s.hint}</p>
+              <p className="mt-1 text-[13px] text-ink-muted">{s.hint}</p>
             </Link>
           ))}
         </div>

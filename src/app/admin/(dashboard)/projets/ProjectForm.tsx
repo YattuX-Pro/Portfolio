@@ -6,7 +6,7 @@ import type { Project } from "@/lib/db/schema";
 import { createProject, updateProject, type ActionState } from "./actions";
 
 const FIELD =
-  "w-full rounded-md border border-line-strong bg-surface px-3.5 py-3 text-[15px] text-ink placeholder:text-muted/60 focus:border-ink outline-none transition-colors duration-200";
+  "w-full rounded-md border border-line-strong bg-surface px-3.5 py-3 text-[15px] text-ink placeholder:text-ink-muted/60 focus:border-ink outline-none transition-colors duration-200";
 
 function Submit({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -14,7 +14,7 @@ function Submit({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-accent text-white text-[15px] font-medium hover:bg-accent-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
+      className="inline-flex items-center justify-center h-12 px-6 rounded-md bg-brand text-white text-[15px] font-medium hover:bg-brand-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
     >
       {pending ? "Enregistrement…" : label}
     </button>
@@ -38,7 +38,7 @@ function Field({
         {label}
       </label>
       {children}
-      {hint ? <p className="text-[13px] text-muted">{hint}</p> : null}
+      {hint ? <p className="text-[13px] text-ink-muted">{hint}</p> : null}
     </div>
   );
 }
@@ -143,13 +143,13 @@ export default function ProjectForm({ project }: { project?: Project }) {
           type="checkbox"
           name="published"
           defaultChecked={project?.published ?? true}
-          className="h-5 w-5 accent-[var(--accent)] cursor-pointer"
+          className="h-5 w-5 accent-[var(--brand)] cursor-pointer"
         />
         <span className="text-[15px] text-ink">Visible sur le site</span>
       </label>
 
       {state.error ? (
-        <p role="alert" className="text-[14px] text-accent">
+        <p role="alert" className="text-[14px] text-brand">
           {state.error}
         </p>
       ) : null}

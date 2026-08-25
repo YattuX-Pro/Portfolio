@@ -17,7 +17,7 @@ const FIELD =
   "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-[15px] text-ink focus:border-ink outline-none transition-colors duration-200";
 
 const ICON_BTN =
-  "inline-flex items-center justify-center h-11 w-11 rounded-md text-muted hover:text-ink hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer";
+  "inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-ink hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer";
 
 function Submit({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -25,7 +25,7 @@ function Submit({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-accent text-white text-[14px] font-medium hover:bg-accent-hover disabled:opacity-60 transition-colors duration-200 cursor-pointer shrink-0"
+      className="inline-flex items-center justify-center h-11 px-4 rounded-md bg-brand text-white text-[14px] font-medium hover:bg-brand-hover disabled:opacity-60 transition-colors duration-200 cursor-pointer shrink-0"
     >
       {pending ? "…" : label}
     </button>
@@ -127,7 +127,7 @@ export default function CategoryCard({
       </div>
 
       {editState.error ? (
-        <p role="alert" className="mt-3 text-[14px] text-accent">
+        <p role="alert" className="mt-3 text-[14px] text-brand">
           {editState.error}
         </p>
       ) : null}
@@ -143,7 +143,7 @@ export default function CategoryCard({
                 <button
                   type="submit"
                   aria-label={`Retirer ${item.label}`}
-                  className="inline-flex items-center justify-center h-11 w-9 text-muted hover:text-accent transition-colors duration-200 cursor-pointer"
+                  className="inline-flex items-center justify-center h-11 w-9 text-ink-muted hover:text-brand transition-colors duration-200 cursor-pointer"
                 >
                   ×
                 </button>
@@ -174,7 +174,7 @@ export default function CategoryCard({
       </form>
 
       {addState.error ? (
-        <p role="alert" className="mt-2 text-[14px] text-accent">
+        <p role="alert" className="mt-2 text-[14px] text-brand">
           {addState.error}
         </p>
       ) : null}
@@ -185,14 +185,14 @@ export default function CategoryCard({
           Supprimer cette catégorie
         </summary>
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <p className="text-[14px] text-muted">
+          <p className="text-[14px] text-ink-muted">
             Les {category.items.length} compétences seront supprimées avec elle.
           </p>
           <form action={deleteCategory}>
             <input type="hidden" name="id" value={category.id} />
             <button
               type="submit"
-              className="inline-flex items-center h-11 px-4 rounded-md border border-line-strong text-[14px] text-muted hover:text-accent hover:border-accent transition-colors duration-200 cursor-pointer"
+              className="inline-flex items-center h-11 px-4 rounded-md border border-line-strong text-[14px] text-ink-muted hover:text-brand hover:border-brand transition-colors duration-200 cursor-pointer"
             >
               Supprimer définitivement
             </button>

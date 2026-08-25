@@ -29,7 +29,7 @@ export default async function LoginPage() {
         <h1 className="text-[28px] font-semibold tracking-[-0.03em] text-ink">
           Connexion
         </h1>
-        <p className="mt-3 text-[15px] leading-[1.6] text-muted">
+        <p className="mt-3 text-[15px] leading-[1.6] text-ink-muted">
           Espace réservé. Aucun compte ne peut être créé depuis cette page.
         </p>
 

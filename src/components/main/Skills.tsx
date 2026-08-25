@@ -14,7 +14,7 @@ const ACCENTS: Record<string, string> = {
   "flag-red": "var(--flag-red)",
   "flag-green": "var(--flag-green)",
   text: "var(--text)",
-  muted: "var(--muted)",
+  muted: "var(--ink-muted)",
 };
 
 const accentOf = (token: string) => ACCENTS[token] ?? "var(--text)";

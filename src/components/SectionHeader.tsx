@@ -20,7 +20,7 @@ export default function SectionHeader({
     <header className="mb-12 sm:mb-14">
       <Reveal>
         <p className="meta">
-          <span className="text-accent">{num}</span>
+          <span className="text-brand">{num}</span>
           <span aria-hidden className="mx-2 text-line-strong">
             /
           </span>
@@ -39,7 +39,7 @@ export default function SectionHeader({
 
       {intro && (
         <Reveal delay={0.12}>
-          <p className="mt-5 max-w-prose text-[18px] leading-[1.7] text-muted">{intro}</p>
+          <p className="mt-5 max-w-prose text-[18px] leading-[1.7] text-ink-muted">{intro}</p>
         </Reveal>
       )}
     </header>

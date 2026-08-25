@@ -38,7 +38,7 @@ export default function HeroContent({
       >
         {/* Eyebrow */}
         <motion.p variants={revealItem} className="meta flex items-center gap-2.5">
-          <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+          <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-brand" />
           {settings?.heroRole ?? "Analyste Développeur"}
           {settings?.heroAvailable ? (
             <>
@@ -58,7 +58,7 @@ export default function HeroContent({
         >
           Aboubacar Tidiane
           <br />
-          Yattara<span className="text-accent">.</span>
+          Yattara<span className="text-brand">.</span>
         </motion.h1>
 
         {/* Filet tricolore — Guinée */}
@@ -69,7 +69,7 @@ export default function HeroContent({
         {/* Bio */}
         <motion.p
           variants={revealItem}
-          className="mt-8 max-w-prose text-[18px] leading-[1.7] text-muted"
+          className="mt-8 max-w-prose text-[18px] leading-[1.7] text-ink-muted"
         >
           {settings?.heroBio}
         </motion.p>
@@ -78,7 +78,7 @@ export default function HeroContent({
         <motion.div variants={revealItem} className="mt-9 flex flex-wrap items-center gap-3">
           <button
             onClick={() => onNavigate?.("projects")}
-            className="group inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md bg-accent text-white text-[15px] font-medium hover:bg-accent-hover transition-colors duration-200 cursor-pointer"
+            className="group inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md bg-brand text-white text-[15px] font-medium hover:bg-brand-hover transition-colors duration-200 cursor-pointer"
           >
             Voir mes projets
             <HiArrowRight
@@ -123,7 +123,7 @@ export default function HeroContent({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="inline-flex items-center justify-center h-11 w-11 rounded-md text-muted hover:text-accent hover:bg-accent-soft transition-colors duration-200 cursor-pointer"
+                  className="inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-brand hover:bg-brand-soft transition-colors duration-200 cursor-pointer"
                 >
                   <Icon size={18} aria-hidden />
                 </a>

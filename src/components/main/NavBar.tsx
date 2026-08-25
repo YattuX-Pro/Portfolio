@@ -110,7 +110,7 @@ export default function NavBar() {
         {/* Monogramme */}
         <button
           onClick={() => scrollTo("home")}
-          className="font-mono text-[13px] tracking-[0.14em] text-ink hover:text-accent transition-colors duration-200 cursor-pointer py-3 -mx-1 px-1"
+          className="font-mono text-[13px] tracking-[0.14em] text-ink hover:text-brand transition-colors duration-200 cursor-pointer py-3 -mx-1 px-1"
           aria-label="Retour en haut de page"
         >
           A.YATTARA
@@ -126,13 +126,13 @@ export default function NavBar() {
                 onClick={() => scrollTo(link.id)}
                 aria-current={isActive ? "true" : undefined}
                 className={`relative px-3 h-11 text-[14px] transition-colors duration-200 cursor-pointer ${
-                  isActive ? "text-ink" : "text-muted hover:text-ink"
+                  isActive ? "text-ink" : "text-ink-muted hover:text-ink"
                 }`}
               >
                 {link.label}
                 <span
                   aria-hidden
-                  className={`absolute left-3 right-3 bottom-2 h-px bg-accent transition-opacity duration-200 ${
+                  className={`absolute left-3 right-3 bottom-2 h-px bg-brand transition-opacity duration-200 ${
                     isActive ? "opacity-100" : "opacity-0"
                   }`}
                 />
@@ -196,10 +196,10 @@ export default function NavBar() {
                         onClick={() => scrollTo(link.id)}
                         aria-current={isActive ? "true" : undefined}
                         className={`w-full text-left flex items-center gap-3 py-5 text-[22px] font-medium tracking-[-0.02em] transition-colors duration-200 cursor-pointer ${
-                          isActive ? "text-accent" : "text-ink"
+                          isActive ? "text-brand" : "text-ink"
                         }`}
                       >
-                        <span aria-hidden className="font-mono text-[12px] text-muted w-6">
+                        <span aria-hidden className="font-mono text-[12px] text-ink-muted w-6">
                           {String(NAV_LINKS.indexOf(link) + 1).padStart(2, "0")}
                         </span>
                         {link.label}
@@ -213,7 +213,7 @@ export default function NavBar() {
                 href="/cv/CV_Yattara_Aboubacar.pdf"
                 download
                 onClick={() => setOpen(false)}
-                className="mt-8 inline-flex items-center justify-center h-12 w-full rounded-md bg-accent text-white text-[15px] font-medium cursor-pointer"
+                className="mt-8 inline-flex items-center justify-center h-12 w-full rounded-md bg-brand text-white text-[15px] font-medium cursor-pointer"
               >
                 Télécharger le CV
               </a>

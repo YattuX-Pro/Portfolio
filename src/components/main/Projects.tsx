@@ -46,7 +46,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                 {/* Contenu */}
                 <div className="lg:col-span-7 flex flex-col">
                   <div className="flex items-baseline gap-3">
-                    <span className="font-mono text-[12px] text-accent tabular-nums">
+                    <span className="font-mono text-[12px] text-brand tabular-nums">
                       {pad(i)}
                     </span>
                     <h3 className="text-[22px] sm:text-[24px] font-semibold tracking-[-0.02em] text-ink">
@@ -54,7 +54,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                     </h3>
                   </div>
 
-                  <p className="mt-3 max-w-prose text-[17px] leading-[1.65] text-muted">
+                  <p className="mt-3 max-w-prose text-[17px] leading-[1.65] text-ink-muted">
                     {p.description}
                   </p>
 
@@ -63,7 +63,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                     {p.stack.map((t) => (
                       <li
                         key={t}
-                        className="font-mono text-[11px] tracking-[0.08em] uppercase text-muted border border-line px-2.5 py-1"
+                        className="font-mono text-[11px] tracking-[0.08em] uppercase text-ink-muted border border-line px-2.5 py-1"
                       >
                         {t}
                       </li>
@@ -77,7 +77,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                         href={p.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+                        className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-brand transition-colors duration-200 cursor-pointer"
                       >
                         <FaGithub size={16} aria-hidden />
                         Code source
@@ -90,7 +90,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
                         href={p.demoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+                        className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-brand transition-colors duration-200 cursor-pointer"
                       >
                         <HiExternalLink size={16} aria-hidden />
                         Voir la démo
