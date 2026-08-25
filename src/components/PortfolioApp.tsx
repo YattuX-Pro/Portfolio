@@ -18,29 +18,31 @@ export default function PortfolioApp() {
       <NavBar />
 
       <main className="pt-16">
-        <div className="max-w-6xl mx-auto px-6 sm:px-10">
+        {/* px-5 sur mobile, aligné sur le header. 100svh plutôt que 100vh :
+            la barre d'adresse mobile fausse vh et rogne le bas du hero. */}
+        <div className="max-w-6xl mx-auto px-5 sm:px-10">
           <section
             id="home"
-            className="min-h-[calc(100vh-4rem)] flex items-center py-20 lg:py-24"
+            className="min-h-[calc(100svh-4rem)] flex items-center py-14 sm:py-20 lg:py-24"
           >
             <Hero onNavigate={scrollTo} />
           </section>
 
-          <FlagRule className="justify-center" thickness={6} width={72} />
+          <FlagRule className="mx-auto justify-center" thickness={6} width={72} />
 
-          <section id="skills" className="py-24 lg:py-32">
+          <section id="skills" className="py-20 sm:py-24 lg:py-32">
             <Skills />
           </section>
 
-          <FlagRule className="justify-center" thickness={6} width={72} />
+          <FlagRule className="mx-auto justify-center" thickness={6} width={72} />
 
-          <section id="projects" className="py-24 lg:py-32">
+          <section id="projects" className="py-20 sm:py-24 lg:py-32">
             <Projects />
           </section>
 
-          <FlagRule className="justify-center" thickness={6} width={72} />
+          <FlagRule className="mx-auto justify-center" thickness={6} width={72} />
 
-          <section id="footer" className="py-24 lg:py-32">
+          <section id="footer" className="py-20 sm:py-24 lg:py-32">
             <Footer />
           </section>
         </div>

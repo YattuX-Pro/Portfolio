@@ -45,6 +45,22 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Filet de sécurité contre le scroll horizontal. Les tailles sont
+     corrigées à la source ; ceci évite qu'un futur ajout ne le réintroduise. */
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  /* Supprime le délai de 300ms au tap et le flash bleu sur mobile. */
+  a,
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   /* Focus visible cohérent sur tout le site (a11y) */
   :focus-visible {
     outline: 2px solid var(--accent);
@@ -63,7 +79,7 @@
      C'est ce détail qui porte le signal « tech » — à garder rare. */
   .meta {
     font-family: var(--font-mono), ui-monospace, monospace;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted);

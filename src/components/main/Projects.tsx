@@ -70,7 +70,7 @@ export default function Projects() {
         {PROJECTS.map((p, i) => (
           <li key={p.title} className="border-b border-line">
             <Reveal>
-              <article className="grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-6 py-12">
+              <article className="grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-6 py-10 sm:py-12">
                 {/* Visuel */}
                 <div className="lg:col-span-5">
                   <div className="relative aspect-[16/10] w-full overflow-hidden border border-line bg-surface">
@@ -90,7 +90,7 @@ export default function Projects() {
                     <span className="font-mono text-[12px] text-accent tabular-nums">
                       {pad(i)}
                     </span>
-                    <h3 className="text-[24px] font-semibold tracking-[-0.02em] text-ink">
+                    <h3 className="text-[22px] sm:text-[24px] font-semibold tracking-[-0.02em] text-ink">
                       {p.title}
                     </h3>
                   </div>
@@ -112,12 +112,12 @@ export default function Projects() {
                   </ul>
 
                   {/* Liens */}
-                  <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+                  <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-x-6 gap-y-1">
                     <a
                       href={p.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-[14px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+                      className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
                     >
                       <FaGithub size={16} aria-hidden />
                       Code source
@@ -129,7 +129,7 @@ export default function Projects() {
                         href={p.demo}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-[14px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+                        className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
                       >
                         <HiExternalLink size={16} aria-hidden />
                         Voir la démo

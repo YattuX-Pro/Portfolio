@@ -17,7 +17,7 @@ export default function SectionHeader({
   intro?: string;
 }) {
   return (
-    <header className="mb-14">
+    <header className="mb-12 sm:mb-14">
       <Reveal>
         <p className="meta">
           <span className="text-accent">{num}</span>
@@ -31,7 +31,7 @@ export default function SectionHeader({
       <Reveal delay={0.06}>
         <h2
           className="font-semibold tracking-[-0.03em] leading-[1.05] text-ink mt-4"
-          style={{ fontSize: "clamp(30px, 4.5vw, 46px)" }}
+          style={{ fontSize: "clamp(26px, 5vw, 46px)" }}
         >
           {title}
         </h2>

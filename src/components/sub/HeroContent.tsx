@@ -53,7 +53,7 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
         <motion.h1
           variants={revealItem}
           className="font-display font-semibold mt-6 leading-[0.95] tracking-[-0.035em] text-ink"
-          style={{ fontSize: "clamp(44px, 8.5vw, 92px)" }}
+          style={{ fontSize: "clamp(30px, 9vw, 92px)" }}
         >
           Aboubacar Tidiane
           <br />
@@ -79,7 +79,7 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
         <motion.div variants={revealItem} className="mt-9 flex flex-wrap items-center gap-3">
           <button
             onClick={() => onNavigate?.("projects")}
-            className="group inline-flex items-center gap-2 h-11 px-5 rounded-md bg-accent text-white text-[14px] font-medium hover:bg-accent-hover transition-colors duration-200 cursor-pointer"
+            className="group inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md bg-accent text-white text-[15px] font-medium hover:bg-accent-hover transition-colors duration-200 cursor-pointer"
           >
             Voir mes projets
             <HiArrowRight
@@ -92,7 +92,7 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
           <a
             href="/cv/CV_Yattara_Aboubacar.pdf"
             download
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-md border border-line-strong text-ink text-[14px] font-medium hover:border-ink hover:bg-surface transition-colors duration-200 cursor-pointer"
+            className="inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md border border-line-strong text-ink text-[15px] font-medium hover:border-ink hover:bg-surface transition-colors duration-200 cursor-pointer"
           >
             <HiDownload size={15} aria-hidden />
             Télécharger le CV
@@ -100,8 +100,8 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
         </motion.div>
 
         {/* Filet + méta bas de hero */}
-        <motion.div variants={revealItem} className="mt-14 pt-6 border-t border-line">
-          <div className="flex flex-wrap items-center gap-x-10 gap-y-6">
+        <motion.div variants={revealItem} className="mt-12 sm:mt-14 pt-6 border-t border-line">
+          <div className="flex flex-wrap items-center gap-x-8 sm:gap-x-10 gap-y-6">
             {STATS.map((s) => (
               <div key={s.label} className="flex items-baseline gap-2">
                 <span className="font-display font-semibold text-[28px] tracking-[-0.02em] leading-none text-ink">{s.value}</span>
@@ -109,7 +109,7 @@ export default function HeroContent({ onNavigate }: { onNavigate?: (id: string) 
               </div>
             ))}
 
-            <div className="flex items-center gap-1 sm:ml-auto">
+            <div className="flex items-center gap-1 -ml-2.5 w-full sm:w-auto sm:ml-auto">
               {SOCIALS.map(({ href, label, icon: Icon }) => (
                 <a
                   key={label}

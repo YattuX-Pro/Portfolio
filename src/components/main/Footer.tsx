@@ -31,8 +31,8 @@ export default function Footer() {
       <Reveal>
         <a
           href={`mailto:${EMAIL}`}
-          className="group inline-flex items-center gap-3 font-semibold tracking-[-0.03em] text-ink hover:text-accent transition-colors duration-200 cursor-pointer break-all"
-          style={{ fontSize: "clamp(24px, 4vw, 44px)" }}
+          className="group inline-flex items-center gap-3 font-semibold tracking-[-0.03em] text-ink hover:text-accent transition-colors duration-200 cursor-pointer break-words"
+          style={{ fontSize: "clamp(20px, 5vw, 44px)" }}
         >
           <HiEnvelope className="flex-shrink-0 opacity-40 group-hover:opacity-100 transition-opacity duration-200" aria-hidden />
           {EMAIL}
@@ -52,7 +52,7 @@ export default function Footer() {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+              className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
             >
               <Icon size={17} aria-hidden />
               {label}
@@ -63,7 +63,7 @@ export default function Footer() {
           <a
             href="/cv/CV_Yattara_Aboubacar.pdf"
             download
-            className="inline-flex items-center gap-2 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
+            className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-accent transition-colors duration-200 cursor-pointer"
           >
             Télécharger le CV
           </a>
