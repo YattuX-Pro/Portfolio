@@ -6,6 +6,7 @@ import { PlusIcon, Trash2Icon, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
 import { toast } from "sonner";
 import type { SkillGroup } from "@/lib/db/queries";
 import DataTable from "@/components/admin/DataTable";
+import PageHeader from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -126,6 +127,11 @@ export default function SkillsClient({ categories }: { categories: SkillGroup[] 
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Compétences"
+        description="Les quatre colonnes de la section Expertise du portfolio."
+      />
+
       <DataTable
         columns={columns}
         data={rows}

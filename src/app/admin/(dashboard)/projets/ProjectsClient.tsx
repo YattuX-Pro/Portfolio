@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import DataTable from "@/components/admin/DataTable";
+import PageHeader from "@/components/admin/PageHeader";
 import { buildColumns } from "./columns";
 import ProjectForm from "./ProjectForm";
 import { deleteProject, moveProject } from "./actions";
@@ -60,7 +61,18 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Projets"
+        description="Ce qui s'affiche dans la section Projets du portfolio."
+        action={
+          <Button onClick={() => setCreating(true)} disabled={isPending}>
+            <PlusIcon data-icon="inline-start" />
+            Nouveau projet
+          </Button>
+        }
+      />
+
       <DataTable
         columns={columns}
         data={projects}
@@ -76,12 +88,6 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
         }}
         emptyTitle="Aucun projet"
         emptyDescription="Créez votre premier projet pour l'afficher sur le portfolio."
-        toolbarEnd={
-          <Button onClick={() => setCreating(true)} disabled={isPending}>
-            <PlusIcon data-icon="inline-start" />
-            Nouveau projet
-          </Button>
-        }
       />
 
       {/* Création */}
@@ -142,6 +148,6 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

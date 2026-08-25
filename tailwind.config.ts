@@ -127,6 +127,12 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    /* Les composants shadcn utilisent @container, natif en Tailwind v4 mais
+       fourni par un plugin en v3. Sans lui les classes @container/@lg sont
+       simplement absentes du CSS. */
+    require("@tailwindcss/container-queries"),
+  ],
 };
 export default config;

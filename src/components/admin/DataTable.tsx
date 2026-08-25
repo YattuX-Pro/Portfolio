@@ -34,7 +34,6 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
@@ -133,8 +132,16 @@ export default function DataTable<TData, TValue>({
                 ?.setFilterValue(v === ALL ? undefined : v)
             }
           >
-            <SelectTrigger className="sm:w-[180px]" aria-label={facet.label}>
-              <SelectValue placeholder={facet.label} />
+            <SelectTrigger className="sm:w-[190px]" aria-label={facet.label}>
+              {/* Libellé explicite plutôt que <SelectValue> : la valeur
+                  sentinelle __all__ s'affichait telle quelle dans le
+                  déclencheur au lieu du texte « Statut : tous ». */}
+              <span className="truncate">
+                {facetValue === ALL
+                  ? `${facet.label} : tous`
+                  : (facet.options.find((o) => o.value === facetValue)?.label ??
+                    facet.label)}
+              </span>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
