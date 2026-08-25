@@ -80,7 +80,21 @@ export default function ProjectForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="imageUrl">Image</FieldLabel>
+          <FieldLabel htmlFor="imageFile">Téléverser une image</FieldLabel>
+          <Input
+            id="imageFile"
+            name="imageFile"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+          />
+          <FieldDescription>
+            JPEG, PNG, WebP, AVIF ou GIF, 5 Mo maximum. Envoyée vers le stockage
+            objet Neon. Un fichier choisi ici remplace le champ ci-dessous.
+          </FieldDescription>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="imageUrl">Ou saisir une adresse</FieldLabel>
           <Input
             id="imageUrl"
             name="imageUrl"
@@ -88,6 +102,8 @@ export default function ProjectForm({
           />
           <FieldDescription>
             Chemin local (/carties.PNG) ou URL complète. Vide = sans visuel.
+            Une valeur commençant par « neon: » désigne un fichier déjà
+            téléversé — la laisser telle quelle.
           </FieldDescription>
         </Field>
 

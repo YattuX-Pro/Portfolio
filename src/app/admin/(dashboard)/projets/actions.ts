@@ -5,6 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { projects } from "@/lib/db/schema";
 import { assertAdmin } from "@/lib/admin-guard";
+import { uploadImage, deleteImage, isStorageKey } from "@/lib/storage";
 
 /* CHAQUE action commence par assertAdmin().
    Une server action est un point d'entrée HTTP à part entière : la
@@ -40,16 +41,30 @@ function orNull(v: FormDataEntryValue | null): string | null {
   return s.length > 0 ? s : null;
 }
 
-function readForm(formData: FormData) {
+async function readForm(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const slugRaw = String(formData.get("slug") ?? "").trim();
+  const slug = slugify(slugRaw || title);
+
+  /* Un fichier téléversé l'emporte sur le champ texte : c'est l'action
+     explicite de l'utilisateur. Sinon on garde ce qu'il a saisi. */
+  const upload = formData.get("imageFile");
+  let imageUrl = orNull(formData.get("imageUrl"));
+  let uploadError: string | null = null;
+
+  if (upload instanceof File && upload.size > 0) {
+    const res = await uploadImage(upload, slug || "sans-slug");
+    if ("error" in res) uploadError = res.error;
+    else imageUrl = res.value;
+  }
 
   return {
+    uploadError,
     title,
     description,
-    slug: slugify(slugRaw || title),
-    imageUrl: orNull(formData.get("imageUrl")),
+    slug,
+    imageUrl,
     demoUrl: orNull(formData.get("demoUrl")),
     githubUrl: orNull(formData.get("githubUrl")),
     stack: parseStack(String(formData.get("stack") ?? "")),
@@ -57,7 +72,8 @@ function readForm(formData: FormData) {
   };
 }
 
-function validate(v: ReturnType<typeof readForm>): string | null {
+function validate(v: Awaited<ReturnType<typeof readForm>>): string | null {
+  if (v.uploadError) return v.uploadError;
   if (!v.title) return "Le titre est obligatoire.";
   if (!v.description) return "La description est obligatoire.";
   if (!v.slug) return "Le titre doit contenir au moins une lettre ou un chiffre.";
@@ -78,8 +94,8 @@ export async function createProject(
 ): Promise<ActionState> {
   await assertAdmin();
 
-  const values = readForm(formData);
-  const invalid = validate(values);
+  const { uploadError, ...values } = await readForm(formData);
+  const invalid = validate({ ...values, uploadError });
   if (invalid) return { error: invalid };
 
   /* position : à la suite du dernier projet. COALESCE gère la table vide. */
@@ -110,8 +126,8 @@ export async function updateProject(
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return { error: "Projet introuvable." };
 
-  const values = readForm(formData);
-  const invalid = validate(values);
+  const { uploadError, ...values } = await readForm(formData);
+  const invalid = validate({ ...values, uploadError });
   if (invalid) return { error: invalid };
 
   try {
@@ -136,6 +152,14 @@ export async function deleteProject(formData: FormData) {
 
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
+
+  /* Retire l'objet du bucket avant la ligne, sinon la clé est perdue et
+     l'image reste orpheline pour toujours. */
+  const [row] = await db
+    .select({ imageUrl: projects.imageUrl })
+    .from(projects)
+    .where(eq(projects.id, id));
+  if (row?.imageUrl && isStorageKey(row.imageUrl)) await deleteImage(row.imageUrl);
 
   await db.delete(projects).where(eq(projects.id, id));
   revalidatePath("/");

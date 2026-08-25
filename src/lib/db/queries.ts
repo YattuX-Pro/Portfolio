@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { asc, eq } from "drizzle-orm";
 import { db } from "./index";
+import { isStorageKey, publicImageUrl } from "@/lib/storage";
 import {
   projects,
   skillCategories,
@@ -26,14 +27,31 @@ export const getHeroStack = cache(async () =>
   db.select().from(heroStack).orderBy(asc(heroStack.position)),
 );
 
+/* Une clé de stockage devient une URL publique au moment du rendu.
+   La base ne garde que la clé : l'endpoint dépend de la branche Neon et le
+   figer en colonne casserait les images au premier changement de branche. */
+function resolveImages<T extends { imageUrl: string | null }>(rows: T[]): T[] {
+  return rows.map((row) =>
+    isStorageKey(row.imageUrl)
+      ? { ...row, imageUrl: publicImageUrl(row.imageUrl) }
+      : row,
+  );
+}
+
 export const getPublishedProjects = cache(async () =>
-  db
-    .select()
-    .from(projects)
-    .where(eq(projects.published, true))
-    .orderBy(asc(projects.position)),
+  resolveImages(
+    await db
+      .select()
+      .from(projects)
+      .where(eq(projects.published, true))
+      .orderBy(asc(projects.position)),
+  ),
 );
 
+/* Volontairement NON résolu : c'est la requête de l'administration, dont le
+   formulaire réécrit imageUrl tel quel. Résoudre ici ferait enregistrer
+   l'URL complète à la place de la clé au premier réenregistrement, figeant
+   l'endpoint de la branche dans la base. */
 export const getAllProjects = cache(async () =>
   db.select().from(projects).orderBy(asc(projects.position)),
 );
