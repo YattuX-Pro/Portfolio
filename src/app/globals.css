@@ -77,6 +77,16 @@
 @layer components {
   /* Label mono : numéros de section, tags de stack, métadonnées.
      C'est ce détail qui porte le signal « tech » — à garder rare. */
+  /* Barre de défilement masquée : utilisé par la nav horizontale de
+     l'admin sur petit écran, où la barre native chevaucherait les onglets. */
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
   .meta {
     font-family: var(--font-mono), ui-monospace, monospace;
     font-size: 12px;
