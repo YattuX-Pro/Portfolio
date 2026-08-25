@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import PageHeader from "@/components/admin/PageHeader";
 import SettingsForm from "./SettingsForm";
 import ListEditor from "./ListEditor";
 import { addStat, deleteStat, addStackRow, deleteStackRow } from "./actions";
@@ -23,11 +22,6 @@ export default async function AdminProfilePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Profil"
-        description="Identité, disponibilité, coordonnées et contenu du hero."
-      />
-
       <Card>
         <CardHeader>
           <CardTitle>Identité & contact</CardTitle>

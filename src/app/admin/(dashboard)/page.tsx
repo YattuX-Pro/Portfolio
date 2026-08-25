@@ -73,12 +73,13 @@ export default async function AdminDashboardPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
       <PageHeader
         title="Tableau de bord"
         description="Vue d'ensemble du contenu publié sur le portfolio."
       />
 
+      <div className="flex flex-col gap-6 p-4 md:p-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           icon={FolderKanbanIcon}
@@ -169,6 +170,7 @@ export default async function AdminDashboardPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

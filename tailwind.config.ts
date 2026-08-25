@@ -95,6 +95,15 @@ const config: Config = {
           ring: "var(--sidebar-ring)",
         },
       },
+      /* Tailwind v3 donne au ring une couleur par défaut : blue-500 à 50 %.
+         Tout `ring-*` sans couleur explicite affichait donc un liseré bleu,
+         hors charte. On le ramène sur l'accent rouge. */
+      ringColor: {
+        DEFAULT: "var(--ring)",
+      },
+      ringOffsetColor: {
+        DEFAULT: "var(--background)",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

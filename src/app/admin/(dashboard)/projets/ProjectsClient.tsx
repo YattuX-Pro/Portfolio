@@ -61,11 +61,11 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
       <PageHeader
         title="Projets"
         description="Ce qui s'affiche dans la section Projets du portfolio."
-        action={
+        actions={
           <Button onClick={() => setCreating(true)} disabled={isPending}>
             <PlusIcon data-icon="inline-start" />
             Nouveau projet
@@ -73,6 +73,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
         }
       />
 
+      <div className="flex flex-col gap-6 p-4 md:p-6">
       <DataTable
         columns={columns}
         data={projects}
@@ -148,6 +149,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </>
   );
 }

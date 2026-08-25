@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/admin-guard";
-import AdminShell from "./AdminShell";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/admin/AppSidebar";
 import { Toaster } from "@/components/ui/sonner";
 
 /* auth.getSession() lit les cookies : la section doit être rendue
@@ -22,11 +23,13 @@ export default async function AdminLayout({
   const user = await requireAdmin();
 
   return (
-    <>
-      <AdminShell email={user.email}>{children}</AdminShell>
-      {/* Monté ici et non dans le layout racine : les toasts ne servent
-          qu'à l'admin, inutile d'embarquer sonner sur le site public. */}
+    <SidebarProvider>
+      <AppSidebar email={user.email} />
+      {/* Le layout ne porte plus d'en-tête : chaque page rend le sien, avec
+          son titre et ses actions propres. */}
+      <SidebarInset>{children}</SidebarInset>
+      {/* Monté ici et non à la racine : les toasts ne servent qu'à l'admin. */}
       <Toaster position="bottom-right" />
-    </>
+    </SidebarProvider>
   );
 }

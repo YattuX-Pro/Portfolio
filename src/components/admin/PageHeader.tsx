@@ -1,24 +1,37 @@
-/* En-tête de page de l'administration. Le fil d'Ariane situe, ce titre
-   nomme et explique — sans lui le contenu démarrait à sec sur la barre
-   d'outils. */
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+
+/* En-tête rendu par CHAQUE page, comme dans l'admin Guidoc, plutôt qu'un fil
+   d'Ariane générique dans le layout : la page connaît son titre, sa
+   description et ses actions, le layout non. */
 export default function PageHeader({
   title,
   description,
-  action,
+  actions,
+  children,
 }: {
   title: string;
   description?: string;
-  action?: React.ReactNode;
+  actions?: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4 pb-6 border-b">
-      <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-[-0.02em]">{title}</h1>
-        {description ? (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        ) : null}
+    <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+      <div className="flex h-16 items-center gap-3 px-4 md:px-6">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-1 h-5" />
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-base font-semibold tracking-[-0.01em]">
+            {title}
+          </h1>
+          {description ? (
+            <p className="truncate text-xs text-muted-foreground">{description}</p>
+          ) : null}
+        </div>
+        {actions ? <div className="shrink-0">{actions}</div> : null}
       </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
-    </div>
+      {/* Zone d'onglets, quand la page en a. */}
+      {children}
+    </header>
   );
 }

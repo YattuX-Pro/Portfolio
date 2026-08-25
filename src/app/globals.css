@@ -135,6 +135,12 @@
   * {
     @apply border-border;
     outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+    /* Tailwind v3 initialise --tw-ring-color sur un bleu dans sa couche de
+       base, avant tout thème : n'importe quel `ring-*` sans couleur explicite
+       affichait donc un liseré bleu, hors charte. On écrase la variable
+       elle-même, la seule façon d'atteindre cette valeur par défaut. */
+    --tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
+    --tw-ring-offset-color: var(--background);
   }
 }
 
