@@ -2,10 +2,10 @@
 
 import { useState, useTransition } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { PlusIcon, Trash2Icon, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import type { SkillGroup } from "@/lib/db/queries";
-import DataTable from "@/components/admin/DataTable";
+import DataTable, { SortHeader } from "@/components/admin/DataTable";
 import TabbedPage from "@/components/admin/TabbedPage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -98,14 +98,17 @@ export default function SkillsClient({
   const columns: ColumnDef<Row>[] = [
     {
       accessorKey: "label",
-      header: "Compétence",
+      header: ({ column }) => <SortHeader column={column}>Compétence</SortHeader>,
+      /* Voir columns.tsx des projets : les largeurs occupent la ligne. */
+      meta: { width: "45%" },
       cell: ({ row }) => (
-        <span className="font-medium">{row.original.label}</span>
+        <span className="text-sm font-medium">{row.original.label}</span>
       ),
     },
     {
       accessorKey: "category",
       header: "Catégorie",
+      meta: { width: "45%" },
       cell: ({ row }) => (
         <span className="flex items-center gap-2">
           <span
@@ -125,12 +128,14 @@ export default function SkillsClient({
       id: "actions",
       header: () => <span className="sr-only">Actions</span>,
       enableSorting: false,
+      meta: { width: "10%", align: "right" as const },
       cell: ({ row }) => (
         <div className="flex justify-end">
           <Button
             variant="ghost"
-            size="icon"
+            size="icon-sm"
             aria-label={`Retirer ${row.original.label}`}
+            className="cursor-pointer text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus-visible:opacity-100 group-hover:opacity-100"
             disabled={isPending}
             onClick={() => {
               const fd = new FormData();
@@ -138,7 +143,7 @@ export default function SkillsClient({
               run(deleteItem, fd, `« ${row.original.label} » retirée.`);
             }}
           >
-            <Trash2Icon />
+            <Trash2 className="size-4" />
           </Button>
         </div>
       ),
@@ -146,7 +151,7 @@ export default function SkillsClient({
   ];
 
   const skillsTab = (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <DataTable
         columns={columns}
         data={rows}
@@ -157,6 +162,7 @@ export default function SkillsClient({
           label: "Catégorie",
           options: categories.map((c) => ({ value: c.label, label: c.label })),
         }}
+        countLabel="compétence"
         emptyTitle="Aucune compétence"
         emptyDescription="Ajoutez-en une avec le formulaire ci-dessous."
       />
@@ -170,14 +176,17 @@ export default function SkillsClient({
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <Field className="sm:max-w-[220px]">
+            <Field className="sm:w-[220px] sm:shrink-0">
               <FieldLabel htmlFor="cat">Catégorie</FieldLabel>
               {/* base-ui peut émettre null (désélection) : on le ramène à "". */}
               <Select
                 value={addingTo}
                 onValueChange={(v) => setAddingTo(v ?? "")}
               >
-                <SelectTrigger id="cat">
+                {/* `w-full` : le déclencheur shadcn est en `w-fit`, il se
+                    serait réduit à la longueur du libellé au lieu de remplir
+                    son champ, à côté d'un champ texte pleine largeur. */}
+                <SelectTrigger id="cat" className="w-full">
                   <SelectValue placeholder="Choisir" />
                 </SelectTrigger>
                 <SelectContent>
@@ -215,7 +224,7 @@ export default function SkillsClient({
                 });
               }}
             >
-              <PlusIcon data-icon="inline-start" />
+              <Plus className="size-4" />
               Ajouter
             </Button>
           </div>
@@ -233,9 +242,10 @@ export default function SkillsClient({
         <Button
           variant="outline"
           size="sm"
+          className="cursor-pointer"
           onClick={() => setCategorySheet("new")}
         >
-          <PlusIcon data-icon="inline-start" />
+          <Plus className="size-4" />
           Nouvelle
         </Button>
       </div>
@@ -244,7 +254,7 @@ export default function SkillsClient({
         {categories.map((c, i) => (
           <li
             key={c.id}
-            className="flex items-center gap-3 rounded-lg border p-3"
+            className="card-hover flex items-center gap-3 rounded-xl border border-border bg-card p-3"
           >
             <span
               aria-hidden
@@ -262,7 +272,8 @@ export default function SkillsClient({
 
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-sm"
+              className="cursor-pointer"
               aria-label={`Monter ${c.label}`}
               disabled={i === 0 || isPending}
               onClick={() => {
@@ -272,11 +283,12 @@ export default function SkillsClient({
                 run(moveCategory, fd, "Ordre mis à jour.");
               }}
             >
-              <ArrowUpIcon />
+              <ArrowUp className="size-4" />
             </Button>
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-sm"
+              className="cursor-pointer"
               aria-label={`Descendre ${c.label}`}
               disabled={i === categories.length - 1 || isPending}
               onClick={() => {
@@ -286,22 +298,24 @@ export default function SkillsClient({
                 run(moveCategory, fd, "Ordre mis à jour.");
               }}
             >
-              <ArrowDownIcon />
+              <ArrowDown className="size-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
+              className="cursor-pointer"
               onClick={() => setCategorySheet(c)}
             >
               Modifier
             </Button>
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-sm"
+              className="cursor-pointer text-muted-foreground hover:text-destructive"
               aria-label={`Supprimer ${c.label}`}
               onClick={() => setPendingDelete(c)}
             >
-              <Trash2Icon />
+              <Trash2 className="size-4" />
             </Button>
           </li>
         ))}
@@ -379,7 +393,7 @@ export default function SkillsClient({
                         : "text"
                     }
                   >
-                    <SelectTrigger id="accent">
+                    <SelectTrigger id="accent" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

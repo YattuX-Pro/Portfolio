@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { asc, eq } from "drizzle-orm";
 import { db } from "./index";
-import { isStorageKey, publicImageUrl } from "@/lib/storage";
+import { isStorageKey, publicObjectUrl } from "@/lib/storage";
 import {
   projects,
   skillCategories,
@@ -14,9 +14,21 @@ import {
 /* `cache()` déduplique par requête : si plusieurs composants serveur
    demandent les mêmes données pendant un même rendu, une seule requête part. */
 
+/* Volontairement NON résolu : c'est la requête de l'ADMINISTRATION, dont le
+   formulaire réécrit cvUrl tel quel. Résoudre ici ferait enregistrer l'URL
+   complète à la place de la clé au premier réenregistrement, figeant
+   l'endpoint de la branche dans la base. Même piège que getAllProjects. */
 export const getSettings = cache(async () => {
   const [row] = await db.select().from(siteSettings).where(eq(siteSettings.id, 1)).limit(1);
   return row ?? null;
+});
+
+/* Version pour les pages PUBLIQUES : la clé de stockage du CV devient une
+   URL téléchargeable. */
+export const getPublicSettings = cache(async () => {
+  const row = await getSettings();
+  if (!row || !isStorageKey(row.cvUrl)) return row;
+  return { ...row, cvUrl: publicObjectUrl(row.cvUrl) };
 });
 
 export const getHeroStats = cache(async () =>
@@ -33,7 +45,7 @@ export const getHeroStack = cache(async () =>
 function resolveImages<T extends { imageUrl: string | null }>(rows: T[]): T[] {
   return rows.map((row) =>
     isStorageKey(row.imageUrl)
-      ? { ...row, imageUrl: publicImageUrl(row.imageUrl) }
+      ? { ...row, imageUrl: publicObjectUrl(row.imageUrl) }
       : row,
   );
 }
@@ -77,7 +89,7 @@ export const getSkills = cache(async () => {
 /* Tout ce dont la page publique a besoin, en parallèle. */
 export const getSiteData = cache(async () => {
   const [settings, stats, stack, projectList, skills] = await Promise.all([
-    getSettings(),
+    getPublicSettings(),
     getHeroStats(),
     getHeroStack(),
     getPublishedProjects(),

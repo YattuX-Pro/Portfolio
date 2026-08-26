@@ -7,6 +7,10 @@ import type { ReactNode } from "react";
    fade + 16px, 550ms, once. Rien d'autre, nulle part. */
 export const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 export const DURATION = 0.55;
+/* Décalage entre deux frères. Exporté parce que plusieurs composants
+   calculent leur propre délai (Skills, le titre du hero) : recopier 0.06 à la
+   main faisait déjà diverger la cadence — Skills tournait à 50 ms. */
+export const STAGGER = 0.06;
 
 export const revealItem = {
   hidden: { opacity: 0, y: 16 },
@@ -16,7 +20,7 @@ export const revealItem = {
 /* Parent : décale les enfants de 60ms. */
 export const revealGroup = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
+  visible: { transition: { staggerChildren: STAGGER } },
 };
 
 /* Bloc révélé au scroll. `immediate` pour ce qui est déjà visible au chargement. */

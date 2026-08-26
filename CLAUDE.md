@@ -16,7 +16,7 @@ Next 16 removed `next lint`, so `lint` calls `eslint .` directly against the fla
 
 ## What this is
 
-Single-page personal portfolio (Next.js 16 App Router, React 19, TypeScript strict, Tailwind 3, Framer Motion 12). All user-facing copy is in **French**; `<html lang="fr">`. Deployed at yattara.dev.
+Personal portfolio plus an admin console (Next.js 16 App Router, React 19, TypeScript strict, Tailwind 4, Framer Motion 12). All user-facing copy is in **French**; `<html lang="fr">`. Deployed at yattara.dev.
 
 The site was rebuilt from a dark, 3D-heavy design into a **light editorial** one. Only five runtime dependencies remain: `next`, `react`, `react-dom`, `framer-motion`, `react-icons`. If you find yourself reaching for `three`, `@react-three/*`, or a UI kit, that contradicts the design direction — ask first.
 
@@ -46,7 +46,11 @@ Most of the design lives in three shared primitives. Changes that bypass them ar
 
 ### 1. Color — tokens in `globals.css`, one accent
 
-Every color is a CSS variable on `:root`, surfaced to Tailwind in `tailwind.config.ts` as `bg-bg`, `text-ink`, `text-muted`, `border-line`, `bg-accent`, `bg-flag-*`. Never hardcode a hex in a component.
+Every color is a CSS variable on `:root`, surfaced to Tailwind through the `@theme inline` block in `globals.css` as `bg-bg`, `text-ink`, `text-ink-muted`, `border-line`, `bg-brand`, `bg-flag-*`. Never hardcode a hex in a component.
+
+**Tailwind 4 is CSS-first: there is no `tailwind.config.ts`.** The whole theme lives in `src/app/globals.css` — `@theme inline` for the scale, `@utility` for custom classes, `@custom-variant dark` to bind `dark:` to the class instead of `prefers-color-scheme`. The `inline` keyword is load-bearing: it makes utilities point at the variable rather than copy its value, which is what lets `.admin` restyle the entire palette by cascade.
+
+Do not reintroduce Tailwind 3. The shadcn/base-ui components here rely on ~100 variants of the form `data-open:`, `data-active:`, `data-checked:`, `data-horizontal:`, which **v3 does not generate at all, silently** — the failure mode is a component that renders with no styling rather than a build error.
 
 The palette is a warm off-white neutral plus **one** interactive accent (`--accent`, the Guinean flag red `#CE1126`). The accent covers buttons, links, hovers and focus rings — nothing else. Resist adding a second interactive color.
 
@@ -60,9 +64,18 @@ If a request would put yellow on text, say so rather than shipping it.
 
 ### 2. Motion — one spec, in `Reveal.tsx`
 
-`src/components/Reveal.tsx` is the single animation vocabulary: fade + `translateY(16px)`, 550 ms, ease `[0.16, 1, 0.3, 1]`, `once: true`, 60 ms stagger between siblings. It exports `Reveal` (a wrapper), plus `revealGroup`/`revealItem` variants for staggered children and the shared `EASE`/`DURATION` constants.
+`src/components/Reveal.tsx` is the single animation vocabulary: fade + `translateY(16px)`, 550 ms, ease `[0.16, 1, 0.3, 1]`, `once: true`, 60 ms stagger between siblings. It exports `Reveal` (a wrapper), plus `revealGroup`/`revealItem` variants for staggered children and the shared `EASE`/`DURATION`/`STAGGER` constants. **Import those constants — never retype the numbers.** `Skills.tsx` had `0.55` and `0.05` written by hand and was running its stagger at 50 ms while the rest of the site ran at 60 ms.
 
-Use it. Do not introduce parallax, tilt-on-hover, scale transforms, scroll-driven cameras, or a second easing curve — that vocabulary is exactly what the redesign removed. `prefers-reduced-motion` is honored globally in `globals.css`.
+Use it. Do not introduce parallax, tilt-on-hover, card scale-on-hover, scroll-driven cameras, or a second easing curve — that vocabulary is exactly what the redesign removed.
+
+**Sanctioned extensions** (all reuse `EASE`, none moves a block of content):
+
+- `scaleX` + `origin-left` to *draw a rule* — `FlagRule`, and the brand rule under a project title on row hover. This is the one legitimate use of a scale transform; `ease-soft` in Tailwind is the same curve as `EASE`, so it is not a second easing curve.
+- A shared `layoutId` indicator that *slides* between states — the active underline in `NavBar` travels between sections instead of cross-fading.
+- Scroll-linked *indicators* (the 2 px progress line at the bottom of `NavBar`). An indicator is not a scroll-driven camera. Hide these under `motion-reduce:hidden` — see below.
+- Hover micro-interactions at 200–300 ms (colour, opacity, `translate-x-0.5`). The 550 ms spec is for scroll reveals; a hover must feel immediate.
+
+**`prefers-reduced-motion` needs BOTH halves.** The media query in `globals.css` only neutralizes `animation-duration`/`transition-duration` — i.e. CSS animations. Framer Motion does not use CSS transitions: it rewrites inline `transform`/`opacity` every frame, so that media query never reached it and reduced-motion visitors still saw every reveal play in full. `src/components/MotionRoot.tsx` (`MotionConfig reducedMotion="user"`) wraps the whole public site and closes that gap. A value bound straight to a `MotionValue` (the scroll progress line) is a binding rather than an animation, so `MotionConfig` cannot neutralize it either — such elements need `motion-reduce:hidden`.
 
 ### 3. Typography — one family, three roles
 
@@ -81,6 +94,7 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
 ## Shared components
 
 - `Reveal.tsx` — the animation spec (above).
+- `MotionRoot.tsx` — `MotionConfig reducedMotion="user"` around the whole public site. Mounted in `PortfolioApp`; without it Framer ignores `prefers-reduced-motion` entirely.
 - `FlagRule.tsx` — the tricolor bar (red → yellow → green, Guinea's order). Decorative and `aria-hidden`. Parameterized by `thickness`, `width`, `delay`. Used under the hero title and as the section divider.
 - `SectionHeader.tsx` — mono number + label + title + optional intro. Every section below the hero uses it; the numbers (`01`, `02`, `03`) are manual, so renumber if you reorder sections.
 

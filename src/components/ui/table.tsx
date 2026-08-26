@@ -23,7 +23,9 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      /* Ligne d'en-tête de l'admin Guidoc : fond discret, libellés en
+         capitales espacées. */
+      className={cn("[&_tr]:border-b bg-muted/40", className)}
       {...props}
     />
   )
@@ -57,7 +59,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        "border-b border-border transition-colors hover:bg-muted/40 has-aria-expanded:bg-muted/40 data-[state=selected]:bg-primary/5 motion-reduce:transition-none",
         className
       )}
       {...props}
@@ -70,7 +72,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+        "whitespace-nowrap px-4 py-3 text-left align-middle text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}
@@ -83,7 +85,11 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        /* Pas de `whitespace-nowrap` ici : les colonnes ont des largeurs en
+           pourcentage, un contenu long doit passer à la ligne plutôt que
+           faire déborder le tableau. Les en-têtes, eux, restent sur une
+           ligne — ils sont courts par construction. */
+        "px-4 py-3 align-middle [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}

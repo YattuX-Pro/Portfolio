@@ -50,16 +50,24 @@ export default function HeroContent({
           ) : null}
         </motion.p>
 
-        {/* Nom */}
-        <motion.h1
-          variants={revealItem}
+        {/* Nom — révélé LIGNE PAR LIGNE.
+            Le titre était un seul bloc : à 92px, tout le nom apparaissait
+            d'un coup et la cadence du reste de la page s'arrêtait net sur
+            l'élément le plus grand. Chaque ligne devient un enfant du même
+            groupe, donc hérite du stagger de 60ms sans nouvelle courbe ni
+            nouvelle durée. `block` : deux lignes de bloc remplacent le <br>,
+            que le fondu aurait laissé sauter d'un coup. */}
+        <h1
           className="font-display font-semibold mt-6 leading-[0.95] tracking-[-0.035em] text-ink"
           style={{ fontSize: "clamp(30px, 9vw, 92px)" }}
         >
-          Aboubacar Tidiane
-          <br />
-          Yattara<span className="text-brand">.</span>
-        </motion.h1>
+          <motion.span variants={revealItem} className="block">
+            Aboubacar Tidiane
+          </motion.span>
+          <motion.span variants={revealItem} className="block">
+            Yattara<span className="text-brand">.</span>
+          </motion.span>
+        </h1>
 
         {/* Filet tricolore — Guinée */}
         <motion.div variants={revealItem}>

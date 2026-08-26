@@ -1,13 +1,7 @@
 import Link from "next/link";
-import {
-  FolderKanbanIcon,
-  LayersIcon,
-  CircleCheckIcon,
-  ClockIcon,
-  ArrowRightIcon,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { getAllProjects, getSkills, getSettings } from "@/lib/db/queries";
-import PageHeader from "@/components/admin/PageHeader";
+import Header from "@/components/admin/Header";
 import {
   Card,
   CardContent,
@@ -17,7 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import {
   Table,
   TableBody,
@@ -29,28 +28,30 @@ import {
 
 export const dynamic = "force-dynamic";
 
+/* Carte de chiffre, reprise de l'admin Guidoc (dashboard/stat-cards) :
+   libellé en mono capitales, valeur en gros chiffres tabulaires, précision
+   facultative en dessous. Aucune icône — c'est le chiffre qui porte. */
 function StatCard({
-  icon: Icon,
-  value,
   label,
-  hint,
+  value,
+  sub,
 }: {
-  icon: typeof FolderKanbanIcon;
-  value: string | number;
   label: string;
-  hint: string;
+  value: string;
+  sub?: string;
 }) {
   return (
     <Card>
-      <CardHeader>
-        <CardDescription className="flex items-center gap-2">
-          <Icon className="size-4" />
+      <CardContent className="p-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
           {label}
-        </CardDescription>
-        <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{hint}</p>
+        </p>
+        {/* Charte : les titres sont en 600 avec l'approche serrée, jamais en
+            700 — la hiérarchie vient de la graisse et du tracking. */}
+        <p className="mt-1.5 text-3xl font-semibold tracking-[-0.03em] tabular-nums">
+          {value}
+        </p>
+        {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -74,102 +75,109 @@ export default async function AdminDashboardPage() {
 
   return (
     <>
-      <PageHeader
-        title="Tableau de bord"
-        description="Vue d'ensemble du contenu publié sur le portfolio."
-      />
+      <Header title="Tableau de bord" description="Vue d'ensemble du contenu" />
 
-      <div className="flex flex-col gap-6 p-4 md:p-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          icon={FolderKanbanIcon}
-          value={published.length}
-          label="Projets publiés"
-          hint={hidden > 0 ? `${hidden} masqué${hidden > 1 ? "s" : ""}` : "Aucun masqué"}
-        />
-        <StatCard
-          icon={LayersIcon}
-          value={skills.length}
-          label="Catégories"
-          hint={`${skillCount} compétences`}
-        />
-        <StatCard
-          icon={CircleCheckIcon}
-          value={settings?.heroAvailable ? "Oui" : "Non"}
-          label="Disponible"
-          hint="Affiché dans le hero"
-        />
-        <StatCard
-          icon={ClockIcon}
-          value={
-            lastUpdated
-              ? lastUpdated.toLocaleDateString("fr-FR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                })
-              : "—"
-          }
-          label="Dernière modif."
-          hint="Projet le plus récent"
-        />
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Projets récents</CardTitle>
-          <CardDescription>Les cinq dernières entrées et leur statut.</CardDescription>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto"
-            render={
-              <Link href="/admin/projets">
-                Tout gérer
-                <ArrowRightIcon data-icon="inline-end" />
-              </Link>
+      <div className="flex flex-1 flex-col gap-6 p-6 lg:p-8">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard
+            label="Projets publiés"
+            value={String(published.length)}
+            sub={
+              hidden > 0
+                ? `${hidden} masqué${hidden > 1 ? "s" : ""}`
+                : "Aucun masqué"
             }
           />
-        </CardHeader>
-        <CardContent>
-          {projects.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyTitle>Aucun projet</EmptyTitle>
-                <EmptyDescription>
-                  Créez votre premier projet pour l&apos;afficher sur le portfolio.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Titre</TableHead>
-                  <TableHead className="hidden sm:table-cell">Stack</TableHead>
-                  <TableHead>Statut</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {projects.slice(0, 5).map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.title}</TableCell>
-                    <TableCell className="hidden sm:table-cell text-muted-foreground">
-                      {p.stack.slice(0, 3).join(" · ") || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {p.published ? (
-                        <Badge variant="secondary">Publié</Badge>
-                      ) : (
-                        <Badge variant="outline">Masqué</Badge>
-                      )}
-                    </TableCell>
+          <StatCard
+            label="Catégories"
+            value={String(skills.length)}
+            sub={`${skillCount} compétence${skillCount > 1 ? "s" : ""}`}
+          />
+          <StatCard
+            label="Disponibilité"
+            value={settings?.heroAvailable ? "Oui" : "Non"}
+            sub="Affichée dans le hero"
+          />
+          <StatCard
+            label="Dernière modif."
+            value={
+              lastUpdated
+                ? lastUpdated.toLocaleDateString("fr-FR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })
+                : "—"
+            }
+            sub="Projet le plus récent"
+          />
+        </div>
+
+        <Card>
+          <CardHeader className="border-b">
+            <CardTitle>Projets récents</CardTitle>
+            <CardDescription>
+              Les cinq dernières entrées et leur statut.
+            </CardDescription>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto cursor-pointer gap-1.5"
+              render={
+                <Link href="/admin/projets">
+                  Tout gérer
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              }
+            />
+          </CardHeader>
+          <CardContent className="p-0">
+            {projects.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyTitle>Aucun projet</EmptyTitle>
+                  <EmptyDescription>
+                    Créez votre premier projet pour l&apos;afficher sur le
+                    portfolio.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <Table>
+                <colgroup>
+                  <col style={{ width: "40%" }} />
+                  <col style={{ width: "40%" }} />
+                  <col style={{ width: "20%" }} />
+                </colgroup>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Titre</TableHead>
+                    <TableHead className="hidden sm:table-cell">Stack</TableHead>
+                    <TableHead>Statut</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {projects.slice(0, 5).map((p) => (
+                    <TableRow key={p.id} className="last:border-0">
+                      <TableCell className="text-sm font-medium">
+                        {p.title}
+                      </TableCell>
+                      <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
+                        {p.stack.slice(0, 3).join(" · ") || "—"}
+                      </TableCell>
+                      <TableCell>
+                        {p.published ? (
+                          <Badge variant="secondary">Publié</Badge>
+                        ) : (
+                          <Badge variant="outline">Masqué</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </>
   );

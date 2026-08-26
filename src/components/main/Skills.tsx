@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Reveal, { EASE } from "@/components/Reveal";
+import Reveal, { DURATION, EASE, STAGGER } from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
 import type { SkillGroup } from "@/lib/db/queries";
 
@@ -42,7 +42,7 @@ export default function Skills({
               <div className="flex items-center gap-2.5 pb-3 border-b-2 border-ink">
                 <span
                   aria-hidden
-                  className="block h-2.5 w-2.5 flex-shrink-0"
+                  className="block h-2.5 w-2.5 shrink-0"
                   style={{ backgroundColor: accentOf(cat.accent) }}
                 />
                 <h3 className="meta text-ink">{cat.label}</h3>
@@ -56,7 +56,16 @@ export default function Skills({
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: 0.55, ease: EASE, delay: ci * 0.07 + i * 0.05 }}
+                  /* Durée et cadence lues depuis la spec, plus recopiées :
+                     0.55 et 0.05 étaient écrits à la main ici, ce qui faisait
+                     tourner cette colonne à 50 ms au lieu des 60 ms du reste
+                     du site — un décalage invisible seul, sensible à côté du
+                     hero. */
+                  transition={{
+                    duration: DURATION,
+                    ease: EASE,
+                    delay: ci * 0.07 + i * STAGGER,
+                  }}
                   className="py-3 border-b border-line text-[15px] font-medium text-ink"
                 >
                   {item.label}

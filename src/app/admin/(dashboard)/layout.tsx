@@ -1,17 +1,11 @@
-import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/admin-guard";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import AdminUserProvider from "@/components/admin/AdminUserProvider";
 import AppSidebar from "@/components/admin/AppSidebar";
-import { Toaster } from "@/components/ui/sonner";
 
 /* auth.getSession() lit les cookies : la section doit être rendue
    dynamiquement, jamais mise en cache statiquement. */
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  title: "Administration",
-  robots: { index: false, follow: false },
-};
 
 export default async function AdminLayout({
   children,
@@ -23,13 +17,13 @@ export default async function AdminLayout({
   const user = await requireAdmin();
 
   return (
-    <SidebarProvider>
-      <AppSidebar email={user.email} />
-      {/* Le layout ne porte plus d'en-tête : chaque page rend le sien, avec
-          son titre et ses actions propres. */}
-      <SidebarInset>{children}</SidebarInset>
-      {/* Monté ici et non à la racine : les toasts ne servent qu'à l'admin. */}
-      <Toaster position="bottom-right" />
-    </SidebarProvider>
+    <AdminUserProvider user={{ email: user.email, name: user.name ?? null }}>
+      <SidebarProvider>
+        <AppSidebar />
+        {/* Le layout ne porte pas d'en-tête : chaque page rend le sien, avec
+            son titre et ses actions propres. */}
+        <SidebarInset>{children}</SidebarInset>
+      </SidebarProvider>
+    </AdminUserProvider>
   );
 }

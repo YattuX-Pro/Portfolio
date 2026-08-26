@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { projects } from "@/lib/db/schema";
 import { assertAdmin } from "@/lib/admin-guard";
-import { uploadImage, deleteImage, isStorageKey } from "@/lib/storage";
+import { uploadImage, deleteObject, isStorageKey } from "@/lib/storage";
 
 /* CHAQUE action commence par assertAdmin().
    Une server action est un point d'entrée HTTP à part entière : la
@@ -159,7 +159,7 @@ export async function deleteProject(formData: FormData) {
     .select({ imageUrl: projects.imageUrl })
     .from(projects)
     .where(eq(projects.id, id));
-  if (row?.imageUrl && isStorageKey(row.imageUrl)) await deleteImage(row.imageUrl);
+  if (row?.imageUrl && isStorageKey(row.imageUrl)) await deleteObject(row.imageUrl);
 
   await db.delete(projects).where(eq(projects.id, id));
   revalidatePath("/");

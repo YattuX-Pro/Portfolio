@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import DataTable from "@/components/admin/DataTable";
-import PageHeader from "@/components/admin/PageHeader";
+import Header from "@/components/admin/Header";
 import { buildColumns } from "./columns";
 import ProjectForm from "./ProjectForm";
 import { deleteProject, moveProject } from "./actions";
@@ -62,23 +62,29 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
 
   return (
     <>
-      <PageHeader
+      <Header
         title="Projets"
-        description="Ce qui s'affiche dans la section Projets du portfolio."
+        description="Section Projets du portfolio"
         actions={
-          <Button onClick={() => setCreating(true)} disabled={isPending}>
-            <PlusIcon data-icon="inline-start" />
+          <Button
+            size="sm"
+            className="cursor-pointer gap-1.5"
+            onClick={() => setCreating(true)}
+            disabled={isPending}
+          >
+            <PlusIcon className="size-4" />
             Nouveau projet
           </Button>
         }
       />
 
-      <div className="flex flex-col gap-6 p-4 md:p-6">
+      <div className="flex flex-1 flex-col gap-4 p-6 lg:p-8">
       <DataTable
         columns={columns}
         data={projects}
         searchColumnId="title"
         searchPlaceholder="Rechercher un projet…"
+        countLabel="projet"
         facet={{
           columnId: "statut",
           label: "Statut",

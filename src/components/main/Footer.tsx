@@ -37,7 +37,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
             style={{ fontSize: "clamp(20px, 5vw, 44px)" }}
           >
             <HiEnvelope
-              className="flex-shrink-0 opacity-40 group-hover:opacity-100 transition-opacity duration-200"
+              className="shrink-0 opacity-40 group-hover:opacity-100 transition-opacity duration-200"
               aria-hidden
             />
             {settings.email}

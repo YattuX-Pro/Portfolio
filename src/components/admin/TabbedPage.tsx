@@ -1,6 +1,6 @@
 "use client";
 
-import PageHeader from "@/components/admin/PageHeader";
+import Header from "@/components/admin/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type PageTab = {
@@ -10,7 +10,7 @@ export type PageTab = {
 };
 
 /* Une page dont les sections sont des onglets plutôt qu'une pile de cartes.
-   Les onglets vivent dans l'en-tête collant : ils restent visibles quand le
+   Les onglets vivent dans le bandeau collant : ils restent visibles quand le
    panneau défile, et la page garde une seule route — ce sont des sections,
    pas des destinations. */
 export default function TabbedPage({
@@ -26,10 +26,10 @@ export default function TabbedPage({
 }) {
   return (
     <Tabs defaultValue={tabs[0]?.value} className="gap-0">
-      <PageHeader title={title} description={description} actions={actions}>
+      <Header title={title} description={description} actions={actions}>
         <TabsList
           variant="line"
-          className="h-9 w-full justify-start overflow-x-auto rounded-none px-4 md:px-6"
+          className="h-9 w-full justify-start overflow-x-auto rounded-none px-4"
         >
           {tabs.map((tab) => (
             <TabsTrigger
@@ -41,9 +41,10 @@ export default function TabbedPage({
             </TabsTrigger>
           ))}
         </TabsList>
-      </PageHeader>
+      </Header>
 
-      <div className="p-4 md:p-6">
+      {/* Même gouttière que les pages Guidoc : p-6, p-8 au-delà de 1024 px. */}
+      <div className="flex flex-1 flex-col gap-4 p-6 lg:p-8">
         {tabs.map((tab) => (
           <TabsContent key={tab.value} value={tab.value}>
             {tab.content}

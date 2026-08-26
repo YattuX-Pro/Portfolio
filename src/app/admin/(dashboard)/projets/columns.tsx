@@ -1,11 +1,12 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDownIcon, MoreHorizontalIcon } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import type { Project } from "@/lib/db/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SortHeader } from "@/components/admin/DataTable";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,23 +47,18 @@ export function buildColumns(actions: ProjectRowActions): ColumnDef<Project>[] {
       ),
       enableSorting: false,
       enableHiding: false,
+      meta: { width: "3rem" },
     },
     {
       accessorKey: "title",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Titre
-          <ArrowUpDownIcon data-icon="inline-end" />
-        </Button>
-      ),
+      header: ({ column }) => <SortHeader column={column}>Titre</SortHeader>,
+      /* Les largeurs se répartissent la ligne entière : sans elles, chaque
+         colonne se réduit à son contenu et le reste part en vide à droite. */
+      meta: { width: "34%" },
       cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="font-medium">{row.original.title}</span>
-          <span className="font-mono text-xs text-muted-foreground">
+        <div className="flex min-w-0 flex-col">
+          <span className="truncate text-sm font-medium">{row.original.title}</span>
+          <span className="truncate font-mono text-xs text-muted-foreground">
             {row.original.slug}
           </span>
         </div>
@@ -72,6 +68,7 @@ export function buildColumns(actions: ProjectRowActions): ColumnDef<Project>[] {
       accessorKey: "stack",
       header: "Stack",
       enableSorting: false,
+      meta: { width: "34%" },
       cell: ({ row }) => {
         const stack = row.original.stack;
         if (stack.length === 0) {
@@ -97,6 +94,7 @@ export function buildColumns(actions: ProjectRowActions): ColumnDef<Project>[] {
       id: "statut",
       accessorFn: (row) => (row.published ? "publie" : "masque"),
       header: "Statut",
+      meta: { width: "16%" },
       cell: ({ row }) =>
         row.original.published ? (
           <Badge variant="secondary">Publié</Badge>
@@ -109,6 +107,7 @@ export function buildColumns(actions: ProjectRowActions): ColumnDef<Project>[] {
       id: "actions",
       header: () => <span className="sr-only">Actions</span>,
       enableSorting: false,
+      meta: { width: "10%", align: "right" as const },
       cell: ({ row, table }) => {
         const project = row.original;
         const index = row.index;
@@ -119,8 +118,16 @@ export function buildColumns(actions: ProjectRowActions): ColumnDef<Project>[] {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="ghost" size="icon" aria-label={`Actions sur ${project.title}`}>
-                    <MoreHorizontalIcon />
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Actions sur ${project.title}`}
+                    /* Révélées au survol de la ligne, comme chez Guidoc.
+                       `focus-visible:opacity-100` : au clavier, un bouton
+                       invisible mais focusable est un piège. */
+                    className="cursor-pointer opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+                  >
+                    <MoreHorizontal className="size-4" />
                   </Button>
                 }
               />

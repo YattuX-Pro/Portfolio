@@ -5,6 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { siteSettings, heroStats, heroStack } from "@/lib/db/schema";
 import { assertAdmin } from "@/lib/admin-guard";
+import { uploadCv, deleteObject, isStorageKey } from "@/lib/storage";
 
 export type ActionState = { error: string | null; ok?: boolean };
 
@@ -36,8 +37,41 @@ export async function updateSettings(
   const method = orNull(formData.get("method"));
   const githubUrl = orNull(formData.get("githubUrl"));
   const linkedinUrl = orNull(formData.get("linkedinUrl"));
-  const cvUrl = orNull(formData.get("cvUrl"));
   const heroAvailable = formData.get("heroAvailable") === "on";
+
+  /* ── CV ──────────────────────────────────────────────────────────────
+     Le CV est téléversé, plus saisi comme lien. Trois cas, dans cet ordre :
+
+     1. un fichier est joint  -> on le téléverse et on remplace ;
+     2. « retirer » est coché -> on efface la valeur ;
+     3. rien de tout ça       -> on garde l'existant.
+
+     Le cas 3 est le point délicat : le formulaire ne transporte plus d'URL,
+     donc sans lecture de la valeur en base, tout enregistrement d'un autre
+     champ (la bio, par exemple) effacerait le CV au passage. */
+  const current = await db
+    .select({ cvUrl: siteSettings.cvUrl })
+    .from(siteSettings)
+    .where(eq(siteSettings.id, 1))
+    .limit(1);
+  const previousCv = current[0]?.cvUrl ?? null;
+
+  const upload = formData.get("cvFile");
+  const removeCv = formData.get("cvRemove") === "on";
+  let cvUrl = previousCv;
+  /* La clé remplacée n'est supprimée du bucket qu'APRÈS l'écriture en base :
+     supprimer d'abord laisserait un lien mort si l'insert échouait. */
+  let staleCv: string | null = null;
+
+  if (upload instanceof File && upload.size > 0) {
+    const res = await uploadCv(upload);
+    if ("error" in res) return { error: res.error };
+    cvUrl = res.value;
+    if (isStorageKey(previousCv)) staleCv = previousCv;
+  } else if (removeCv) {
+    cvUrl = null;
+    if (isStorageKey(previousCv)) staleCv = previousCv;
+  }
 
   if (!heroRole) return { error: "Le rôle est obligatoire." };
   if (!heroBio) return { error: "La bio est obligatoire." };
@@ -45,10 +79,11 @@ export async function updateSettings(
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Format d'e-mail invalide." };
   }
+  /* cvUrl n'est plus validé comme lien : il vient soit du téléversement,
+     soit de la base. */
   for (const [label, url] of [
     ["GitHub", githubUrl],
     ["LinkedIn", linkedinUrl],
-    ["CV", cvUrl],
   ] as const) {
     if (badUrl(url)) {
       return { error: `Le lien ${label} doit commencer par http://, https:// ou /.` };
@@ -73,6 +108,8 @@ export async function updateSettings(
     .insert(siteSettings)
     .values({ id: 1, ...values })
     .onConflictDoUpdate({ target: siteSettings.id, set: values });
+
+  if (staleCv) await deleteObject(staleCv);
 
   refresh();
   return { error: null, ok: true };

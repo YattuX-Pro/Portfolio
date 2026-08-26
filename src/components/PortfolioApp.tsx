@@ -7,6 +7,7 @@ import Skills from "@/components/main/Skills";
 import Projects from "@/components/main/Projects";
 import Footer from "@/components/main/Footer";
 import FlagRule from "@/components/FlagRule";
+import MotionRoot from "@/components/MotionRoot";
 import type { SiteData } from "@/lib/db/queries";
 
 export default function PortfolioApp({ data }: { data: SiteData }) {
@@ -15,7 +16,9 @@ export default function PortfolioApp({ data }: { data: SiteData }) {
   }, []);
 
   return (
-    <>
+    /* MotionRoot enveloppe TOUT le site public : c'est le seul endroit d'où
+       `prefers-reduced-motion` atteint les animations Framer. */
+    <MotionRoot>
       <NavBar />
 
       <main className="pt-16">
@@ -48,6 +51,6 @@ export default function PortfolioApp({ data }: { data: SiteData }) {
           </section>
         </div>
       </main>
-    </>
+    </MotionRoot>
   );
 }

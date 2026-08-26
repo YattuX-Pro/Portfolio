@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { EASE } from "@/components/Reveal";
+import { motion, AnimatePresence, useScroll } from "framer-motion";
+import { DURATION, EASE } from "@/components/Reveal";
 
 const NAV_LINKS = [
   { id: "home", label: "Accueil" },
@@ -21,6 +21,10 @@ export default function NavBar() {
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  /* Avancement de la lecture, 0 → 1. Lu directement par le style : pas de
+     state, donc pas de rendu React à chaque pixel de scroll. */
+  const { scrollYProgress } = useScroll();
 
   /* Scroll spy + état « scrollé » du header */
   useEffect(() => {
@@ -106,6 +110,21 @@ export default function NavBar() {
         scrolled || open ? "border-b border-line" : "border-b border-transparent"
       }`}
     >
+      {/* Avancement de la lecture. `scaleX` + `origin-left` : le filet se
+          dessine de gauche à droite — même mécanique que FlagRule, sans quoi
+          il grandirait depuis son centre. Aucune courbe d'easing en jeu, la
+          valeur suit le scroll au pixel. Décoratif, donc aria-hidden : le
+          lecteur d'écran a déjà la structure en titres. */}
+      <motion.span
+        aria-hidden
+        style={{ scaleX: scrollYProgress }}
+        /* `motion-reduce:hidden` : le filet est lié au scroll, pas à une
+           animation — MotionConfig ne peut donc pas le neutraliser. Comme il
+           est purement décoratif, on le retire simplement pour qui demande
+           moins de mouvement. */
+        className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-brand motion-reduce:hidden"
+      />
+
       <div className="max-w-6xl mx-auto px-5 sm:px-10 h-16 flex items-center justify-between gap-4">
         {/* Monogramme */}
         <button
@@ -130,12 +149,19 @@ export default function NavBar() {
                 }`}
               >
                 {link.label}
-                <span
-                  aria-hidden
-                  className={`absolute left-3 right-3 bottom-2 h-px bg-brand transition-opacity duration-200 ${
-                    isActive ? "opacity-100" : "opacity-0"
-                  }`}
-                />
+                {/* Un SEUL filet, partagé : `layoutId` fait glisser le même
+                    élément d'un lien à l'autre au lieu d'en faire apparaître
+                    un et disparaître un autre. C'est le mouvement qui dit
+                    « vous vous déplacez dans une même page », là où deux
+                    fondus croisés ne disaient rien. */}
+                {isActive ? (
+                  <motion.span
+                    aria-hidden
+                    layoutId="nav-active"
+                    className="absolute left-3 right-3 bottom-2 h-px bg-brand"
+                    transition={{ duration: DURATION, ease: EASE }}
+                  />
+                ) : null}
               </button>
             );
           })}

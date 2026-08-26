@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import { FileText } from "lucide-react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import type { SiteSettings } from "@/lib/db/schema";
@@ -16,6 +17,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
 import { updateSettings, type ActionState } from "./actions";
 
 function Submit() {
@@ -28,7 +30,16 @@ function Submit() {
   );
 }
 
-export default function SettingsForm({ settings }: { settings: SiteSettings | null }) {
+export default function SettingsForm({
+  settings,
+  cvHref,
+}: {
+  settings: SiteSettings | null;
+  /* URL publique du CV, résolue côté serveur. La valeur en base est une clé
+     de stockage (« neon:… »), pas une adresse : le composant client ne peut
+     pas la reconstruire, l'endpoint n'est connu que du serveur. */
+  cvHref: string | null;
+}) {
   const [state, action] = useActionState<ActionState, FormData>(updateSettings, {
     error: null,
   });
@@ -37,104 +48,145 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
     if (state.ok) toast.success("Profil mis à jour.");
   }, [state.ok]);
 
+  const hasCv = Boolean(settings?.cvUrl);
+
   return (
     <form action={action}>
       <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="heroRole">Rôle affiché</FieldLabel>
-          <Input
-            id="heroRole"
-            name="heroRole"
-            required
-            placeholder="Analyste Développeur"
-            defaultValue={settings?.heroRole ?? ""}
-          />
-        </Field>
+        {/* Deux colonnes dès 768 px, comme les formulaires de Guidoc : sur un
+            écran large, une seule colonne de champs laisserait la moitié de la
+            carte vide. La bio et le CV, qui portent du texte long, occupent la
+            largeur entière. */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="heroRole">Rôle affiché</FieldLabel>
+            <Input
+              id="heroRole"
+              name="heroRole"
+              required
+              placeholder="Analyste Développeur"
+              defaultValue={settings?.heroRole ?? ""}
+            />
+          </Field>
 
-        <Field orientation="horizontal">
-          <Switch
-            id="heroAvailable"
-            name="heroAvailable"
-            defaultChecked={settings?.heroAvailable ?? true}
-          />
-          <FieldLabel htmlFor="heroAvailable">
-            Afficher « Disponible » dans le hero
-          </FieldLabel>
-        </Field>
+          <Field>
+            <FieldLabel htmlFor="method">Méthode</FieldLabel>
+            <Input
+              id="method"
+              name="method"
+              placeholder="Agile Scrum"
+              defaultValue={settings?.method ?? ""}
+            />
+            <FieldDescription>
+              Affichée sous la grille des compétences. Vide = ligne masquée.
+            </FieldDescription>
+          </Field>
 
-        <Field>
-          <FieldLabel htmlFor="heroBio">Bio</FieldLabel>
-          <Textarea
-            id="heroBio"
-            name="heroBio"
-            required
-            rows={4}
-            placeholder="Une ou deux phrases sur ce que vous faites."
-            defaultValue={settings?.heroBio ?? ""}
-          />
-        </Field>
+          <Field className="md:col-span-2">
+            <FieldLabel htmlFor="heroBio">Bio</FieldLabel>
+            <Textarea
+              id="heroBio"
+              name="heroBio"
+              required
+              rows={3}
+              placeholder="Une ou deux phrases sur ce que vous faites."
+              defaultValue={settings?.heroBio ?? ""}
+            />
+          </Field>
 
-        <Field>
-          <FieldLabel htmlFor="method">Méthode</FieldLabel>
-          <Input
-            id="method"
-            name="method"
-            placeholder="Agile Scrum"
-            defaultValue={settings?.method ?? ""}
-          />
-          <FieldDescription>
-            Affichée sous la grille des compétences. Vide = ligne masquée.
-          </FieldDescription>
-        </Field>
+          <Field orientation="horizontal" className="md:col-span-2">
+            <Switch
+              id="heroAvailable"
+              name="heroAvailable"
+              defaultChecked={settings?.heroAvailable ?? true}
+            />
+            <FieldLabel htmlFor="heroAvailable">
+              Afficher « Disponible » dans le hero
+            </FieldLabel>
+          </Field>
+        </div>
 
         <Separator />
 
-        <Field>
-          <FieldLabel htmlFor="email">E-mail</FieldLabel>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            required
-            placeholder="vous@exemple.com"
-            defaultValue={settings?.email ?? ""}
-          />
-        </Field>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="email">E-mail</FieldLabel>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="vous@exemple.com"
+              defaultValue={settings?.email ?? ""}
+            />
+          </Field>
 
-        <Field>
-          <FieldLabel htmlFor="githubUrl">GitHub</FieldLabel>
-          <Input
-            id="githubUrl"
-            name="githubUrl"
-            type="url"
-            placeholder="https://github.com/…"
-            defaultValue={settings?.githubUrl ?? ""}
-          />
-        </Field>
+          <Field>
+            <FieldLabel htmlFor="githubUrl">GitHub</FieldLabel>
+            <Input
+              id="githubUrl"
+              name="githubUrl"
+              type="url"
+              placeholder="https://github.com/…"
+              defaultValue={settings?.githubUrl ?? ""}
+            />
+          </Field>
 
-        <Field>
-          <FieldLabel htmlFor="linkedinUrl">LinkedIn</FieldLabel>
-          <Input
-            id="linkedinUrl"
-            name="linkedinUrl"
-            type="url"
-            placeholder="https://www.linkedin.com/in/…"
-            defaultValue={settings?.linkedinUrl ?? ""}
-          />
-        </Field>
+          <Field>
+            <FieldLabel htmlFor="linkedinUrl">LinkedIn</FieldLabel>
+            <Input
+              id="linkedinUrl"
+              name="linkedinUrl"
+              type="url"
+              placeholder="https://www.linkedin.com/in/…"
+              defaultValue={settings?.linkedinUrl ?? ""}
+            />
+          </Field>
 
-        <Field>
-          <FieldLabel htmlFor="cvUrl">CV</FieldLabel>
-          <Input
-            id="cvUrl"
-            name="cvUrl"
-            placeholder="/cv/CV_Yattara_Aboubacar.pdf"
-            defaultValue={settings?.cvUrl ?? ""}
-          />
-          <FieldDescription>
-            Chemin interne (/cv/CV_Yattara_Aboubacar.pdf) ou URL complète.
-          </FieldDescription>
-        </Field>
+          {/* Le CV se téléverse, il ne se saisit plus comme lien : coller un
+              chemin qui n'existe pas donnait un bouton « Télécharger le CV »
+              cassé sur le portfolio, sans rien pour le signaler. */}
+          <Field className="md:col-span-2">
+            <FieldLabel htmlFor="cvFile">CV (PDF)</FieldLabel>
+            <Input
+              id="cvFile"
+              name="cvFile"
+              type="file"
+              accept="application/pdf"
+            />
+            <FieldDescription>
+              {hasCv
+                ? "Un CV est en ligne. Choisir un fichier le remplace."
+                : "Aucun CV en ligne : le bouton de téléchargement est masqué sur le portfolio."}
+              {" "}10 Mo maximum.
+            </FieldDescription>
+
+            {hasCv ? (
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                <a
+                  href={cvHref ?? undefined}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
+                >
+                  <FileText className="size-3.5" />
+                  {/* « Télécharger » et non « Voir » : l'objet porte un
+                      Content-Disposition: attachment, il s'enregistre au lieu
+                      de s'afficher. */}
+                  Télécharger le CV en ligne
+                </a>
+
+                {/* Une case et non un bouton : la suppression part avec
+                    l'enregistrement du formulaire, comme le reste. Un bouton
+                    l'exécuterait aussitôt, sans possibilité d'annuler. */}
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+                  <Checkbox id="cvRemove" name="cvRemove" />
+                  Retirer le CV du portfolio
+                </label>
+              </div>
+            ) : null}
+          </Field>
+        </div>
 
         {state.error ? (
           <p role="alert" className="text-sm text-destructive">
@@ -142,7 +194,11 @@ export default function SettingsForm({ settings }: { settings: SiteSettings | nu
           </p>
         ) : null}
 
-        <Submit />
+        {/* Bouton aligné à droite, au bord de la carte : c'est là qu'on le
+            cherche quand le formulaire fait toute la largeur. */}
+        <div className="flex justify-end">
+          <Submit />
+        </div>
       </FieldGroup>
     </form>
   );

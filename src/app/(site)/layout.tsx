@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
+
+/* Racine du SITE PUBLIC uniquement. L'administration a sa propre racine
+   (src/app/admin/layout.tsx) : deux <html> distincts, donc deux jeux de
+   polices, de couleurs et de thèmes qui ne peuvent plus se contaminer.
+   Naviguer entre les deux recharge la page, ce qui est exactement le
+   comportement attendu entre un site vitrine et une console. */
 
 /* Une seule famille : IBM Plex. La hiérarchie passe par la graisse et
    l'approche, pas par un changement de fonte.
@@ -34,7 +40,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${sans.variable} ${mono.variable}`}>
-      <body className="bg-bg text-ink font-sans antialiased">{children}</body>
+      {/* La classe `site` porte les règles réservées au public : anneau de
+          focus rouge, sélection de texte. L'admin ne les hérite pas. */}
+      <body className="site bg-bg text-ink font-sans antialiased">{children}</body>
     </html>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,8 +50,15 @@ export default function ListEditor({
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="rounded-lg border overflow-x-auto">
+        <div className="overflow-x-auto rounded-xl border border-border bg-card">
           <Table>
+            {/* Sans <colgroup>, les deux colonnes se réduisent à leur contenu
+                et le reste de la largeur s'accumule en vide à droite. */}
+            <colgroup>
+              <col style={{ width: "30%" }} />
+              <col style={{ width: "60%" }} />
+              <col style={{ width: "10%" }} />
+            </colgroup>
             <TableHeader>
               <TableRow>
                 <TableHead>{fields.left.label}</TableHead>
@@ -63,14 +70,17 @@ export default function ListEditor({
             </TableHeader>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="font-mono">{row.left}</TableCell>
-                  <TableCell className="text-muted-foreground">{row.right}</TableCell>
+                <TableRow key={row.id} className="group last:border-0">
+                  <TableCell className="font-mono text-sm">{row.left}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {row.right}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="icon-sm"
                       aria-label={`Supprimer ${row.left}`}
+                      className="cursor-pointer text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus-visible:opacity-100 group-hover:opacity-100"
                       disabled={isPending}
                       onClick={() => {
                         const fd = new FormData();
@@ -81,7 +91,7 @@ export default function ListEditor({
                         });
                       }}
                     >
-                      <Trash2Icon />
+                      <Trash2 className="size-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -91,8 +101,11 @@ export default function ListEditor({
         </div>
       )}
 
+      {/* Ligne d'ajout calée sur les colonnes du tableau : 30 % / 60 % / le
+          bouton, pour que le formulaire occupe la même largeur que la liste
+          qu'il alimente. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <Field className="sm:max-w-[160px]">
+        <Field className="sm:w-[30%] sm:shrink-0">
           <FieldLabel htmlFor={fields.left.name}>{fields.left.label}</FieldLabel>
           <Input
             id={fields.left.name}
@@ -127,7 +140,7 @@ export default function ListEditor({
             });
           }}
         >
-          <PlusIcon data-icon="inline-start" />
+          <Plus className="size-4" />
           Ajouter
         </Button>
       </div>

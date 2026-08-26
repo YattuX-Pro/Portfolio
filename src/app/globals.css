@@ -1,38 +1,284 @@
+@import "tailwindcss";
+@import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-/* ─── Design tokens ────────────────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════════════════════════
+   Tailwind v4, config en CSS. Il n'y a plus de tailwind.config.ts.
+
+   Pourquoi la v4 : les composants shadcn/base-ui de ce projet sont écrits
+   pour elle. Ils s'appuient sur une centaine de variantes de la forme
+   `data-open:`, `data-active:`, `data-checked:`, `data-horizontal:` — que la
+   v3 ne génère PAS, silencieusement. Concrètement, sous v3 :
+   `data-horizontal:flex-col` était inerte, la racine des onglets restait donc
+   en `flex-row` et le contenu des pages à onglets partait se coller à droite
+   du bandeau ; l'onglet actif n'était pas surligné ; les interrupteurs ne
+   changeaient pas de couleur ; les popups n'avaient pas d'animation.
+
+   Guidoc est en v4 : aligner la version est ce qui rend l'admin réellement
+   identique, au lieu de rétro-porter chaque classe à la main.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* next-themes pose la classe `dark` sur <html>. En v4 la variante `dark:`
+   suit `prefers-color-scheme` par défaut : cette ligne la rebranche sur la
+   classe, sinon le mode sombre de l'admin ignorerait le sélecteur. */
+@custom-variant dark (&:is(.dark, .dark *));
+
+/* ─── Tokens du site ──────────────────────────────────────────────────────
    Un seul accent. Le neutre chaud fait tout le travail.
-   Contrastes vérifiés : muted 5.2:1, accent 6.4:1, blanc/accent 6.7:1.
+   Contrastes vérifiés : ink-muted 7.45:1, brand 5.38:1, blanc/brand 6.7:1.
    -------------------------------------------------------------------------- */
 :root {
-  --bg:            #FAFAF8;
-  --surface:       #FFFFFF;
-  --text:          #1A1A18;
-  --ink-muted:         #55524C;
-  --line:          #E7E5E0;
-  --line-strong:   #D8D5CE;
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --text: #1a1a18;
+  --ink-muted: #55524c;
+  --line: #e7e5e0;
+  --line-strong: #d8d5ce;
+
   /* Drapeau de la Guinée — ordre officiel : rouge, jaune, vert. */
-  --flag-red:    #CE1126;
-  --flag-yellow: #FCD116;
-  --flag-green:  #009460;
+  --flag-red: #ce1126;
+  --flag-yellow: #fcd116;
+  --flag-green: #009460;
   /* Variante assombrie du vert : le vert officiel n'atteint que 3.72:1,
      insuffisant pour du texte courant. Celle-ci monte à 5.85:1. */
-  --flag-green-ink: #00713F;
+  --flag-green-ink: #00713f;
 
   /* Accent interactif = rouge du drapeau (5.38:1 sur --bg). */
-  --brand:        #CE1126;
-  --brand-hover:  #A50E1F;
-  --brand-soft:   #FCF0F1;
+  --brand: #ce1126;
+  --brand-hover: #a50e1f;
+  --brand-soft: #fcf0f1;
 
   /* Le rôle « display » existe toujours, mais il est servi par Plex Sans :
      la hiérarchie vient de la graisse et de l'approche, pas d'une 2e fonte. */
   --font-display: var(--font-sans);
 }
 
+/* ─── Thème shadcn du SITE PUBLIC ─────────────────────────────────────────
+   Mappé sur la palette du site : même produit, mêmes couleurs. */
+:root {
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+
+  /* primary = le rouge du drapeau : boutons pleins, liens. */
+  --primary: var(--brand);
+  --primary-foreground: #ffffff;
+
+  --secondary: #f1efea;
+  --secondary-foreground: var(--text);
+
+  /* muted appartient à shadcn : c'est un FOND discret, pas ma couleur de
+     texte secondaire (celle-ci est --ink-muted). Ne pas confondre. */
+  --muted: #f1efea;
+  --muted-foreground: var(--ink-muted);
+
+  /* accent appartient à shadcn : fond de survol dans les menus. */
+  --accent: var(--brand-soft);
+  --accent-foreground: var(--brand);
+
+  --destructive: var(--brand);
+  --border: var(--line);
+  --input: var(--line-strong);
+
+  /* Anneau de focus clavier : gris chaud discret plutôt que le rouge de
+     marque, qui attirait trop l'œil. #8A8680 mesure 3.46:1 sur le fond
+     crème — juste au-dessus du seuil de 3:1 exigé pour un indicateur de
+     focus. Descendre plus bas casserait la navigation au clavier. */
+  --ring: #8a8680;
+
+  --chart-1: var(--flag-red);
+  --chart-2: var(--flag-green);
+  --chart-3: var(--text);
+  --chart-4: var(--ink-muted);
+  --chart-5: var(--line-strong);
+
+  --radius: 0.5rem;
+
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--brand-soft);
+  --sidebar-accent-foreground: var(--brand);
+  --sidebar-border: var(--line);
+  --sidebar-ring: #8a8680;
+}
+
+/* ─── Thème sombre de l'ADMINISTRATION ───────────────────────────────────
+   La console emprunte la CHARTE DU PORTFOLIO, pas celle de Guidoc : elle
+   hérite donc du mapping shadcn ci-dessus (neutre crème, accent rouge du
+   drapeau) sans rien redéfinir en mode clair. Seules les polices sont
+   nommées ici, parce que la racine de l'admin les expose sous ses propres
+   variables.
+
+   `.admin` reste sur <html> et non sur <body> : les menus, dialogues et
+   infobulles sortent en portail sur <body> et doivent hériter du thème ; et
+   la règle de base `html { @apply font-sans }` y lit `--font-sans`, qui,
+   déclarée un cran plus bas, laisserait la police invalide.
+   -------------------------------------------------------------------------- */
+.admin {
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
+}
+
+/* Le portfolio n'a pas de mode sombre : cette échelle est propre à la
+   console, dérivée de la charte plutôt que copiée de Guidoc. Le neutre est
+   chaud — même famille que le crème #FAFAF8 du site, pas le marine Guidoc.
+
+   L'accent passe du #CE1126 du drapeau à #F2455A. Le rouge officiel ne
+   mesure que 2.97:1 sur les cartes sombres : illisible en texte, donc
+   inutilisable pour l'entrée de menu active ou un lien. Le #F2455A remonte à
+   4.60:1 sur carte et 5.20:1 sur la sidebar, et porte un texte foncé à
+   5.03:1 — c'est le même compromis que `--flag-green-ink` côté site, où le
+   vert officiel est assombri pour devenir lisible en texte.
+
+   `.admin.dark` d'abord : next-themes pose `.dark` sur le <html> qui porte
+   déjà `admin`, les deux classes sont donc sur le MÊME élément. La forme
+   descendante reste là pour un thème posé plus haut. */
+.admin.dark,
+.dark .admin {
+  --bg: #16150f;
+  --surface: #1f1e17;
+  --text: #f5f4f0;
+  --ink-muted: #a8a49b;
+  --line: #302e26;
+  --line-strong: #423f34;
+
+  /* Rouge éclairci, seul écart de teinte avec la charte. `--brand-soft`
+     devient un voile et non une teinte pastel : sur fond sombre, un pastel
+     clair ferait une tache plus lumineuse que la carte qui le porte. */
+  --brand: #f2455a;
+  --brand-hover: #f4707f;
+  --brand-soft: #2a1a1c;
+
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+
+  /* Texte FONCÉ sur le rouge plein : le blanc n'y mesure que 3.64:1, sous le
+     seuil. Le fond sombre, lui, atteint 5.03:1. */
+  --primary: var(--brand);
+  --primary-foreground: #16150f;
+
+  --secondary: #262419;
+  --secondary-foreground: var(--text);
+
+  --muted: #262419;
+  --muted-foreground: var(--ink-muted);
+
+  --accent: var(--brand-soft);
+  --accent-foreground: var(--brand);
+
+  --destructive: var(--brand);
+  --border: var(--line);
+  --input: var(--line-strong);
+
+  /* Anneau de focus : gris chaud, comme en clair, remonté en luminosité pour
+     rester visible sur le fond sombre. */
+  --ring: #8a8680;
+
+  --chart-1: var(--brand);
+  --chart-2: #4ec98d;
+  --chart-3: var(--text);
+  --chart-4: var(--ink-muted);
+  --chart-5: var(--line-strong);
+
+  --sidebar: #121109;
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: #16150f;
+  --sidebar-accent: var(--brand-soft);
+  --sidebar-accent-foreground: var(--brand);
+  --sidebar-border: var(--line);
+  --sidebar-ring: #8a8680;
+}
+
+/* ─── Échelle Tailwind ────────────────────────────────────────────────────
+   `@theme inline` : les utilitaires pointent sur la variable au lieu d'en
+   copier la valeur. C'est ce qui permet à `.admin` de redéfinir toute la
+   palette par cascade — sans `inline`, `bg-card` serait figé sur la valeur
+   lue à la compilation et la console garderait les couleurs du site.
+
+   La v4 applique nativement les modificateurs d'opacité (`bg-primary/10`) à
+   une couleur portée par une variable : la fabrique `v()` de l'ancien
+   tailwind.config.ts, et le bug de `NaN%` qu'elle traînait, disparaissent
+   avec elle.
+   -------------------------------------------------------------------------- */
+@theme inline {
+  /* Site */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--text);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-flag-red: var(--flag-red);
+  --color-flag-yellow: var(--flag-yellow);
+  --color-flag-green: var(--flag-green);
+  --color-flag-ink: var(--flag-green-ink);
+
+  /* shadcn */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --container-prose: 62ch;
+  --ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @layer base {
+  /* La v4 ne pose plus de couleur de bordure par défaut : sans cette règle,
+     `border` seul serait transparent. Convention shadcn. */
+  * {
+    @apply border-border outline-ring/50;
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
@@ -40,8 +286,6 @@
   }
 
   body {
-    background-color: var(--bg);
-    color: var(--text);
     font-feature-settings: "kern", "liga";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -64,113 +308,109 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Focus visible cohérent sur tout le site (a11y) */
-  :focus-visible {
+  /* Focus visible du SITE PUBLIC (a11y). Réservé à `.site` : l'admin suit
+     les anneaux de focus de shadcn (`ring-ring`), et un second contour rouge
+     par-dessus faisait double liseré sur chaque champ. */
+  .site :focus-visible {
     outline: 2px solid var(--brand);
     outline-offset: 3px;
     border-radius: 2px;
   }
 
-  ::selection {
+  .site ::selection {
     background: var(--brand);
     color: #fff;
   }
-  .theme {
-    --font-heading:            var(--font-sans);
-    --font-sans:            var(--font-sans);
+
+  /* Barre de défilement fine, réservée à la console. */
+  .admin ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
   }
-  /* Thème shadcn mappé sur la palette du site : même produit, mêmes couleurs.
-     Les valeurs pointent sur mes tokens plutôt que sur les gris oklch par
-     défaut, pour que l'admin ne parte pas en dérive visuelle. */
-  :root {
-    --background: var(--bg);
-    --foreground: var(--text);
-    --card: var(--surface);
-    --card-foreground: var(--text);
-    --popover: var(--surface);
-    --popover-foreground: var(--text);
-
-    /* primary = le rouge du drapeau : boutons pleins, liens, focus. */
-    --primary: var(--brand);
-    --primary-foreground: #ffffff;
-
-    --secondary: #F1EFEA;
-    --secondary-foreground: var(--text);
-
-    /* muted appartient à shadcn : c'est un FOND discret, pas ma couleur de
-       texte secondaire (celle-ci est --ink-muted). Ne pas confondre. */
-    --muted: #F1EFEA;
-    --muted-foreground: var(--ink-muted);
-
-    /* accent appartient à shadcn : fond de survol dans les menus. */
-    --accent: var(--brand-soft);
-    --accent-foreground: var(--brand);
-
-    --destructive: var(--brand);
-    --border: var(--line);
-    --input: var(--line-strong);
-
-    /* Anneau de focus clavier : gris chaud discret plutôt que le rouge de
-       marque, qui attirait trop l'œil. #8A8680 mesure 3.46:1 sur le fond
-       crème — juste au-dessus du seuil de 3:1 exigé pour un indicateur de
-       focus. Descendre plus bas le rendrait invisible et casserait la
-       navigation au clavier, seul repère de position pour qui n'utilise
-       pas la souris. */
-    --ring: #8A8680;
-
-    --chart-1: var(--flag-red);
-    --chart-2: var(--flag-green);
-    --chart-3: var(--text);
-    --chart-4: var(--ink-muted);
-    --chart-5: var(--line-strong);
-
-    --radius: 0.5rem;
-
-    --sidebar: var(--surface);
-    --sidebar-foreground: var(--text);
-    --sidebar-primary: var(--brand);
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: var(--brand-soft);
-    --sidebar-accent-foreground: var(--brand);
-    --sidebar-border: var(--line);
-    --sidebar-ring: #8A8680;
+  .admin ::-webkit-scrollbar-track {
+    background: transparent;
   }
-  /* Couleur de bordure par défaut, convention shadcn.
-     `outline-ring/50` de shadcn est écrit pour Tailwind v4 : en v3 le
-     modificateur d'opacité ne s'applique pas à une couleur portée par une
-     variable CSS. Écrit en CSS explicite, avec color-mix pour l'alpha. */
-  * {
-    @apply border-border;
-    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
-    /* Tailwind v3 initialise --tw-ring-color sur un bleu dans sa couche de
-       base, avant tout thème : n'importe quel `ring-*` sans couleur explicite
-       affichait donc un liseré bleu, hors charte. On écrase la variable
-       elle-même, la seule façon d'atteindre cette valeur par défaut. */
-    --tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
-    --tw-ring-offset-color: var(--background);
+  .admin ::-webkit-scrollbar-thumb {
+    background: hsl(0 0% 40%);
+    border-radius: 4px;
   }
 }
 
-@layer components {
-  /* Label mono : numéros de section, tags de stack, métadonnées.
-     C'est ce détail qui porte le signal « tech » — à garder rare. */
-  /* Barre de défilement masquée : utilisé par la nav horizontale de
-     l'admin sur petit écran, où la barre native chevaucherait les onglets. */
-  .scrollbar-hidden {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hidden::-webkit-scrollbar {
+/* ─── Utilitaires ─────────────────────────────────────────────────────────
+   `@utility` est la forme v4 : ces classes se comportent comme des
+   utilitaires Tailwind natifs (variantes, ordre de cascade) au lieu d'être
+   de simples règles dans `@layer components`.
+   -------------------------------------------------------------------------- */
+
+/* Label mono : numéros de section, tags de stack, métadonnées.
+   C'est ce détail qui porte le signal « tech » — à garder rare. */
+@utility meta {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Barre de défilement masquée : la nav horizontale de l'admin sur petit
+   écran, où la barre native chevaucherait les onglets. */
+@utility scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
     display: none;
   }
+}
 
-  .meta {
-    font-family: var(--font-mono), ui-monospace, monospace;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
+/* Bandeau de marque de la console. Guidoc y met son marine ; ici c'est
+   l'encre du portfolio (#1A1A18), en léger dégradé. Identique en clair et en
+   sombre : c'est une couleur de marque, pas une couleur de thème — d'où les
+   valeurs littérales plutôt que des tokens, qui basculeraient avec le thème.
+   Le blanc y mesure 17.4:1. */
+@utility brand-band {
+  background-image: linear-gradient(135deg, #23231f 0%, #131311 100%);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.4s var(--ease-soft) var(--anim-delay, 0ms) both;
+}
+@utility animate-fade-in {
+  animation: fade-in 0.3s ease var(--anim-delay, 0ms) both;
+}
+@utility anim-delay-* {
+  --anim-delay: calc(--value(integer) * 1ms);
+}
+
+@utility card-hover {
+  @apply transition-all duration-200;
+  &:hover {
+    @apply -translate-y-px;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.08);
+  }
+}
+
+@utility rule-fade {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
 }
 
 /* ─── Accessibilité : mouvement réduit ─────────────────────────────────── */
