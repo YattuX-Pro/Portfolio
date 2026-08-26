@@ -99,7 +99,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
 
       {/* Création */}
       <Sheet open={creating} onOpenChange={setCreating}>
-        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+        <SheetContent className="w-full overflow-y-auto data-[side=right]:sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>Nouveau projet</SheetTitle>
             <SheetDescription>
@@ -115,7 +115,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
 
       {/* Édition */}
       <Sheet open={editing !== null} onOpenChange={(o) => !o && setEditing(null)}>
-        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+        <SheetContent className="w-full overflow-y-auto data-[side=right]:sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>Modifier le projet</SheetTitle>
             <SheetDescription>{editing?.title}</SheetDescription>

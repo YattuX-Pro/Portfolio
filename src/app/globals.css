@@ -48,6 +48,24 @@
   --brand-hover: #a50e1f;
   --brand-soft: #fcf0f1;
 
+  /* Voile décoratif du hero. `--brand-soft` (#FCF0F1) ne se distinguait
+     quasiment pas du fond crème (#FAFAF8) — dix points d'écart sur le vert,
+     sept sur le bleu, rien sur le rouge. Le rouge de marque à 12% donne
+     #F5DEDF sur ce fond : une teinte lisible, sans introduire de couleur
+     nouvelle dans la charte.
+
+     ⚠️ Écrit en `rgb()` avec alpha, et NON en
+     `color-mix(in oklab, var(--brand) 12%, transparent)` : pour cette forme,
+     lightningcss génère un repli destiné aux navigateurs sans `color-mix`, et
+     le repli qu'il choisit est `var(--brand)` — le rouge PLEINE PUISSANCE. Un
+     navigateur un peu ancien aurait donc affiché un angle rouge vif au lieu
+     d'un voile. `rgb()` avec alpha est compris partout et ne déclenche aucun
+     repli.
+
+     Le triplet est celui de `--brand` (#CE1126) : à garder synchronisé si
+     l'accent change. C'est le prix de la robustesse ici. */
+  --brand-veil: rgb(206 17 38 / 0.12);
+
   /* Le rôle « display » existe toujours, mais il est servi par Plex Sans :
      la hiérarchie vient de la graisse et de l'approche, pas d'une 2e fonte. */
   --font-display: var(--font-sans);

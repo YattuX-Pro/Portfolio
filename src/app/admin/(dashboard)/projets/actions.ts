@@ -51,12 +51,19 @@ async function readForm(formData: FormData) {
      explicite de l'utilisateur. Sinon on garde ce qu'il a saisi. */
   const upload = formData.get("imageFile");
   let imageUrl = orNull(formData.get("imageUrl"));
+  /* La vignette suit l'image. Un imageUrl saisi à la main (chemin /public ou
+     URL externe) n'en a pas : on remet null plutôt que de laisser celle de
+     l'image précédente, qui afficherait un flou sans rapport. */
+  let imageBlur: string | null = null;
   let uploadError: string | null = null;
 
   if (upload instanceof File && upload.size > 0) {
     const res = await uploadImage(upload, slug || "sans-slug");
     if ("error" in res) uploadError = res.error;
-    else imageUrl = res.value;
+    else {
+      imageUrl = res.value;
+      imageBlur = res.blur;
+    }
   }
 
   return {
@@ -65,6 +72,13 @@ async function readForm(formData: FormData) {
     description,
     slug,
     imageUrl,
+    imageBlur,
+    /* Étude de cas. Tout est optionnel : un projet peut vivre sans, le
+       panneau du site n'affiche alors que ce qui est renseigné. */
+    problem: orNull(formData.get("problem")),
+    solution: orNull(formData.get("solution")),
+    role: orNull(formData.get("role")),
+    year: orNull(formData.get("year")),
     demoUrl: orNull(formData.get("demoUrl")),
     githubUrl: orNull(formData.get("githubUrl")),
     stack: parseStack(String(formData.get("stack") ?? "")),

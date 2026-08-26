@@ -48,9 +48,12 @@ import {
   FieldLabel,
   FieldDescription,
 } from "@/components/ui/field";
+import IconPicker from "@/components/admin/IconPicker";
+import { TechGlyph, guessIconSlug } from "@/lib/tech-icons";
 import { ACCENT_OPTIONS, ACCENT_VARS } from "./constants";
 import {
   addItem,
+  updateItemIcon,
   deleteItem,
   deleteCategory,
   moveCategory,
@@ -58,7 +61,13 @@ import {
   updateCategory,
 } from "./actions";
 
-type Row = { id: number; label: string; category: string; accent: string };
+type Row = {
+  id: number;
+  label: string;
+  icon: string | null;
+  category: string;
+  accent: string;
+};
 
 export default function SkillsClient({
   categories,
@@ -70,6 +79,9 @@ export default function SkillsClient({
     categories[0] ? String(categories[0].id) : "",
   );
   const [newItem, setNewItem] = useState("");
+  /* `null` = « laisse deviner depuis le libellé ». L'utilisateur n'a donc
+     rien à choisir pour les technologies connues du registre. */
+  const [newIcon, setNewIcon] = useState<string | null>(null);
   const [categorySheet, setCategorySheet] = useState<SkillGroup | "new" | null>(
     null,
   );
@@ -79,6 +91,7 @@ export default function SkillsClient({
     c.items.map((i) => ({
       id: i.id,
       label: i.label,
+      icon: i.icon,
       category: c.label,
       accent: c.accent,
     })),
@@ -100,15 +113,54 @@ export default function SkillsClient({
       accessorKey: "label",
       header: ({ column }) => <SortHeader column={column}>Compétence</SortHeader>,
       /* Voir columns.tsx des projets : les largeurs occupent la ligne. */
-      meta: { width: "45%" },
+      meta: { width: "40%" },
+      cell: ({ row }) => {
+        return (
+          <span className="flex items-center gap-2.5">
+            {/* Gabarit de taille fixe même sans icône : sinon les libellés
+                d'une colonne se décaleraient les uns par rapport aux autres
+                selon qu'une icône est présente ou non. */}
+            <span className="flex size-5 shrink-0 items-center justify-center text-muted-foreground">
+              <TechGlyph slug={row.original.icon} className="size-4" />
+            </span>
+            <span className="text-sm font-medium">{row.original.label}</span>
+          </span>
+        );
+      },
+    },
+    {
+      id: "icon",
+      header: "Icône",
+      enableSorting: false,
+      meta: { width: "22%" },
+      /* Un sélecteur directement dans la ligne, plutôt qu'un panneau
+         d'édition : l'icône est le seul champ qu'on retouche après coup. Le
+         changement partant aussitôt, il n'y a pas de bouton « Enregistrer »
+         à oublier. */
       cell: ({ row }) => (
-        <span className="text-sm font-medium">{row.original.label}</span>
+        <IconPicker
+          value={row.original.icon}
+          ariaLabel={`Icône de ${row.original.label}`}
+          className="h-9"
+          onChange={(slug) => {
+            const fd = new FormData();
+            fd.set("id", String(row.original.id));
+            fd.set("icon", slug ?? "");
+            run(
+              updateItemIcon,
+              fd,
+              slug
+                ? `Icône de « ${row.original.label} » mise à jour.`
+                : `Icône de « ${row.original.label} » retirée.`,
+            );
+          }}
+        />
       ),
     },
     {
       accessorKey: "category",
       header: "Catégorie",
-      meta: { width: "45%" },
+      meta: { width: "28%" },
       cell: ({ row }) => (
         <span className="flex items-center gap-2">
           <span
@@ -211,16 +263,35 @@ export default function SkillsClient({
               />
             </Field>
 
+            <Field className="sm:w-[220px] sm:shrink-0">
+              <FieldLabel htmlFor="icon">Icône</FieldLabel>
+              <IconPicker
+                id="icon"
+                /* Tant que rien n'est choisi, on montre l'icône devinée depuis
+                   le libellé — l'utilisateur voit ce qui sera enregistré au
+                   lieu de découvrir le résultat après coup. */
+                value={newIcon ?? guessIconSlug(newItem)}
+                onChange={setNewIcon}
+              />
+            </Field>
+
             <Button
               disabled={isPending || !newItem.trim() || !addingTo}
               onClick={() => {
                 const fd = new FormData();
                 fd.set("categoryId", addingTo);
                 fd.set("label", newItem.trim());
+                /* Vide = laisse l'action deviner depuis le libellé. */
+                fd.set("icon", newIcon ?? "");
                 startTransition(async () => {
-                  await addItem({ error: null }, fd);
+                  const res = await addItem({ error: null }, fd);
+                  if (res.error) {
+                    toast.error(res.error);
+                    return;
+                  }
                   toast.success(`« ${newItem.trim()} » ajoutée.`);
                   setNewItem("");
+                  setNewIcon(null);
                 });
               }}
             >
@@ -338,7 +409,7 @@ export default function SkillsClient({
         open={categorySheet !== null}
         onOpenChange={(o) => !o && setCategorySheet(null)}
       >
-        <SheetContent className="w-full sm:max-w-md">
+        <SheetContent className="w-full data-[side=right]:sm:max-w-md">
           <SheetHeader>
             <SheetTitle>
               {categorySheet === "new"

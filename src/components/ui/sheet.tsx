@@ -36,6 +36,16 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   )
 }
 
+/* ⚠️ POUR CHANGER LA LARGEUR, écrivez `data-[side=right]:sm:max-w-2xl` et
+   NON `sm:max-w-2xl`.
+
+   La classe de base est `data-[side=right]:sm:max-w-sm`. `tailwind-merge` ne
+   déduplique que dans une même chaîne de variantes : `sm:max-w-xl` et
+   `data-[side=right]:sm:max-w-sm` lui paraissent sans rapport, il garde donc
+   les deux. Et comme la base sort APRÈS dans la feuille compilée, à
+   spécificité égale, c'est elle qui gagne — la largeur passée est
+   silencieusement ignorée. Vérifié : tous les panneaux du projet étaient
+   restés bloqués à 384px. */
 function SheetContent({
   className,
   children,

@@ -20,6 +20,31 @@ export const projects = pgTable(
     title: text("title").notNull(),
     description: text("description").notNull(),
     imageUrl: text("image_url"),
+    /* Placeholder flou (LQIP) de l'image, en data URL base64 — une vignette
+       d'une vingtaine de pixels, que next/image affiche étirée et floutée le
+       temps du chargement.
+
+       Stocké plutôt que recalculé au rendu : produire la vignette suppose de
+       décoder l'image, ce qui n'a rien à faire dans le chemin de rendu d'une
+       page. Nullable : les images d'avant cette colonne, et tout échec de
+       génération, retombent sur un flou neutre côté composant. */
+    imageBlur: text("image_blur"),
+    /* ── Étude de cas ─────────────────────────────────────────────────
+       Le détail affiché dans le panneau du site public. Tout est nullable :
+       `description` reste le seul texte obligatoire, un projet peut donc
+       exister sans étude de cas et le panneau n'affiche alors que les
+       sections renseignées. */
+
+    /* Le POURQUOI : le besoin, le problème de départ. */
+    problem: text("problem"),
+    /* La réponse apportée, côté produit comme côté technique. */
+    solution: text("solution"),
+    /* Ce que tu as fait dessus. « Développeur full-stack », « Analyste »… */
+    role: text("role"),
+    /* Texte et non entier : « 2025 », mais aussi « 2024 — 2025 ». Un projet
+       s'étale rarement sur une année pile. */
+    year: text("year"),
+
     /* Tags de stack, dans l'ordre voulu. */
     stack: text("stack").array().notNull().default([]),
     demoUrl: text("demo_url"),
@@ -48,6 +73,12 @@ export const skillItems = pgTable("skill_items", {
     .notNull()
     .references(() => skillCategories.id, { onDelete: "cascade" }),
   label: text("label").notNull(),
+  /* SLUG d'icône, pas un nom de composant ni un chemin d'image : la
+     correspondance vit dans src/lib/tech-icons.ts. Un nom de composant en
+     base deviendrait `undefined` à l'import si le registre changeait, et la
+     page publique tomberait AU RENDU. Nullable : une compétence sans icône
+     s'affiche simplement sans. */
+  icon: text("icon"),
   position: integer("position").notNull().default(0),
 });
 

@@ -11,7 +11,10 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx --env-file=.env scripts/seed.ts",
+    "db:blur": "tsx --env-file=.env scripts/backfill-blur.ts",
     "admin:create": "tsx --env-file=.env scripts/create-admin.ts",
+    "admin:check": "tsx --env-file=.env scripts/check-admin-login.ts",
+    "admin:reset": "tsx --env-file=.env scripts/reset-admin.ts",
     "db:copy": "tsx --env-file=.env scripts/migrate-data.ts"
   },
   "dependencies": {

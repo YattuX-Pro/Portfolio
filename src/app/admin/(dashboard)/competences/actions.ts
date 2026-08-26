@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { skillCategories, skillItems } from "@/lib/db/schema";
 import { assertAdmin } from "@/lib/admin-guard";
 import { ACCENT_VALUES } from "./constants";
+import { TECH_ICON_SLUGS, guessIconSlug } from "@/lib/tech-icons";
 
 /* Rappel : chaque action est un point d'entrée HTTP à part entière.
    assertAdmin() en tête, sans exception. */
@@ -77,18 +78,53 @@ export async function addItem(
 
   const categoryId = Number(formData.get("categoryId"));
   const label = String(formData.get("label") ?? "").trim();
+  const rawIcon = String(formData.get("icon") ?? "").trim();
 
   if (!Number.isInteger(categoryId)) return { error: "Catégorie introuvable." };
   if (!label) return { error: "Le nom de la compétence est obligatoire." };
+
+  /* Le slug est validé contre le registre, jamais inséré tel quel : une
+     valeur inconnue en base ne casserait rien au rendu (techIcon renvoie
+     null) mais deviendrait une donnée morte, invisible et impossible à
+     corriger depuis l'interface. */
+  let icon: string | null = null;
+  if (rawIcon) {
+    if (!TECH_ICON_SLUGS.includes(rawIcon)) return { error: "Icône inconnue." };
+    icon = rawIcon;
+  } else {
+    /* Aucune icône choisie : on tente la correspondance sur le libellé.
+       Saisir « Kubernetes » donne l'icône Kubernetes sans rien cocher. */
+    icon = guessIconSlug(label);
+  }
 
   const [{ next }] = await db
     .select({ next: sql<number>`coalesce(max(${skillItems.position}), -1) + 1` })
     .from(skillItems)
     .where(eq(skillItems.categoryId, categoryId));
 
-  await db.insert(skillItems).values({ categoryId, label, position: next });
+  await db.insert(skillItems).values({ categoryId, label, icon, position: next });
   refresh();
   return { error: null, ok: true };
+}
+
+/** Change l'icône d'une compétence existante.
+
+    Une action à part plutôt qu'un formulaire d'édition complet : l'icône est
+    le seul champ qu'on ajuste après coup, et un sélecteur dans la ligne du
+    tableau suffit. Une chaîne vide retire l'icône. */
+export async function updateItemIcon(formData: FormData): Promise<void> {
+  await assertAdmin();
+
+  const id = Number(formData.get("id"));
+  const raw = String(formData.get("icon") ?? "").trim();
+  if (!Number.isInteger(id)) return;
+  if (raw && !TECH_ICON_SLUGS.includes(raw)) return;
+
+  await db
+    .update(skillItems)
+    .set({ icon: raw || null })
+    .where(eq(skillItems.id, id));
+  refresh();
 }
 
 export async function deleteItem(formData: FormData) {

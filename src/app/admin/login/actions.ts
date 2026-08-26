@@ -19,8 +19,15 @@ export async function signInAction(
   const { error } = await auth.signIn.email({ email, password });
 
   if (error) {
-    /* Message volontairement identique pour un e-mail inconnu et un mot de
-       passe faux : distinguer les deux révélerait quels comptes existent. */
+    /* La cause réelle part dans les logs du SERVEUR, jamais dans la réponse.
+
+       Le message rendu reste volontairement identique pour un e-mail inconnu
+       et un mot de passe faux : les distinguer révélerait quels comptes
+       existent. Mais il était aussi renvoyé pour une panne réseau, un
+       MISSING_ORIGIN ou une limite de débit — « Identifiants invalides. »
+       devenait alors un contresens qui envoyait chercher le problème du
+       mauvais côté. Le masque reste, la cause est tracée. */
+    console.error("[admin/login] échec signIn.email :", error);
     return { error: "Identifiants invalides." };
   }
 

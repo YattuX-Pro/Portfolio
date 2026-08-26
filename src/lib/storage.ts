@@ -1,5 +1,7 @@
 import "server-only";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { blurDataUrl } from "./blur";
+import { BUCKET, toObjectKey, toStorageValue } from "./storage-url";
 
 /* Neon Object Storage — compatible S3.
 
@@ -12,31 +14,29 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
    Le bucket est en public_read : les images et le CV d'un portfolio sont
    publics par nature. Une URL présignée aurait expiré au bout d'une heure
    alors que la page publique est mise en cache statiquement — elle aurait
-   fini par servir des liens morts. */
+   fini par servir des liens morts.
 
-export const BUCKET = process.env.STORAGE_BUCKET ?? "portfolio-images";
+   Ce module porte `server-only` parce qu'il instancie le client S3 avec les
+   clés. L'adressage (préfixe, URL publique) vit dans storage-url.ts et le
+   calcul des vignettes dans blur.ts : ni l'un ni l'autre ne touche aux
+   identifiants, et les scripts hors Next peuvent donc les réutiliser. Les
+   deux sont réexportés ici pour ne pas casser les imports existants. */
 
-/* Clé interne stockée en base, distinguée d'un chemin /public ou d'une URL
-   externe par ce préfixe. */
-export const STORAGE_PREFIX = "neon:";
+export {
+  BUCKET,
+  STORAGE_PREFIX,
+  isStorageKey,
+  toStorageValue,
+  toObjectKey,
+  publicObjectUrl,
+} from "./storage-url";
+export { blurDataUrl } from "./blur";
 
 let client: S3Client | null = null;
 
 function s3() {
   if (!client) client = new S3Client({ forcePathStyle: true });
   return client;
-}
-
-export function isStorageKey(value: string | null | undefined): value is string {
-  return typeof value === "string" && value.startsWith(STORAGE_PREFIX);
-}
-
-export function toStorageValue(key: string) {
-  return `${STORAGE_PREFIX}${key}`;
-}
-
-export function toObjectKey(value: string) {
-  return value.slice(STORAGE_PREFIX.length);
 }
 
 const IMAGE_EXTENSIONS: Record<string, string> = {
@@ -61,14 +61,19 @@ export function extensionFor(contentType: string) {
   return IMAGE_EXTENSIONS[contentType];
 }
 
-/** Téléverse un objet et renvoie la valeur à stocker en base. */
-async function put(file: File, key: string, disposition?: string) {
+/** Téléverse des octets et renvoie la valeur à stocker en base. */
+async function putBytes(
+  bytes: Buffer,
+  contentType: string,
+  key: string,
+  disposition?: string,
+) {
   await s3().send(
     new PutObjectCommand({
       Bucket: BUCKET,
       Key: key,
-      Body: Buffer.from(await file.arrayBuffer()),
-      ContentType: file.type,
+      Body: bytes,
+      ContentType: contentType,
       CacheControl: "public, max-age=31536000, immutable",
       ContentDisposition: disposition,
     }),
@@ -76,11 +81,20 @@ async function put(file: File, key: string, disposition?: string) {
   return { value: toStorageValue(key) };
 }
 
-/** Téléverse une image de projet. */
+async function put(file: File, key: string, disposition?: string) {
+  return putBytes(
+    Buffer.from(await file.arrayBuffer()),
+    file.type,
+    key,
+    disposition,
+  );
+}
+
+/** Téléverse une image de projet, avec sa vignette floue. */
 export async function uploadImage(
   file: File,
   slug: string,
-): Promise<{ value: string } | { error: string }> {
+): Promise<{ value: string; blur: string | null } | { error: string }> {
   if (!ACCEPTED_TYPES.includes(file.type)) {
     return { error: "Format non accepté. Utilisez JPEG, PNG, WebP, AVIF ou GIF." };
   }
@@ -91,7 +105,17 @@ export async function uploadImage(
   /* Une clé neuve à chaque téléversement plutôt que d'écraser la même :
      un objet en cache n'est jamais plus frais que sa clé. */
   const ext = extensionFor(file.type);
-  return put(file, `projets/${slug}/${crypto.randomUUID()}.${ext}`);
+  const bytes = Buffer.from(await file.arrayBuffer());
+
+  /* Vignette calculée à partir des OCTETS déjà en mémoire, pas en relisant
+     l'objet depuis le bucket : le fichier est là, le relire serait un
+     aller-retour réseau pour rien. */
+  const [uploaded, blur] = await Promise.all([
+    putBytes(bytes, file.type, `projets/${slug}/${crypto.randomUUID()}.${ext}`),
+    blurDataUrl(bytes),
+  ]);
+
+  return { value: uploaded.value, blur };
 }
 
 /** Téléverse le CV (PDF). */
@@ -126,18 +150,6 @@ export async function uploadCv(
     `cv/${crypto.randomUUID()}.pdf`,
     'attachment; filename="CV_Aboubacar_Tidiane_Yattara.pdf"',
   );
-}
-
-/** URL publique d'un objet du bucket (image ou CV).
-
-    L'endpoint est reconstruit depuis l'environnement à chaque rendu plutôt
-    que stocké en base : il est propre à la branche Neon, et le figer dans
-    une colonne casserait toutes les images au premier changement de
-    branche. La base ne garde que la clé. */
-export function publicObjectUrl(value: string): string | null {
-  const endpoint = process.env.AWS_ENDPOINT_URL_S3;
-  if (!endpoint) return null;
-  return `${endpoint.replace(/\/+$/, "")}/${BUCKET}/${toObjectKey(value)}`;
 }
 
 /** Supprime un objet. Les échecs sont avalés : un objet orphelin est moins

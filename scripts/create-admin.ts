@@ -90,3 +90,10 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
+
+/* Sans au moins un import ou export, TypeScript traite ce fichier comme un
+   script GLOBAL : ses déclarations de premier niveau (`required`, `main`)
+   entrent alors en collision avec celles des autres scripts du dossier —
+   « Duplicate function implementation ». Cet export vide force la portée
+   module. */
+export {};

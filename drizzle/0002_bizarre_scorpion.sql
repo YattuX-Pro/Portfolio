@@ -1,0 +1,1 @@
+ALTER TABLE "skill_items" ADD COLUMN "icon" text;

@@ -78,6 +78,57 @@ export default function ProjectForm({
           />
         </Field>
 
+        {/* ── Étude de cas ─────────────────────────────────────────────
+            Ce que le panneau de détail affiche sur le site. Tout est
+            facultatif : une section vide ne s'affiche simplement pas. */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="role">Rôle</FieldLabel>
+            <Input
+              id="role"
+              name="role"
+              placeholder="Développeur full-stack"
+              defaultValue={project?.role ?? ""}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="year">Année</FieldLabel>
+            <Input
+              id="year"
+              name="year"
+              placeholder="2025 ou 2024 — 2025"
+              defaultValue={project?.year ?? ""}
+            />
+          </Field>
+        </div>
+
+        <Field>
+          <FieldLabel htmlFor="problem">Le besoin</FieldLabel>
+          <Textarea
+            id="problem"
+            name="problem"
+            rows={3}
+            placeholder="Quel problème le projet résout-il ? Dans quel contexte ?"
+            defaultValue={project?.problem ?? ""}
+          />
+          <FieldDescription>
+            Le « pourquoi ». S&apos;affiche en premier dans le panneau de
+            détail.
+          </FieldDescription>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="solution">La réponse</FieldLabel>
+          <Textarea
+            id="solution"
+            name="solution"
+            rows={4}
+            placeholder="Ce que vous avez conçu et construit, et les choix techniques qui comptent."
+            defaultValue={project?.solution ?? ""}
+          />
+        </Field>
+
         <Field>
           <FieldLabel htmlFor="stack">Stack</FieldLabel>
           <Input

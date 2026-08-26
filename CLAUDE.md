@@ -64,18 +64,36 @@ If a request would put yellow on text, say so rather than shipping it.
 
 ### 2. Motion — one spec, in `Reveal.tsx`
 
-`src/components/Reveal.tsx` is the single animation vocabulary: fade + `translateY(16px)`, 550 ms, ease `[0.16, 1, 0.3, 1]`, `once: true`, 60 ms stagger between siblings. It exports `Reveal` (a wrapper), plus `revealGroup`/`revealItem` variants for staggered children and the shared `EASE`/`DURATION`/`STAGGER` constants. **Import those constants — never retype the numbers.** `Skills.tsx` had `0.55` and `0.05` written by hand and was running its stagger at 50 ms while the rest of the site ran at 60 ms.
+`src/components/Reveal.tsx` is the whole animation vocabulary — it plays the role a `lib/animations.ts` would, and is deliberately NOT split into one: it also exports the `Reveal` component used by seven files, so a separate module would duplicate the same spec in two places.
 
-Use it. Do not introduce parallax, tilt-on-hover, card scale-on-hover, scroll-driven cameras, or a second easing curve — that vocabulary is exactly what the redesign removed.
+It exports:
 
-**Sanctioned extensions** (all reuse `EASE`, none moves a block of content):
+- **Constants** — `EASE` (`[0.16, 1, 0.3, 1]`, the site's only curve), `DURATION` (0.55 s, reveals), `DURATION_FAST` (0.22 s, micro-interactions), `STAGGER` (0.06 s).
+- **Variants** — `fadeInUp` (the default), `fadeInDown`, `fadeIn`, `scaleIn`, `staggerContainer`, `staggerItem`. `revealItem`/`revealGroup` are kept as aliases because existing components import them.
+- **Interaction presets** — `HOVER_LIFT` (`y: -2, scale: 1.01`), `TAP_PRESS` (`scale: 0.98`), `INTERACTION_TRANSITION`.
+- **The component** — `<Reveal preset="up" | "down" | "in" | "scale">`, `once: true`, `immediate` for above-the-fold content.
 
-- `scaleX` + `origin-left` to *draw a rule* — `FlagRule`, and the brand rule under a project title on row hover. This is the one legitimate use of a scale transform; `ease-soft` in Tailwind is the same curve as `EASE`, so it is not a second easing curve.
-- A shared `layoutId` indicator that *slides* between states — the active underline in `NavBar` travels between sections instead of cross-fading.
-- Scroll-linked *indicators* (the 2 px progress line at the bottom of `NavBar`). An indicator is not a scroll-driven camera. Hide these under `motion-reduce:hidden` — see below.
-- Hover micro-interactions at 200–300 ms (colour, opacity, `translate-x-0.5`). The 550 ms spec is for scroll reveals; a hover must feel immediate.
+**Import the constants — never retype the numbers.** `Skills.tsx` once had `0.55` and `0.05` written by hand and ran its stagger at 50 ms while the rest of the site ran at 60 ms.
 
-**`prefers-reduced-motion` needs BOTH halves.** The media query in `globals.css` only neutralizes `animation-duration`/`transition-duration` — i.e. CSS animations. Framer Motion does not use CSS transitions: it rewrites inline `transform`/`opacity` every frame, so that media query never reached it and reduced-motion visitors still saw every reveal play in full. `src/components/MotionRoot.tsx` (`MotionConfig reducedMotion="user"`) wraps the whole public site and closes that gap. A value bound straight to a `MotionValue` (the scroll progress line) is a binding rather than an animation, so `MotionConfig` cannot neutralize it either — such elements need `motion-reduce:hidden`.
+**Direction (updated — the owner asked for a livelier, more premium feel).** Earlier passes banned every scale transform and any decorative background. That is no longer the rule. What IS the rule:
+
+- One curve everywhere (`EASE`). Reveals at 0.55 s, hovers at 0.22 s. No second easing curve.
+- Hover lift and press are the shared presets, and they are *tiny*: −2 px and 1.01. Project images zoom to 1.03, never past 1.05.
+- `scaleIn` is reserved for framed objects (project cards). Text blocks use `fadeInUp` or `fadeIn`.
+- Continuous animation exists in exactly one place: `HeroBackdrop.tsx`. Two veils at 5 % opacity under an 80 px blur, drifting 24 px over 22–28 s, hidden below 768 px, using only colors already in the palette. Do not add a second infinite animation anywhere.
+- Still banned: parallax, tilt-on-hover, scroll-driven cameras, bounce, rotation, typewriter effects.
+
+**Prefer Framer over CSS for hover on animated elements.** A `hover:-translate-y-0.5` class gets overwritten by the inline transform Framer writes during a reveal. And if the cursor leaves mid-motion, Framer returns the element cleanly where a CSS transition jolts.
+
+**Watch for `transition-property` collisions.** Two `transition-*` utilities on the same element (e.g. `transition-[filter,opacity]` plus `transition-transform`) leave stylesheet order to decide, so one silently loses. `ProjectImage` owns the filter transition, so its zoom lives on a wrapper `<div>`. The same trap applies to any two utilities setting the same property — `mt-auto` next to `mt-6` bit us once too.
+
+**`prefers-reduced-motion` needs THREE layers, not one:**
+
+1. `globals.css` — the media query only neutralizes `animation-duration`/`transition-duration`, i.e. CSS animations.
+2. `MotionRoot.tsx` (`MotionConfig reducedMotion="user"`, wrapping the whole public site) — Framer rewrites inline `transform`/`opacity` every frame and never sees that media query.
+3. `useReducedMotion()` **in the component** — required whenever motion does not come from a declarative prop: `animate()` in `AnimatedCounter` is imperative and ignores `MotionConfig`, and `HeroBackdrop`'s infinite loop would keep looping. Scroll-linked `MotionValue` bindings (the NavBar progress line) are bindings rather than animations, so they need `motion-reduce:hidden` instead.
+
+**Navbar offset.** Every `<section>` carries `scroll-mt-20`. The navbar is fixed at 64 px, so without it `scrollIntoView` tucks each section title behind the bar.
 
 ### 3. Typography — one family, three roles
 
@@ -95,6 +113,9 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
 
 - `Reveal.tsx` — the animation spec (above).
 - `MotionRoot.tsx` — `MotionConfig reducedMotion="user"` around the whole public site. Mounted in `PortfolioApp`; without it Framer ignores `prefers-reduced-motion` entirely.
+- `sub/AnimatedCounter.tsx` — counts a stat up from 0 once it scrolls into view. The stat value is **free text from the DB** (`5+`, `3+`), so it animates the leading digits and reprints the rest verbatim; a value with no leading digit renders as-is rather than showing `NaN`.
+- `sub/HeroBackdrop.tsx` — the site's only continuous animation. See the motion section for its budget.
+- `sub/ProjectImage.tsx` — progressive de-blur on load. Sets `filter` **inline** on purpose: Tailwind's `blur-*` routes through `--tw-blur`, declared `@property { syntax: "*" }`, which animates discretely and cannot interpolate; and written as an arbitrary class the minifier collapsed `blur(0px)` to `blur()`.
 - `FlagRule.tsx` — the tricolor bar (red → yellow → green, Guinea's order). Decorative and `aria-hidden`. Parameterized by `thickness`, `width`, `delay`. Used under the hero title and as the section divider.
 - `SectionHeader.tsx` — mono number + label + title + optional intro. Every section below the hero uses it; the numbers (`01`, `02`, `03`) are manual, so renumber if you reorder sections.
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
-import { DURATION, EASE } from "@/components/Reveal";
+import { DURATION, EASE, fadeInDown } from "@/components/Reveal";
 
 const NAV_LINKS = [
   { id: "home", label: "Accueil" },
@@ -105,9 +105,20 @@ export default function NavBar() {
   }, []);
 
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-50 bg-bg/90 backdrop-blur-md transition-colors duration-300 ${
-        scrolled || open ? "border-b border-line" : "border-b border-transparent"
+    /* La navbar descend légèrement à l'ouverture de la page. `animate` et non
+       `whileInView` : elle est visible d'emblée, un déclencheur au scroll ne
+       partirait jamais. */
+    <motion.header
+      variants={fadeInDown}
+      initial="hidden"
+      animate="visible"
+      className={`fixed top-0 inset-x-0 z-50 backdrop-blur-md transition-[background-color,border-color,box-shadow] duration-300 ${
+        scrolled || open
+          ? /* Au scroll : fond plus translucide (le flou fait le travail),
+               bordure visible et une ombre très basse, juste de quoi détacher
+               le bandeau du contenu qui passe dessous. */
+            "bg-bg/75 border-b border-line shadow-[0_1px_3px_rgba(26,26,24,0.04)]"
+          : "bg-bg/90 border-b border-transparent"
       }`}
     >
       {/* Avancement de la lecture. `scaleX` + `origin-left` : le filet se
@@ -247,6 +258,6 @@ export default function NavBar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }
