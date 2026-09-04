@@ -25,6 +25,28 @@ function badUrl(url: string | null): boolean {
   return !/^https?:\/\//i.test(url) && !url.startsWith("/");
 }
 
+/* `<input type="datetime-local">` renvoie « 2022-09-01T00:00 » — une heure
+   SANS fuseau. On la lit donc explicitement en UTC en ajoutant le « Z ».
+
+   ⚠️ C'est le point délicat de ce champ. Sans le « Z », `new Date(...)` aurait
+   interprété la chaîne dans le fuseau du SERVEUR : en local (Europe/Paris) le
+   1er septembre 00h00 devenait 22h00 la veille en UTC, et la même sauvegarde
+   depuis Vercel (UTC) donnait une autre valeur. La date d'ancienneté se
+   serait décalée de deux heures selon l'endroit d'où on enregistre.
+
+   Lire en UTC est aussi la lecture JUSTE ici : la Guinée est à UTC+0, l'heure
+   saisie est donc l'heure réelle de signature. `SettingsForm` réaffiche le
+   champ avec la même convention (`toISOString`), l'aller-retour est stable. */
+const LOCAL_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/;
+
+function parseUtcDatetime(raw: string): Date | null {
+  if (!LOCAL_DATETIME.test(raw)) return null;
+  /* Les secondes sont facultatives selon le navigateur : on les complète. */
+  const withSeconds = raw.length === 16 ? `${raw}:00` : raw;
+  const date = new Date(`${withSeconds}.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export async function updateSettings(
   _prev: ActionState,
   formData: FormData,
@@ -38,6 +60,23 @@ export async function updateSettings(
   const githubUrl = orNull(formData.get("githubUrl"));
   const linkedinUrl = orNull(formData.get("linkedinUrl"));
   const heroAvailable = formData.get("heroAvailable") === "on";
+
+  /* Date du premier contrat. Vide est légitime : le compteur d'expérience
+     disparaît alors du hero. */
+  const rawStart = orNull(formData.get("experienceStartAt"));
+  let experienceStartAt: Date | null = null;
+  if (rawStart) {
+    experienceStartAt = parseUtcDatetime(rawStart);
+    if (!experienceStartAt) {
+      return { error: "Date du premier contrat invalide." };
+    }
+    /* Une date future donnerait des durées négatives, donc un compteur qui
+       affiche « -1 an » sur la page d'accueil. On refuse à la saisie plutôt
+       que d'avoir à s'en défendre au rendu. */
+    if (experienceStartAt.getTime() > Date.now()) {
+      return { error: "La date du premier contrat ne peut pas être dans le futur." };
+    }
+  }
 
   /* ── CV ──────────────────────────────────────────────────────────────
      Le CV est téléversé, plus saisi comme lien. Trois cas, dans cet ordre :
@@ -95,6 +134,7 @@ export async function updateSettings(
     heroBio,
     heroAvailable,
     method,
+    experienceStartAt,
     email,
     githubUrl,
     linkedinUrl,

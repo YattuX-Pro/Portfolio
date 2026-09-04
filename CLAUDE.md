@@ -18,7 +18,7 @@ Next 16 removed `next lint`, so `lint` calls `eslint .` directly against the fla
 
 Personal portfolio plus an admin console (Next.js 16 App Router, React 19, TypeScript strict, Tailwind 4, Framer Motion 12). All user-facing copy is in **French**; `<html lang="fr">`. Deployed at yattara.dev.
 
-The site was rebuilt from a dark, 3D-heavy design into a **light editorial** one. Only five runtime dependencies remain: `next`, `react`, `react-dom`, `framer-motion`, `react-icons`. If you find yourself reaching for `three`, `@react-three/*`, or a UI kit, that contradicts the design direction — ask first.
+The site was rebuilt from a dark, 3D-heavy design into a **light editorial** one. The public site runs on `next`, `react`, `react-dom`, `framer-motion`, `react-icons` and `date-fns` (`intervalToDuration` only, for the hero counter's calendar arithmetic — see below); the rest of `package.json` belongs to the admin console (shadcn/base-ui, drizzle, the S3 client). If you find yourself reaching for `three`, `@react-three/*`, or a second UI kit, that contradicts the design direction — ask first.
 
 ## Architecture
 
@@ -80,7 +80,8 @@ It exports:
 - One curve everywhere (`EASE`). Reveals at 0.55 s, hovers at 0.22 s. No second easing curve.
 - Hover lift and press are the shared presets, and they are *tiny*: −2 px and 1.01. Project images zoom to 1.03, never past 1.05.
 - `scaleIn` is reserved for framed objects (project cards). Text blocks use `fadeInUp` or `fadeIn`.
-- Continuous animation exists in exactly one place: `HeroBackdrop.tsx`. Two veils at 5 % opacity under an 80 px blur, drifting 24 px over 22–28 s, hidden below 768 px, using only colors already in the palette. Do not add a second infinite animation anywhere.
+- Decorative continuous animation exists in exactly one place: `HeroBackdrop.tsx`. Two veils at 5 % opacity under an 80 px blur, drifting 24 px over 22–28 s, hidden below 768 px, using only colors already in the palette. Do not add a second infinite decorative animation anywhere.
+- **One exception, and it is not decorative:** `sub/ExperienceCounter.tsx` re-renders forever, because a live readout that stops is a broken clock. Its budget: one `setState` every 60 ms (the hundredths field needs it; nothing else on the site does), driven by `requestAnimationFrame` (which the browser suspends on a hidden tab — `setInterval` does not), in a **leaf** component so the tick never re-renders the rest of the hero. Nothing moves, nothing transforms: only digit glyphs change. Don't copy this pattern for anything that isn't reading a clock.
 - Still banned: parallax, tilt-on-hover, scroll-driven cameras, bounce, rotation, typewriter effects.
 
 **Prefer Framer over CSS for hover on animated elements.** A `hover:-translate-y-0.5` class gets overwritten by the inline transform Framer writes during a reveal. And if the cursor leaves mid-motion, Framer returns the element cleanly where a CSS transition jolts.
@@ -113,8 +114,19 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
 
 - `Reveal.tsx` — the animation spec (above).
 - `MotionRoot.tsx` — `MotionConfig reducedMotion="user"` around the whole public site. Mounted in `PortfolioApp`; without it Framer ignores `prefers-reduced-motion` entirely.
-- `sub/AnimatedCounter.tsx` — counts a stat up from 0 once it scrolls into view. The stat value is **free text from the DB** (`5+`, `3+`), so it animates the leading digits and reprints the rest verbatim; a value with no leading digit renders as-is rather than showing `NaN`.
-- `sub/HeroBackdrop.tsx` — the site's only continuous animation. See the motion section for its budget.
+- `sub/AnimatedCounter.tsx` — **currently has no caller** (see `hero_stats` below). Counts a stat up from 0 once it scrolls into view. The stat value is **free text from the DB** (`5+`, `3+`), so it animates the leading digits and reprints the rest verbatim; a value with no leading digit renders as-is rather than showing `NaN`.
+- `sub/HeroBackdrop.tsx` — the site's only continuous *decorative* animation. See the motion section for its budget.
+- `sub/ExperienceCounter.tsx` — a **chronograph**, sitting at the foot of the hero's main column where the stats row used to be: `4ans 03j 23h 10min 02,6s`, ticking. The social icons share that row on its right.
+  - **One line, never two.** That is a reading rule, not a layout preference — a watch does not wrap its dial. Hence `flex-nowrap` + `whitespace-nowrap`, and a `clamp(28px, 4.5vw, 68px)` sized so the run always fits: the readout measures ~6.3× the font size, which stays under the column width from a 375 px phone up to 1512 px. Making it bigger overflows before it looks better. The row itself is `flex-wrap` so the icons drop below on a very narrow screen rather than pushing the digits out of frame.
+  - **The only other text is the title.** Row labels, the start date and the year ordinal were all removed on request; every extra word pulled the block away from being a display.
+  - **No months field.** Days therefore run 0–365, counted from the anniversary of the start date. A watch has no month register between years and days, and the field spent most of its life showing `0`. The trade: in June it reads `4ans 287j`, not `4ans 9mois 14j`.
+  - Only the **years** go through `date-fns` (`differenceInYears` / `addYears`) — they alone depend on the calendar (leap years, and 29 February having no anniversary most years). Everything below is plain arithmetic on the millisecond remainder, deliberately: under a year a chronograph counts elapsed time, and a day is always 24 h.
+  - Every field below years is **zero-padded**, the years are not. That is not cosmetic: the run is measured in `em` and a value going 9 → 10 widens its group; the years stay bare because they are what you read first and `04ans` reads like a countdown.
+  - The origin is `site_settings.experience_start_at`, edited from the admin profile form. Null hides the block; there is deliberately no fallback date, because a wrong seniority figure is worse than none.
+  - The date is read and written in **UTC end to end** (`parseUtcDatetime` in the profile action, `toDatetimeLocal` in the form, `getUTC*` in the component). `datetime-local` sends a zoneless string: parsed without an explicit `Z` it lands in the *server's* zone, so the same save from localhost and from Vercel stored two different instants, and each re-save shifted the date again. Guinea is UTC+0, so UTC is also the true signing hour.
+  - Two phases: a 1.8 s count-up from 0 on mount (every field spins), then the live tick at 50 ms — the last rank is tenths, which change every 100 ms. State **must** start at 0: the hero is prerendered, so a value read from `Date.now()` at render time is a guaranteed hydration mismatch. Month names (used only by the `sr-only` sentence) are a hardcoded French array rather than `Intl`, because that string is server-rendered then hydrated and two ICU builds disagreeing on it is enough to fail hydration.
+  - The readout is `aria-hidden` with an `sr-only` sentence beside it: tenths changing 20×/s is noise to a screen reader, and an `aria-live` there would announce every one of them.
+- `sub/StackPanel.tsx` — the hero's right column (`hidden lg:block`, as it always was). Renders `hero_stack` from the DB under a display-size **`.NET` wordmark whose leading dot is `text-brand`** — the same red dot as `Yattara.` in the h1, a few centimetres away. That repetition is the whole idea: it ties the name to the technology without a sentence, and it is what keeps the wordmark from reading as a logo dropped onto the page. Right-aligned so it heads the column of `dd` values. It owns the column's container treatment: the `--brand-veil` radial anchored top-right, `lg:rounded-t-[2rem]`, the `lg:pr-6` gutter, the tricolor rule.
 - `sub/ProjectImage.tsx` — progressive de-blur on load. Sets `filter` **inline** on purpose: Tailwind's `blur-*` routes through `--tw-blur`, declared `@property { syntax: "*" }`, which animates discretely and cannot interpolate; and written as an arbitrary class the minifier collapsed `blur(0px)` to `blur()`.
 - `FlagRule.tsx` — the tricolor bar (red → yellow → green, Guinea's order). Decorative and `aria-hidden`. Parameterized by `thickness`, `width`, `delay`. Used under the hero title and as the section divider.
 - `SectionHeader.tsx` — mono number + label + title + optional intro. Every section below the hero uses it; the numbers (`01`, `02`, `03`) are manual, so renumber if you reorder sections.
@@ -124,6 +136,10 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
 Skills carry **no self-rated percentage** — that system was removed deliberately, so adding a competency never requires inventing a number. Don't reintroduce it.
 
 Section content is hardcoded **inside its component**, not in a shared data file: `PROJECTS` in `main/Projects.tsx`, `CATEGORIES` in `main/Skills.tsx`, `STATS`/`STACK`/`SOCIALS` in `sub/HeroContent.tsx`, `EMAIL`/`LINKS` in `main/Footer.tsx`. The old `src/constants/index.ts` and `utils/motion.ts` were deleted along with the components that used them.
+
+**`hero_stats` is what is orphaned now** (`5+ Projets`, `3+ Années`, `2 Domaines`). The chronograph took that row: two of the three stats duplicated it and `3+ Années` openly contradicted it. The table, the rows and the admin tab are untouched, so that tab currently edits content the site does not render — and `sub/AnimatedCounter.tsx` has no caller left. Decide: give the stats a home elsewhere, or delete all three (tab, table, component).
+
+The hero's seniority origin is **not** in a component: it is `site_settings.experience_start_at`, set from the admin profile form (migration `drizzle/0004_*.sql`). It is a `timestamp with time zone`, not a `date`, because the counter shows hours, minutes and seconds — a `date` column would pin them to midnight forever.
 
 Images and the CV live in `public/` and are referenced by absolute path (`/next.png`, `/cv/CV_Yattara_Aboubacar.pdf`). Note the mixed-case extensions on project screenshots (`.PNG`) — they matter on case-sensitive filesystems.
 

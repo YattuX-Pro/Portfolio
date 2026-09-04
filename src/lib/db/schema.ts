@@ -102,6 +102,18 @@ export const siteSettings = pgTable("site_settings", {
   heroAvailable: boolean("hero_available").notNull().default(true),
   heroBio: text("hero_bio").notNull(),
   method: text("method"),
+  /* Origine du compteur d'expérience du hero : la date de signature du
+     premier contrat.
+
+     `timestamp` et non `date` : le compteur descend jusqu'au centième de
+     seconde, il lui faut l'HEURE. Une colonne `date` aurait forcé minuit et
+     rendu les champs heures/minutes/secondes du hero purement décoratifs.
+
+     Nullable, et sans valeur par défaut : tant que la date n'est pas saisie
+     depuis l'admin, le bloc entier est masqué sur le site. Un défaut arbitraire
+     aurait affiché une ancienneté fausse — le pire résultat possible pour ce
+     chiffre-là. */
+  experienceStartAt: timestamp("experience_start_at", { withTimezone: true }),
   email: text("email").notNull(),
   githubUrl: text("github_url"),
   linkedinUrl: text("linkedin_url"),

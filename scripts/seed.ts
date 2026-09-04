@@ -24,6 +24,11 @@ const SETTINGS = {
   heroBio:
     "J'analyse, conçois et déploie des solutions logicielles robustes — en alliant rigueur fonctionnelle, architecture technique maîtrisée et expérience utilisateur soignée.",
   method: "Agile Scrum",
+  /* Signature du premier contrat : l'origine du compteur d'expérience.
+     Écrit en UTC (`Z`) et non en heure locale de la machine qui seede — la
+     Guinée est à UTC+0, donc c'est bien l'heure réelle de signature, et elle
+     ne bougera pas selon l'endroit d'où part le seed. */
+  experienceStartAt: new Date("2022-09-01T00:00:00.000Z"),
   email: "yattara.pro@gmail.com",
   githubUrl: "https://github.com/YattuX-Pro",
   linkedinUrl: "https://www.linkedin.com/in/aboubacar-tidiane-yattara-5608b6232/",

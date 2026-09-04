@@ -20,6 +20,18 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { updateSettings, type ActionState } from "./actions";
 
+/* Date -> « 2022-09-01T00:00 », la seule forme qu'accepte `datetime-local`.
+
+   Lu en UTC (`toISOString`) et non en heure locale du navigateur, pour la
+   même raison que côté serveur : c'est la convention dans laquelle l'action
+   enregistre. Formater ici en heure locale aurait décalé la valeur affichée
+   de l'offset du visiteur, et le simple fait de réenregistrer le formulaire
+   aurait déplacé la date en base à chaque passage. */
+function toDatetimeLocal(date: Date | null | undefined): string {
+  if (!date) return "";
+  return date.toISOString().slice(0, 16);
+}
+
 function Submit() {
   const { pending } = useFormStatus();
   return (
@@ -79,6 +91,27 @@ export default function SettingsForm({
             />
             <FieldDescription>
               Affichée sous la grille des compétences. Vide = ligne masquée.
+            </FieldDescription>
+          </Field>
+
+          {/* Origine du compteur d'expérience du hero. `datetime-local` et
+              non `date` : le compteur descend au centième de seconde, une
+              date sans heure aurait figé les champs heures/minutes/secondes
+              du hero sur minuit. */}
+          <Field className="md:col-span-2">
+            <FieldLabel htmlFor="experienceStartAt">
+              Premier contrat (compteur d&apos;expérience)
+            </FieldLabel>
+            <Input
+              id="experienceStartAt"
+              name="experienceStartAt"
+              type="datetime-local"
+              defaultValue={toDatetimeLocal(settings?.experienceStartAt)}
+            />
+            <FieldDescription>
+              Date et heure de signature. Le hero en déduit l&apos;ancienneté en
+              direct — années, mois, jours, heures, minutes, secondes. Vide =
+              bloc masqué sur le portfolio.
             </FieldDescription>
           </Field>
 
