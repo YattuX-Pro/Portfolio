@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { DURATION, EASE, fadeInDown } from "@/components/Reveal";
+import ThemeToggle from "@/components/sub/ThemeToggle";
 
 const NAV_LINKS = [
   { id: "home", label: "Accueil" },
@@ -105,9 +106,24 @@ export default function NavBar() {
   }, []);
 
   return (
-    /* La navbar descend légèrement à l'ouverture de la page. `animate` et non
-       `whileInView` : elle est visible d'emblée, un déclencheur au scroll ne
-       partirait jamais. */
+    /* ⚠️ LE PANNEAU MOBILE EST UN FRÈRE DU HEADER, PAS SON ENFANT.
+
+       Il y vivait, et il ne s'affichait pas : hauteur mesurée à 0 px, ouvert.
+       La cause n'est ni le state ni l'animation — c'est que `backdrop-blur-md`
+       sur le header lui fait établir un BLOC CONTENEUR pour ses descendants en
+       `position: fixed` (comme le feraient `transform`, `filter` ou
+       `perspective` ; et Framer écrit justement aussi un `transform` sur ce
+       header). Le panneau se calait donc sur une boîte de 64 px de haut au
+       lieu de la fenêtre : `top-16 bottom-0` y valait 64 px de haut moins
+       64 px de haut, soit rien du tout. Aucune erreur, aucun avertissement,
+       juste un panneau de zéro pixel.
+
+       Sorti du header, son `fixed` retrouve la fenêtre. Le piège vaut pour
+       tout ce qu'on ajouterait de `fixed` dans ce header à l'avenir. */
+    <>
+    {/* La navbar descend légèrement à l'ouverture de la page. `animate` et non
+        `whileInView` : elle est visible d'emblée, un déclencheur au scroll ne
+        partirait jamais. */}
     <motion.header
       variants={fadeInDown}
       initial="hidden"
@@ -146,8 +162,12 @@ export default function NavBar() {
           A.YATTARA
         </button>
 
-        {/* Liens — desktop */}
-        <nav className="hidden md:flex items-center gap-1" aria-label="Navigation principale">
+        {/* Groupe de droite : liens (desktop), bascule de thème, hamburger.
+            La bascule est HORS du panneau mobile et visible à toutes les
+            largeurs — voir l'en-tête de `ThemeToggle`. */}
+        <div className="flex items-center gap-1">
+          {/* Liens — desktop */}
+          <nav className="hidden md:flex items-center gap-1" aria-label="Navigation principale">
           {NAV_LINKS.map((link) => {
             const isActive = activeId === link.id;
             return (
@@ -178,9 +198,11 @@ export default function NavBar() {
           })}
         </nav>
 
-        {/* Hamburger — mobile. 44x44 minimum. */}
-        <button
-          ref={triggerRef}
+          <ThemeToggle />
+
+          {/* Hamburger — mobile. 44x44 minimum. */}
+          <button
+            ref={triggerRef}
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={PANEL_ID}
@@ -205,8 +227,11 @@ export default function NavBar() {
               open ? "-translate-y-[6.5px] -rotate-45" : ""
             }`}
           />
-        </button>
+          </button>
+        </div>
       </div>
+
+    </motion.header>
 
       {/* Panneau mobile */}
       <AnimatePresence>
@@ -221,7 +246,7 @@ export default function NavBar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25, ease: EASE }}
-            className="md:hidden fixed inset-x-0 top-16 bottom-0 bg-bg overflow-y-auto overscroll-contain"
+            className="md:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-bg overflow-y-auto overscroll-contain"
           >
             <nav className="px-5 pt-2 pb-10" aria-label="Navigation mobile">
               <ul>
@@ -250,7 +275,7 @@ export default function NavBar() {
                 href="/cv/CV_Yattara_Aboubacar.pdf"
                 download
                 onClick={() => setOpen(false)}
-                className="mt-8 inline-flex items-center justify-center h-12 w-full rounded-md bg-brand text-white text-[15px] font-medium cursor-pointer"
+                className="mt-8 inline-flex items-center justify-center h-12 w-full rounded-md bg-brand text-brand-on text-[15px] font-medium cursor-pointer"
               >
                 Télécharger le CV
               </a>
@@ -258,6 +283,6 @@ export default function NavBar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </>
   );
 }

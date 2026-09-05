@@ -17,9 +17,18 @@ from PIL import Image, ImageFilter
 from scipy import ndimage
 import os, sys
 
+# Deux jeux de cibles : un par thème du site. Les illustrations sont de
+# l'encre sombre sur fond transparent — sur le fond anthracite du mode sombre
+# il ne resterait que le rouge flottant dans le noir. Chaque source produit
+# donc DEUX fichiers, et les composants les permutent en `dark:`.
 TARGET_RED   = (0xCE, 0x11, 0x26)
 TARGET_GREEN = (0x00, 0x94, 0x60)
 TARGET_INK   = (0x1A, 0x1A, 0x18)
+
+# Tokens du bloc `.dark` de globals.css : --brand, --flag-green-ink, --text.
+DARK_RED     = (0xF2, 0x45, 0x5A)
+DARK_GREEN   = (0x4E, 0xC9, 0x8D)
+DARK_INK     = (0xF5, 0xF4, 0xF0)
 
 def to_hsv(a):
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
@@ -71,14 +80,16 @@ def strip_background(rgba, tol=30):
     out = rgba.copy(); out[..., 3] = np.minimum(rgba[..., 3], a)
     return out, bg, mask.mean()
 
-def recolour(rgba, report):
+def recolour(rgba, report, targets=None, invert_ink=False):
     a = rgba[..., :3].astype(np.float32) / 255.0
     alpha = rgba[..., 3]
     h, s, v = to_hsv(a)
     vis = alpha > 40
 
+    t_red, t_green, t_ink = targets or (TARGET_RED, TARGET_GREEN, TARGET_INK)
+
     for name, target, hue_lo, hue_hi in (
-        ("rouge", TARGET_RED, 330, 25), ("vert", TARGET_GREEN, 90, 190)):
+        ("rouge", t_red, 330, 25), ("vert", t_green, 90, 190)):
         th, ts, tv = to_hsv(np.array(target, np.float32) / 255.0)
         band = ((h >= hue_lo) | (h <= hue_hi)) if hue_lo > hue_hi else ((h >= hue_lo) & (h <= hue_hi))
         sel = vis & band & (s > 0.30) & (v > 0.15)
@@ -102,15 +113,28 @@ def recolour(rgba, report):
                       f"({sel.sum()} px, rotation {dh:+.1f}°)")
 
     # encre : seuls les pixels neutres ET sombres, avec fondu vers le papier
-    tv_ink = TARGET_INK[0] / 255.0
+    tv_ink = t_ink[0] / 255.0
     ink = vis & (s < 0.30) & (v < 0.45)
     if ink.sum() > 200:
         core = vis & (s < 0.30) & (v < 0.22)
         v0 = v[core].mean() if core.sum() > 200 else v[ink].mean()
-        k = tv_ink / max(v0, 1e-3)
-        w = np.clip((0.45 - v) / 0.25, 0, 1)[ink]
-        v[ink] = np.clip(v[ink] * (1 + (k - 1) * w), 0, 1)
-        report.append(f"    encre  : V {v0:.3f} → {tv_ink:.3f} ({ink.sum()} px)")
+        if invert_ink:
+            # NÉGATIF, et pas une simple mise à l'échelle. Remonter V de 0,10 à
+            # 0,96 revient à le multiplier par 9,6 : tout sature à 1, le grain
+            # disparaît et les dégradés du chronographe gravé — ses masses
+            # noires et ses reflets clairs — s'écrasent en un aplat. L'inversion
+            # conserve les écarts internes : ce qui était le plus sombre devient
+            # le plus clair, et l'ordre des valeurs entre les deux est gardé.
+            w = np.clip((0.45 - v) / 0.25, 0, 1)[ink]
+            inv = 1.0 - v[ink]
+            k = tv_ink / max(1.0 - v0, 1e-3)
+            v[ink] = np.clip(v[ink] * (1 - w) + inv * k * w, 0, 1)
+        else:
+            k = tv_ink / max(v0, 1e-3)
+            w = np.clip((0.45 - v) / 0.25, 0, 1)[ink]
+            v[ink] = np.clip(v[ink] * (1 + (k - 1) * w), 0, 1)
+        report.append(f"    encre  : V {v0:.3f} → {tv_ink:.3f} ({ink.sum()} px)"
+                      + ("  [négatif]" if invert_ink else ""))
 
     rgb = (to_rgb(h, s, v) * 255).round().astype(np.uint8)
     return np.dstack([rgb, alpha])
@@ -195,27 +219,43 @@ for src, dst, square, margin in JOBS:
         arr, bg, frac = strip_background(arr)
         rep.append(f"    fond #{int(bg[0]):02X}{int(bg[1]):02X}{int(bg[2]):02X} détouré "
                    f"({frac*100:.0f}% de la surface)")
-    arr = recolour(arr, rep)
+    # ⚠️ LE PAPIER SE VIDE AVANT DE RECOLORER, PAS APRÈS.
+    #
+    # `paper_to_alpha` vide les pixels CLAIRS et peu saturés. Tant qu'on ne
+    # produisait que la version claire, l'ordre n'avait aucune importance :
+    # avant ou après, « clair » y désignait le papier. Il en a pris une, avec
+    # la variante sombre : l'encre y devient claire par construction, et
+    # appelée après l'inversion, l'étape effaçait le trait qu'elle venait de
+    # peindre — il ne restait que les bavures d'anticrénelage, un dessin
+    # rongé. Le papier se juge donc sur l'ORIGINAL, une seule fois, avant que
+    # les valeurs ne bougent.
     before = (arr[..., 3] > 200).sum()
     arr = paper_to_alpha(arr, despeckle=stripped)
     after = (arr[..., 3] > 200).sum()
     if before - after > 1000:
         rep.append(f"    aplats clairs vidés : {before - after} px rendus au papier de la page")
-    arr = recentre(arr, margin=margin, square=square)
-    out = Image.fromarray(arr)
+
+    for suffixe, cibles, negatif in (
+        ("", None, False),
+        ("-dark", (DARK_RED, DARK_GREEN, DARK_INK), True),
+    ):
+      variante = recolour(arr.copy(), rep, targets=cibles, invert_ink=negatif)
+      variante = recentre(variante, margin=margin, square=square)
+      out = Image.fromarray(variante)
+      dst_v = dst.replace(".png", f"{suffixe}.png")
     # Plafond de définition : au-delà de 1000 px on transporte du poids sans
     # gagner un pixel visible — le plus grand emploi prévu est ~360 px de CSS,
     # soit 720 px sur un écran retina.
-    if max(out.size) > 1000:
+      if max(out.size) > 1000:
         r = 1000 / max(out.size)
         out = out.resize((round(out.width * r), round(out.height * r)), Image.LANCZOS)
-    o = os.path.join(DST, dst)
-    out.save(o, optimize=True)
+      o = os.path.join(DST, dst_v)
+      out.save(o, optimize=True)
     # Le grain riso est du bruit : il ruine la compression PNG (1,5 Mo pour un
     # dessin à trois couleurs). Une palette de 128 entrées le rend lisible sans
     # bande visible, et divise le poids par cinq.
-    if os.path.getsize(o) > 250_000:
+      if os.path.getsize(o) > 250_000:
         q = out.quantize(colors=128, method=Image.Quantize.FASTOCTREE)
         q.save(o, optimize=True)
-    rep.append(f"    → {dst}  {out.width}x{out.height}, {os.path.getsize(o)//1024} KB")
+      rep.append(f"    → {dst_v}  {out.width}x{out.height}, {os.path.getsize(o)//1024} KB")
     print("\n".join(rep)); print()

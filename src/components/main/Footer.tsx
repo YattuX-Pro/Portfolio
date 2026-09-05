@@ -27,7 +27,9 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
         label="Contact"
         title="Travaillons ensemble."
         intro="Analyste développeur, ouvert aux opportunités full-time et freelance. Le plus simple reste un e-mail."
-        illustration={{ src: "/illustrations/contact.png", width: 418, height: 418 }}
+        illustration={{ src: "/illustrations/contact.png",
+          srcDark: "/illustrations/contact-dark.png",
+          width: 418, height: 418 }}
       />
 
       {/* E-mail — l'élément principal de la section */}
@@ -52,9 +54,34 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
         <FlagRule className="mt-8" thickness={6} width={92} />
       </Reveal>
 
-      {/* Liens + CV */}
+      {/* ── Liens + CV ───────────────────────────────────────────────────
+          LA RANGÉE TIENT SUR UNE LIGNE JUSQU'À 360px. Elle passait à deux dès
+          390px, et c'est « Télécharger le CV » qui tombait seul en dessous —
+          le lien le plus long, donc celui qui casse en premier, et accessoirement
+          le seul qui compte pour un recruteur.
+
+          Mesuré : 94 + 106 + 119 = 319px de contenu, plus deux gouttières de
+          32px, soit 383px pour 350px disponibles sur un téléphone de 390px.
+          Trois réglages, aucun suffisant seul :
+          - la gouttière de rangée passe à 10px (`gap-x-2.5`) ;
+          - la gouttière interne de chaque lien à 6px (`gap-1.5`) ;
+          - le corps à 14px.
+          Total : 316px, ce qui tient jusqu'à un écran de 360px inclus. À 12px
+          de gouttière le compte tombait sur 320 pour 320 disponibles, et
+          l'arrondi sous-pixel suffisait à faire repasser le CV à la ligne :
+          une marge nulle n'est pas une marge. Au-delà
+          de `sm` tout reprend ses valeurs d'origine — le réglage serré n'existe
+          que là où il sert.
+
+          `flex-wrap` RESTE, volontairement : c'est le filet. Sous 360px la
+          rangée redevient deux lignes au lieu de déborder du cadre et de
+          déclencher un défilement horizontal sur toute la page.
+
+          `justify-between` sur mobile : les 15px qui restent sont répartis
+          entre les trois liens au lieu de s'accumuler à droite, ce qui fait
+          lire la rangée comme cadrée et pas comme serrée à gauche. */}
       <Reveal delay={0.12}>
-        <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-x-2.5 gap-y-4 sm:justify-start sm:gap-x-8">
           {links.map(({ href, label, icon: Icon }) => (
             <motion.a
               key={label}
@@ -64,7 +91,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
               whileHover={HOVER_LIFT}
               whileTap={TAP_PRESS}
               transition={INTERACTION_TRANSITION}
-              className="group inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-brand transition-colors duration-200 cursor-pointer"
+              className="group inline-flex items-center gap-1.5 sm:gap-2 min-h-11 py-1 text-[14px] sm:text-[15px] font-medium text-ink hover:text-brand transition-colors duration-200 cursor-pointer"
             >
               <Icon size={17} aria-hidden />
               {label}
@@ -86,7 +113,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
               whileHover={HOVER_LIFT}
               whileTap={TAP_PRESS}
               transition={INTERACTION_TRANSITION}
-              className="inline-flex items-center gap-2 min-h-11 py-1 text-[15px] font-medium text-ink hover:text-brand transition-colors duration-200 cursor-pointer"
+              className="inline-flex items-center gap-1.5 sm:gap-2 min-h-11 py-1 text-[14px] sm:text-[15px] font-medium text-ink hover:text-brand transition-colors duration-200 cursor-pointer"
             >
               Télécharger le CV
             </motion.a>

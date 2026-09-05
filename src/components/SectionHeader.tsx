@@ -11,7 +11,13 @@ import Reveal from "@/components/Reveal";
     `width`/`height` sont les dimensions INTRINSÈQUES du fichier, pas la taille
     d'affichage : `next/image` en a besoin pour réserver la place avant le
     chargement, sinon la page saute à l'arrivée de chaque image. */
-export type SectionIllustration = { src: string; width: number; height: number };
+export type SectionIllustration = {
+  src: string;
+  /** Variante à encre claire, pour le mode sombre. */
+  srcDark: string;
+  width: number;
+  height: number;
+};
 
 export default function SectionHeader({
   num,
@@ -78,13 +84,37 @@ export default function SectionHeader({
         {illustration ? (
           <div className="hidden md:col-span-4 md:flex md:justify-end">
             <Reveal preset="in" delay={0.18}>
+              {/* DEUX fichiers, permutés par `dark:` et non par un état React.
+
+                  Les illustrations sont de l'encre sombre sur fond
+                  transparent : sur l'anthracite du mode sombre il ne resterait
+                  que le rouge flottant dans le noir. La variante `-dark` est
+                  le même dessin à l'encre claire (`assets/normalise.py`).
+
+                  Permuter la `src` selon le thème aurait demandé un état
+                  client, donc un rendu serveur qui ignore le thème et une
+                  image fausse pendant l'hydratation. En CSS, `.dark` est déjà
+                  sur <html> avant le premier rendu, et rien ne clignote.
+
+                  Le fichier caché n'est PAS téléchargé : `next/image` pose
+                  `loading="lazy"`, et une image en `display:none` n'entre
+                  jamais dans le viewport. Le second thème ne coûte donc rien
+                  à qui ne l'utilise pas. */}
               <Image
                 src={illustration.src}
                 alt=""
                 width={illustration.width}
                 height={illustration.height}
                 sizes="180px"
-                className="w-[180px] h-auto"
+                className="w-[180px] h-auto dark:hidden"
+              />
+              <Image
+                src={illustration.srcDark}
+                alt=""
+                width={illustration.width}
+                height={illustration.height}
+                sizes="180px"
+                className="w-[180px] h-auto hidden dark:block"
               />
             </Reveal>
           </div>

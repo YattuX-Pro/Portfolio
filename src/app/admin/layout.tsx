@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
-import ThemeProvider from "@/components/admin/ThemeProvider";
+import ThemeProvider from "@/components/ThemeProvider";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { Toaster } from "@/components/ui/sonner";
 import "../globals.css";

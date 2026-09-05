@@ -48,6 +48,13 @@
   --brand-hover: #a50e1f;
   --brand-soft: #fcf0f1;
 
+  /* Couleur du TEXTE POSÉ SUR l'aplat rouge. Elle est un token et non un
+     `text-white` écrit dans les composants, parce qu'elle CHANGE avec le
+     thème : le blanc mesure 6.7:1 sur le #CE1126 du mode clair, mais
+     seulement 3.64:1 sur le #F2455A du mode sombre — sous le seuil. En
+     sombre c'est donc un texte foncé qui passe sur le rouge, à 5.03:1. */
+  --brand-on: #ffffff;
+
   /* Voile décoratif du hero. `--brand-soft` (#FCF0F1) ne se distinguait
      quasiment pas du fond crème (#FAFAF8) — dix points d'écart sur le vert,
      sept sur le bleu, rien sur le rouge. Le rouge de marque à 12% donne
@@ -125,6 +132,60 @@
   --sidebar-ring: #8a8680;
 }
 
+/* ─── Thème sombre du SITE ────────────────────────────────────────────────
+   UNE SEULE palette sombre pour tout le produit : les valeurs ci-dessous sont
+   exactement celles de `.admin.dark` plus bas, qui avaient déjà été dérivées
+   de la charte du portfolio et vérifiées au contraste. En inventer une
+   seconde aurait donné deux gris chauds voisins mais différents, et deux
+   endroits à corriger à chaque retouche.
+
+   Le sélecteur reste `.dark` tout court. L'admin porte `admin dark` sur le
+   MÊME <html> : son bloc `.admin.dark` a une spécificité de (0,2,0) contre
+   (0,1,0) ici, il garde donc la main sur ce qui lui est propre — les tokens
+   shadcn, la sidebar — sans que rien ne soit à dupliquer.
+
+   Contrastes mesurés sur `--bg` (#16150F) :
+     --text       #F5F4F0   16.5:1
+     --ink-muted  #A8A49B    7.35:1   (7.45:1 en clair — même lisibilité)
+     --brand      #F2455A    5.03:1
+   Le rouge du drapeau, lui, ne mesure que 3.23:1 sur ce fond : il reste
+   parfait pour un élément graphique, il ne peut plus porter de texte. D'où
+   l'éclaircissement, seul écart de teinte avec la charte.
+
+   LES COULEURS DU DRAPEAU NE BOUGENT PAS. Vérifié sur le fond sombre :
+   rouge 3.25:1, vert 4.71:1, jaune très au-dessus. Toutes franchissent le
+   seuil de 3:1 des éléments graphiques, et `FlagRule` est de toute façon
+   décoratif et `aria-hidden`. Un drapeau dont on change les couleurs selon
+   le thème n'est plus un drapeau.
+   -------------------------------------------------------------------------- */
+.dark {
+  /* Indique au navigateur de peindre en sombre ce qu'il dessine lui-même :
+     barres de défilement, contrôles de formulaire, fond avant premier rendu.
+     Sans elle, l'ascenseur reste blanc sur une page noire. */
+  color-scheme: dark;
+
+  --bg: #16150f;
+  --surface: #1f1e17;
+  --text: #f5f4f0;
+  --ink-muted: #a8a49b;
+  --line: #302e26;
+  --line-strong: #423f34;
+
+  --brand: #f2455a;
+  --brand-hover: #f4707f;
+  --brand-soft: #2a1a1c;
+  --brand-on: #16150f;
+
+  /* Le vert LISIBLE EN TEXTE s'inverse de sens : en clair il fallait
+     assombrir le vert officiel pour qu'il passe sur le crème, en sombre il
+     faut l'éclaircir pour qu'il passe sur l'anthracite. */
+  --flag-green-ink: #4ec98d;
+
+  /* Le voile du hero suit le rouge éclairci, et descend à 10% : sur un fond
+     sombre, une teinte à 12% se voit davantage que sur du crème. */
+  --brand-veil: rgb(242 69 90 / 0.1);
+}
+
 /* ─── Thème sombre de l'ADMINISTRATION ───────────────────────────────────
    La console emprunte la CHARTE DU PORTFOLIO, pas celle de Guidoc : elle
    hérite donc du mapping shadcn ci-dessus (neutre crème, accent rouge du
@@ -142,9 +203,10 @@
   --font-heading: var(--font-sans);
 }
 
-/* Le portfolio n'a pas de mode sombre : cette échelle est propre à la
-   console, dérivée de la charte plutôt que copiée de Guidoc. Le neutre est
-   chaud — même famille que le crème #FAFAF8 du site, pas le marine Guidoc.
+/* Cette échelle est celle du bloc `.dark` du site, reprise à l'identique :
+   elle avait été dérivée de la charte plutôt que copiée de Guidoc, et c'est
+   elle qui sert maintenant aux deux. Le neutre est chaud — même famille que
+   le crème #FAFAF8 du site, pas le marine Guidoc.
 
    L'accent passe du #CE1126 du drapeau à #F2455A. Le rouge officiel ne
    mesure que 2.97:1 sur les cartes sombres : illisible en texte, donc
@@ -239,6 +301,7 @@
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
   --color-brand-soft: var(--brand-soft);
+  --color-brand-on: var(--brand-on);
   --color-flag-red: var(--flag-red);
   --color-flag-yellow: var(--flag-yellow);
   --color-flag-green: var(--flag-green);
@@ -337,7 +400,9 @@
 
   .site ::selection {
     background: var(--brand);
-    color: #fff;
+    /* Même raison que sur les boutons : du blanc sur le rouge éclairci du
+       mode sombre tomberait à 3.64:1. */
+    color: var(--brand-on);
   }
 
   /* Barre de défilement fine, réservée à la console. */

@@ -108,7 +108,7 @@ export default function HeroContent({
             whileHover={HOVER_LIFT}
             whileTap={TAP_PRESS}
             transition={INTERACTION_TRANSITION}
-            className="group inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md bg-brand text-white text-[15px] font-medium hover:bg-brand-hover transition-colors duration-200 cursor-pointer"
+            className="group inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md bg-brand text-brand-on text-[15px] font-medium hover:bg-brand-hover transition-colors duration-200 cursor-pointer"
           >
             Voir mes projets
             <HiArrowRight
@@ -246,13 +246,23 @@ export default function HeroContent({
               transition={{ duration: DURATION, ease: EASE, delay: 0.5 }}
               className="hidden lg:flex justify-end pr-6 mt-14"
             >
+              {/* Deux fichiers permutés en CSS — même mécanique et mêmes
+                  raisons que les marques de section, voir `SectionHeader`. */}
               <Image
                 src="/illustrations/timer.png"
                 alt=""
                 width={334}
                 height={375}
                 sizes="152px"
-                className="w-[152px] h-auto"
+                className="w-[152px] h-auto dark:hidden"
+              />
+              <Image
+                src="/illustrations/timer-dark.png"
+                alt=""
+                width={334}
+                height={375}
+                sizes="152px"
+                className="w-[152px] h-auto hidden dark:block"
               />
             </motion.div>
           ) : null}
