@@ -27,6 +27,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
         label="Contact"
         title="Travaillons ensemble."
         intro="Analyste développeur, ouvert aux opportunités full-time et freelance. Le plus simple reste un e-mail."
+        illustration={{ src: "/illustrations/contact.png", width: 418, height: 418 }}
       />
 
       {/* E-mail — l'élément principal de la section */}

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { HiArrowRight, HiDownload } from "react-icons/hi";
@@ -147,20 +148,34 @@ export default function HeroContent({
             `min-w-0` sur le compteur : il contient une ligne en
             `whitespace-nowrap`, et un enfant flex refuse par défaut de passer
             sous sa largeur de contenu. Sans lui, une suite trop longue aurait
-            poussé les icônes hors du cadre au lieu de rester dans sa boîte. */}
+            poussé les icônes hors du cadre au lieu de rester dans sa boîte.
+
+            SOUS 640px, `basis-full` donne la ligne entière au compteur et les
+            réseaux passent dessous. C'est ce qui débloque sa taille : tant
+            qu'il partageait la rangée avec deux boutons de 44px, il devait
+            rester petit pour leur laisser la place, et un relevé de 28px de
+            haut coincé dans un coin ne se lit pas comme un afficheur. Sur
+            téléphone il occupe maintenant toute la largeur utile — c'est le
+            premier chiffre qu'on voit sous le CV.
+
+            `grow basis-0` au-dessus : le compteur prend TOUT le reste de la
+            rangée au lieu de se dimensionner sur ses chiffres. Ce n'est pas
+            cosmétique — son corps est en `cqw`, donc calculé sur sa propre
+            boîte : tant qu'il se réglait sur son contenu, la boîte dépendait
+            du texte qui dépendait de la boîte, et le chiffre s'effondrait. */}
         <motion.div
           variants={revealItem}
           className="mt-12 sm:mt-14 pt-6 border-t border-line"
         >
-          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-6">
             {settings?.experienceStartAt ? (
               <ExperienceCounter
                 startAt={settings.experienceStartAt}
-                className="min-w-0"
+                className="min-w-0 grow basis-full sm:basis-0"
               />
             ) : null}
 
-            <div className="flex shrink-0 items-center gap-1 -mr-2.5">
+            <div className="flex shrink-0 items-center gap-1 -ml-2.5 sm:ml-0 -mr-2.5">
               {socials.map(({ href, label, icon: Icon }) => (
                 <motion.a
                   key={label}
@@ -181,19 +196,66 @@ export default function HeroContent({
         </motion.div>
       </motion.div>
 
-      {/* ── Colonne droite — stack, signée .NET ─────────────────────────
+      {/* ── Colonne droite — stack signée .NET, puis le chronographe ─────
           `initial/animate` plutôt qu'un enfant de `revealGroup` : la colonne
           n'appartient pas à la série de gauche, elle entre une fois, avec son
           propre retard. Le conteneur (voile, arrondis, gouttière) vit dans
-          `StackPanel` : ici il ne reste que le placement en grille. */}
-      {stack.length > 0 ? (
+          `StackPanel` : ici il ne reste que le placement en grille.
+
+          La condition porte sur les DEUX contenus depuis que le chronographe
+          est là : elle ne testait que la stack, et une base sans stack aurait
+          escamoté le dessin avec elle. */}
+      {stack.length > 0 || settings?.experienceStartAt ? (
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: DURATION, ease: EASE, delay: 0.32 }}
           className="lg:col-span-4 lg:col-start-9"
         >
-          <StackPanel rows={stack} />
+          {stack.length > 0 ? <StackPanel rows={stack} /> : null}
+
+          {/* ── Le chronographe ────────────────────────────────────────────
+              Il comble le seul vide franc de la page : la colonne droite
+              s'arrêtait après le tableau de stack (~470px) pendant que la
+              colonne gauche descendait jusqu'à ~790px, et le trou tombait
+              exactement en face du relevé d'ancienneté. Le dessin lui répond,
+              c'est pour ça qu'il est lié à `experienceStartAt` et pas à la
+              stack : sans compteur en face, il n'illustre plus rien.
+
+              `hidden lg:flex` comme `StackPanel` : la colonne entière est
+              absente sous 1024px, où le compteur a rejoint la colonne
+              principale.
+
+              `pr-6` reprend la gouttière interne de `StackPanel`, sinon le
+              dessin dépasse de l'axe droit que tiennent le logotype `.NET` et
+              les valeurs de la liste.
+
+              Retard de 0,5 s : après la colonne (0,32) et après le compteur
+              d'en face, pour que le regard aille d'abord au relevé.
+
+              Le fichier est recadré au ras de son encre (marge de 1,5% dans
+              `assets/normalise.py`, contre 8% pour les marques de section) :
+              le logotype `.NET` et les six valeurs de la liste, juste
+              au-dessus, forment un axe au fer à droite, et une marge cuite
+              dans le PNG aurait décalé le dessin de cet axe sans qu'aucune
+              règle CSS ne puisse le rattraper. */}
+          {settings?.experienceStartAt ? (
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: DURATION, ease: EASE, delay: 0.5 }}
+              className="hidden lg:flex justify-end pr-6 mt-14"
+            >
+              <Image
+                src="/illustrations/timer.png"
+                alt=""
+                width={334}
+                height={375}
+                sizes="152px"
+                className="w-[152px] h-auto"
+              />
+            </motion.div>
+          ) : null}
         </motion.div>
       ) : null}
     </div>

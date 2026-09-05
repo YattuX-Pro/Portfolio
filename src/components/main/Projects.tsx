@@ -44,6 +44,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
         label="Projets"
         title="Une sélection de ce que j'ai livré."
         intro="Du microservice .NET au dashboard Django. « Détail » ouvre le besoin, la réponse et la stack de chaque projet."
+        illustration={{ src: "/illustrations/livraison.png", width: 1000, height: 1000 }}
       />
 
       {/* <ol> et non <ul> : les entrées sont ordonnées. */}

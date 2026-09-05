@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { animate, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { addYears, differenceInYears } from "date-fns";
+import { DURATION, EASE, STAGGER } from "@/components/Reveal";
 
 /* ══════════════════════════════════════════════════════════════════════════
    ANNÉES D'EXPÉRIENCE — un chronographe, pas un tableau.
@@ -27,6 +29,15 @@ import { addYears, differenceInYears } from "date-fns";
 
    L'origine vient de la BASE (`site_settings.experience_start_at`, éditable
    depuis l'admin) : une date d'ancienneté est du contenu, pas une constante.
+
+   PAS DE MONTÉE À L'ARRIVÉE. Le relevé partait de 0 et défilait 1,8 s avant
+   de se poser sur sa vraie valeur : pendant deux secondes le bloc affichait
+   un chiffre FAUX, et le seul geste « premium » de la page était celui d'un
+   odomètre de station-service. Le compteur affiche désormais sa valeur juste
+   dès la première frame, et c'est la RÉVÉLATION qui fait l'entrée — chaque
+   groupe monte de sa propre hauteur, sort d'un flou, décalé de 60 ms sur son
+   voisin de gauche. Même courbe, même durée, même stagger que le reste du
+   site (`Reveal.tsx`) : c'est une entrée de plus, pas un effet à part.
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* Cadence de rafraîchissement. Le dernier rang est le DIXIÈME de seconde :
@@ -52,6 +63,32 @@ const MONTHS_FR = [
   "novembre",
   "décembre",
 ];
+
+/* ── L'entrée ───────────────────────────────────────────────────────────────
+   `y` en POURCENTAGE et pas en pixels : un transform en % se rapporte à la
+   hauteur de l'élément, donc la montée suit le corps du chiffre — même geste
+   à 30px sur un téléphone qu'à 68px sur un écran large. Un `y: 16` fixe aurait
+   été un saut sur mobile et un frémissement sur desktop.
+
+   Le flou fait le reste : il donne à des glyphes qui ne bougent presque pas la
+   sensation d'une mise au point, comme un cadran qui s'allume. Il est posé en
+   `filter` inline par Framer (même raison que `ProjectImage` : la classe
+   Tailwind `blur-*` passe par `--tw-blur`, déclarée `syntax: "*"`, qui ne sait
+   pas s'interpoler). */
+const dialGroup: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: STAGGER, delayChildren: 0.1 } },
+};
+
+const dialItem: Variants = {
+  hidden: { opacity: 0, y: "38%", filter: "blur(10px)" },
+  visible: {
+    opacity: 1,
+    y: "0%",
+    filter: "blur(0px)",
+    transition: { duration: DURATION, ease: EASE },
+  },
+};
 
 /* Lu en UTC, comme la date est écrite par l'admin. La Guinée est à UTC+0 :
    c'est l'heure réelle de signature, et elle ne se décale pas selon le pays
@@ -84,24 +121,15 @@ export default function ExperienceCounter({
      prérendu sur le serveur, où `Date.now()` ne vaut pas ce qu'il vaudra à
      l'hydratation. Une valeur calculée au rendu aurait donc produit deux
      chaînes différentes et une erreur d'hydratation à chaque visite.
-     Partir de 0 est aussi ce qui donne la montée initiale, gratuitement. */
+
+     Ce 0 n'est JAMAIS vu : tant que `ready` est faux le relevé est à
+     `opacity: 0`. Il n'est pas pour autant démonté — c'est lui qui réserve la
+     hauteur et la largeur exactes du bloc (mêmes glyphes, `tabular-nums`),
+     donc rien ne saute au montage. */
   const [elapsed, setElapsed] = useState(0);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const target = Date.now() - startMs;
-
-    /* Mouvement réduit : ni montée, ni battement. On pose la valeur une fois
-       et on s'arrête là. `MotionConfig` ne couvre pas ce cas — `animate()` est
-       impératif et la boucle rAF ne passe par aucune prop déclarative.
-
-       Le `setState` passe par un rAF et non par le corps de l'effet :
-       `react-hooks/set-state-in-effect` refuse l'appel synchrone, qui
-       provoque un rendu en cascade. Une frame de décalage, invisible. */
-    if (reduced) {
-      const once = requestAnimationFrame(() => setElapsed(target));
-      return () => cancelAnimationFrame(once);
-    }
-
     let raf = 0;
     let last = 0;
 
@@ -115,23 +143,31 @@ export default function ExperienceCounter({
       setElapsed(Date.now() - startMs);
     };
 
-    /* Deux temps : la montée de 0 à aujourd'hui — tous les rangs défilent, du
-       centième à l'année — puis le relais vers le temps réel. La cible est
-       figée au montage ; les 1,8 s écoulées pendant la montée sont rattrapées
-       au premier tick. */
-    const controls = animate(0, target, {
-      duration: 1.8,
-      /* Le compteur ralentit en arrivant, ce qui se lit comme un arrêt et non
-         comme une coupure. */
-      ease: "easeOut",
-      onUpdate: setElapsed,
-      onComplete: () => {
-        raf = requestAnimationFrame(tick);
-      },
-    });
+    /* La vraie valeur est posée dès le montage, puis le battement prend le
+       relais — plus aucune montée. Le `setState` est différé et non appelé
+       dans le corps de l'effet : `react-hooks/set-state-in-effect` refuse
+       l'appel synchrone, qui provoque un rendu en cascade.
+
+       Ce premier report est un `setTimeout` et PAS un `requestAnimationFrame`,
+       contrairement au battement juste au-dessus. La raison est celle qui fait
+       justement préférer rAF ensuite : le navigateur ne planifie aucune frame
+       pour un onglet en arrière-plan. Une page ouverte dans un onglet caché
+       (Cmd-clic, restauration de session) serait donc restée sur son zéro
+       invisible, et n'aurait affiché ses chiffres qu'au moment où on la
+       regarde. Un timer, lui, part même caché : la valeur est juste, l'entrée
+       est jouée, et il ne reste qu'à la lire.
+
+       Mouvement réduit : la valeur est posée, et rien ne bat. `MotionConfig`
+       neutralise déjà la révélation (elle est déclarative), mais pas cette
+       boucle-ci, qui ne passe par aucune prop. */
+    const start = setTimeout(() => {
+      setElapsed(Date.now() - startMs);
+      setReady(true);
+      if (!reduced) raf = requestAnimationFrame(tick);
+    }, 0);
 
     return () => {
-      controls.stop();
+      clearTimeout(start);
       cancelAnimationFrame(raf);
     };
   }, [reduced, startMs]);
@@ -160,11 +196,10 @@ export default function ExperienceCounter({
 
   /* Les rangs sous l'année sont COMPLÉTÉS À DEUX CHIFFRES, l'année non.
 
-     Ce n'est pas cosmétique : le relevé est en `flex-wrap`, une valeur qui
-     passe de 9 à 10 élargit son groupe et peut faire basculer un groupe
-     entier à la ligne suivante. Toute la composition sauterait une fois par
-     jour. L'année reste nue parce qu'elle est la valeur qu'on lit en premier,
-     et que « 04ans » se lit comme un compte à rebours. */
+     Ce n'est pas cosmétique : le relevé est mesuré en `em` et une valeur qui
+     passe de 9 à 10 élargit son groupe, donc toute la suite. L'année reste
+     nue parce qu'elle est la valeur qu'on lit en premier, et que « 04ans » se
+     lit comme un compte à rebours. */
   const groups: { value: ReactNode; unit: string }[] = [
     { value: String(years), unit: "ans" },
     { value: pad2(days), unit: "j" },
@@ -184,17 +219,38 @@ export default function ExperienceCounter({
   ];
 
   return (
-    <div className={className}>
+    /* `containerType: "inline-size"` : c'est cette racine qui sert d'unité au
+       corps du relevé (voir le `cqw` plus bas). Posé en style inline et pas en
+       classe `@container` pour rester à côté du `fontSize` qui s'en sert —
+       séparés, on retire l'un sans comprendre qu'on casse l'autre. */
+    <div className={className} style={{ containerType: "inline-size" }}>
       <p className="meta">Années d&apos;expérience</p>
 
       {/* ── L'afficheur ──────────────────────────────────────────────────
           `flex-nowrap` + `whitespace-nowrap` : la suite ne se replie jamais,
           c'est la règle du bloc. Le corps est donc calé pour qu'elle tienne
-          partout — le relevé mesure environ 6,3 fois le corps, et le clamp
-          garde ce produit sous la largeur de la colonne principale : 28px sur
-          un téléphone de 375px (177px de relevé pour 335px utiles), 68px à
-          1512px (430px pour ~580px utiles). Grossir au-delà ferait déborder
-          avant de faire joli.
+          partout — le relevé mesure environ 9,4 fois le corps, et le clamp
+          garde ce produit sous la largeur disponible.
+
+          Le corps est en `cqw` (1 % de la largeur du BLOC) et non en `vw`,
+          parce que le relevé n'occupe pas la même fraction de la fenêtre selon
+          l'endroit : pleine ligne sous 640px, puis une colonne de 7/12 moins
+          la place des icônes au-delà. Un terme en `vw` calé pour le téléphone
+          débordait de la colonne sur un portable de 1024px, et calé pour le
+          portable ne remplissait plus rien sur le téléphone. En `cqw` il n'y a
+          plus de régime à arbitrer : le chiffre suit sa propre boîte, quelle
+          que soit la raison pour laquelle elle a cette largeur. C'est
+          `containerType: "inline-size"` sur la racine du bloc qui l'active, et
+          c'est pour ça que la racine doit recevoir sa largeur du parent
+          (`basis-full` / `grow` côté hero) : un bloc qui se dimensionne sur son
+          contenu ne peut pas servir de référence à son contenu.
+
+          Le diviseur : le relevé mesure ~8,9 fois le corps aujourd'hui, ~9,5
+          quand l'année passera à deux chiffres. 10,4cqw laisse la marge des
+          deux, plutôt que de recadrer tout le bloc un matin de janvier.
+
+          Le plafond de 68px reste : au-delà le relevé cesse d'être un chiffre
+          qu'on lit pour devenir une bannière, et il dépasserait le corps du h1.
 
           `fontSize` est posé SUR LE CONTENEUR, et tout le reste est en `em` :
           le corps des unités (0.3em), leur décalage (0.1em) et l'écart entre
@@ -203,10 +259,7 @@ export default function ExperienceCounter({
 
           Chiffres en `font-display` et unités en mono : c'est la répartition
           du site — les nombres appartiennent à la fonte de titrage (le h1, les
-          stats), le mono porte les libellés. Le relevé se lit comme une montre
-          par sa SÉQUENCE et son remplissage à deux chiffres, pas en changeant
-          de fonte ; et le mono du site n'est chargé qu'en 400/500, il aurait
-          été maigre à ce corps.
+          stats), le mono porte les libellés.
 
           `items-baseline` : sans lui, chaque unité se centrerait sur la
           hauteur de son groupe et flotterait au milieu du chiffre.
@@ -215,13 +268,18 @@ export default function ExperienceCounter({
           Laissé lisible, il donnait à un lecteur d'écran une bouillie de
           chiffres ; et un `aria-live` aurait été pire, il aurait annoncé
           chaque dixième. Le texte utile est en `sr-only` juste après. */}
-      <div
+      <motion.div
         aria-hidden
+        variants={dialGroup}
+        initial="hidden"
+        animate={ready ? "visible" : "hidden"}
         className="mt-4 flex flex-nowrap items-baseline gap-x-[0.28em] whitespace-nowrap"
-        style={{ fontSize: "clamp(28px, 4.5vw, 68px)" }}
+        style={{ fontSize: "min(68px, 10.4cqw)" }}
       >
         {groups.map((g) => (
-          <span key={g.unit} className="flex items-baseline">
+          /* Le groupe entier (chiffre + unité) est UN objet qui monte : les
+             séparer aurait fait décoller l'unité de son nombre. */
+          <motion.span key={g.unit} variants={dialItem} className="flex items-baseline">
             {/* `tabular-nums` : sans lui la largeur du glyphe change à chaque
                 incrément et toute la ligne tremble. */}
             <span className="font-display font-semibold tabular-nums leading-[0.9] tracking-[-0.03em] text-ink">
@@ -230,9 +288,9 @@ export default function ExperienceCounter({
             <span className="ml-[0.1em] font-mono text-[0.3em] leading-none text-ink-muted">
               {g.unit}
             </span>
-          </span>
+          </motion.span>
         ))}
-      </div>
+      </motion.div>
 
       <span className="sr-only">
         Expérience professionnelle continue depuis le{" "}
