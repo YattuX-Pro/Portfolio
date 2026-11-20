@@ -55,15 +55,18 @@ export default function PortfolioApp({ data }: { data: SiteData }) {
 
         {/* Padding réduit par rapport aux anciennes sections (py-32 en
             desktop) : la traversée fait déjà la respiration entre deux
-            escales — son ciel au-dessus, son rivage en dessous. */}
-        {ESCALES.filter((e) => content[e.id]).map((e) => (
-          <Fragment key={e.id}>
-            <Crossing to={e.label} cap={e.cap} />
-            <Escale id={e.id} className="pt-6 pb-16 sm:pt-8 sm:pb-20 lg:pt-10 lg:pb-24">
-              {content[e.id]}
-            </Escale>
-          </Fragment>
-        ))}
+            escales. Le numéro de l'escale suit `ESCALES`, comme les numéros
+            des en-têtes de section (01–04), même si Parcours est masqué. */}
+        {ESCALES.map((e, i) =>
+          content[e.id] ? (
+            <Fragment key={e.id}>
+              <Crossing to={e.label} cap={e.cap} num={String(i + 1).padStart(2, "0")} />
+              <Escale id={e.id} className="pt-6 pb-16 sm:pt-8 sm:pb-20 lg:pt-10 lg:pb-24">
+                {content[e.id]}
+              </Escale>
+            </Fragment>
+          ) : null,
+        )}
       </main>
     </MotionRoot>
   );

@@ -81,6 +81,15 @@
      lise encore sur l'anthracite. */
   --shadow: rgb(26 26 24 / 0.18);
 
+  /* Lumières de la scène du voyage (`voyage/Crossing.tsx`). Comme
+     `--shadow`, ce ne sont pas des couleurs d'interface : elles n'existent
+     que DANS l'illustration — scintillement des reflets sur l'eau, halo de
+     l'astre, écume sous la coque. À l'aube elles sont chaudes, la nuit
+     elles prennent le froid de la lune. */
+  --sea-glint: rgb(255 240 205 / 0.95);
+  --sea-glow: rgb(255 222 160 / 0.35);
+  --sea-foam: rgb(255 255 255 / 0.55);
+
   /* Le rôle « display » existe toujours, mais il est servi par Plex Sans :
      la hiérarchie vient de la graisse et de l'approche, pas d'une 2e fonte. */
   --font-display: var(--font-sans);
@@ -194,6 +203,9 @@
   --brand-veil: rgb(242 69 90 / 0.1);
 
   --shadow: rgb(0 0 0 / 0.45);
+  --sea-glint: rgb(222 232 255 / 0.95);
+  --sea-glow: rgb(190 210 255 / 0.22);
+  --sea-foam: rgb(225 234 255 / 0.4);
 }
 
 /* ─── Thème sombre de l'ADMINISTRATION ───────────────────────────────────
@@ -384,10 +396,17 @@
   }
 
   /* Filet de sécurité contre le scroll horizontal. Les tailles sont
-     corrigées à la source ; ceci évite qu'un futur ajout ne le réintroduise. */
+     corrigées à la source ; ceci évite qu'un futur ajout ne le réintroduise.
+
+     `clip` et NON `hidden` : posé sur <html> ET <body>, `hidden` fait de
+     <body> un conteneur de défilement (son `overflow-y` passe à `auto`) qui
+     ne défile jamais — c'est la fenêtre qui défile. Tout `position: sticky`
+     s'accroche alors à <body> et ne colle plus : les scènes épinglées du
+     voyage (`voyage/Crossing.tsx`) défilaient avec la page. `clip` coupe
+     pareil sans créer de conteneur de défilement. */
   html,
   body {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100%;
   }
 
