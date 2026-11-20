@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import HeroOrbit from "@/components/sub/HeroOrbit";
 
 /* Un tour complet en 90 s, soit 4° par seconde : assez lent pour qu'on
    perçoive que la barre vit sans que l'œil puisse suivre une poignée. */
@@ -97,6 +98,13 @@ export default function HeroCaptain() {
           }}
         />
       </div>
+
+      {/* Le stack en orbite. Frère de l'avatar et non enfant, et sans
+          `z-index` sur son conteneur : c'est ce qui laisse chaque icône
+          passer devant (3) ou derrière (1) l'avatar (2). Un conteneur avec
+          son propre `z-index` formerait un contexte d'empilement, et les six
+          icônes passeraient toutes du même côté. */}
+      <HeroOrbit />
     </div>
   );
 }
