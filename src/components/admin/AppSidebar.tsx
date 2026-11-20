@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderKanban, House, UserRound, Wrench } from "lucide-react";
+import { FolderKanban, House, Route, UserRound, Wrench } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -35,6 +35,7 @@ type NavItem = {
 
 const navMain: NavItem[] = [
   { title: "Tableau de bord", url: "/admin", icon: House, exact: true },
+  { title: "Parcours", url: "/admin/parcours", icon: Route },
   { title: "Projets", url: "/admin/projets", icon: FolderKanban },
   { title: "Compétences", url: "/admin/competences", icon: Wrench },
   { title: "Profil", url: "/admin/profil", icon: UserRound },
