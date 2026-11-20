@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import NavBar from "@/components/main/NavBar";
 import Hero from "@/components/main/Hero";
+import Journey from "@/components/main/Journey";
 import Skills from "@/components/main/Skills";
 import Projects from "@/components/main/Projects";
 import Footer from "@/components/main/Footer";
@@ -42,12 +43,22 @@ export default function PortfolioApp({ data }: { data: SiteData }) {
               devenaient un motif répétitif au lieu d'un repère. */}
           <WaveRule />
 
-          <section id="skills" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
-            <Skills skills={data.skills} method={data.settings?.method ?? null} />
-          </section>
+          {/* Ordre du récit : d'où je viens (Parcours), ce que j'ai livré
+              (Projets), avec quoi (Expertise), puis le contact. Sans étape en
+              base, la section Parcours disparaît plutôt que d'afficher un
+              journal vide. */}
+          {data.journey.length > 0 ? (
+            <section id="parcours" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
+              <Journey steps={data.journey} />
+            </section>
+          ) : null}
 
           <section id="projects" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
             <Projects projects={data.projects} />
+          </section>
+
+          <section id="skills" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
+            <Skills skills={data.skills} method={data.settings?.method ?? null} />
           </section>
 
           <section id="footer" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">

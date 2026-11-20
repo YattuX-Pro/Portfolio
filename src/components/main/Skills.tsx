@@ -52,7 +52,7 @@ export default function Skills({
   return (
     <>
       <SectionHeader
-        num="01"
+        num="03"
         label="Expertise"
         title="Ce que je construis, et avec quoi."
         intro="Une base back-end .NET et FastAPI, un front Angular et Next.js, et l'outillage DevOps qui va avec pour livrer, sécuriser et maintenir en production."

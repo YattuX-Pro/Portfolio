@@ -5,14 +5,19 @@ import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { DURATION, EASE, fadeInDown } from "@/components/Reveal";
 import ThemeToggle from "@/components/sub/ThemeToggle";
 
+/* L'ordre du récit, comme dans `PortfolioApp`. Plus de lien « Accueil » :
+   le monogramme y ramène déjà, et quatre liens tiennent mieux qu'un menu de
+   cinq dont le premier ne fait que remonter. */
 const NAV_LINKS = [
-  { id: "home", label: "Accueil" },
-  { id: "skills", label: "Expertise" },
+  { id: "parcours", label: "Parcours" },
   { id: "projects", label: "Projets" },
+  { id: "skills", label: "Expertise" },
   { id: "footer", label: "Contact" },
 ] as const;
 
-const SECTION_IDS = NAV_LINKS.map((l) => l.id);
+/* Le hero reste suivi par le scroll spy même sans lien : sans lui, le
+   premier lien serait marqué actif dès le haut de page. */
+const SECTION_IDS = ["home", ...NAV_LINKS.map((l) => l.id)];
 const PANEL_ID = "menu-mobile";
 
 export default function NavBar() {

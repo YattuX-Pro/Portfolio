@@ -31,12 +31,13 @@ page.tsx    → PortfolioApp
               └─ main
                  ├─ section id="home"     → Hero → HeroContent
                  ├─ WaveRule              (the one divider, below the hero)
-                 ├─ section id="skills"   → Skills
-                 ├─ section id="projects" → Projects
-                 └─ section id="footer"   → Footer
+                 ├─ section id="parcours" → Journey   (01, hidden when the table is empty)
+                 ├─ section id="projects" → Projects  (02)
+                 ├─ section id="skills"   → Skills    (03)
+                 └─ section id="footer"   → Footer    (04, Contact)
 ```
 
-Navigation is `document.getElementById(id).scrollIntoView()` against those section ids — there is no router. Adding or renaming a section means updating both `PortfolioApp`'s JSX **and** `NAV_LINKS` in `src/components/main/NavBar.tsx`, which derives its scroll-spy `SECTION_IDS` from that array.
+The order tells a story: where I come from, what I shipped, with what, then contact. Navigation is `document.getElementById(id).scrollIntoView()` against those section ids — there is no router. Adding or renaming a section means updating both `PortfolioApp`'s JSX **and** `NAV_LINKS` in `src/components/main/NavBar.tsx`, which derives its scroll-spy `SECTION_IDS` from that array (plus `home`, tracked without a link: the monogram already goes back up).
 
 ## The three systems to respect
 
@@ -132,13 +133,14 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
 - `sub/StackPanel.tsx` — **no longer rendered** (replaced by `HeroCaptain`); was the hero's right column (`hidden lg:block`). Renders `hero_stack` from the DB under a display-size **`.NET` wordmark whose leading dot is `text-brand`** — the same red dot as `Yattara.` in the h1, a few centimetres away. That repetition is the whole idea: it ties the name to the technology without a sentence, and it is what keeps the wordmark from reading as a logo dropped onto the page. Right-aligned so it heads the column of `dd` values. It owns the column's container treatment: the `--brand-veil` radial anchored top-right, `lg:rounded-t-[2rem]`, the `lg:pr-6` gutter.
 - `sub/ProjectImage.tsx` — progressive de-blur on load. Sets `filter` **inline** on purpose: Tailwind's `blur-*` routes through `--tw-blur`, declared `@property { syntax: "*" }`, which animates discretely and cannot interpolate; and written as an arbitrary class the minifier collapsed `blur(0px)` to `blur()`.
 - `WaveRule.tsx` — the swell line, the only divider left: once below the hero, once above the footer credits. A 1.5 px stroke in `--line-strong`, decorative and `aria-hidden`. The wavelength is **fixed** (the path is drawn in pixels over 2400 px and the SVG crops it, no `viewBox`) so the waves keep their shape on every screen width. It enters with a left-to-right `clip-path` wipe, not `scaleX`, which would squash the waves mid-animation. It replaced `FlagRule`, the tricolor bar, removed from the screens at the owner's request.
-- `SectionHeader.tsx` — mono number + label + title + optional intro. Every section below the hero uses it; the numbers (`01`, `02`, `03`) are manual, so renumber if you reorder sections.
+- `SectionHeader.tsx` — mono number + label + title + optional intro + optional illustration. Every section below the hero uses it; the numbers (`01`–`04`) are manual, so renumber if you reorder sections. A pirate illustration passes `display: { mobile, desktop }` (shown at every width, under the text on a phone), an optional fixed `tilt`, and `float` for the bottle.
+- `main/Journey.tsx` — the Parcours section, a ship's log: one row per `experiences` row, the stop number derived from the order (`Escale 06 · en cours` … `Port de départ`), never stored. Square marker: brand red for the current job, ink for a job, flag green for training (a graphic, so 3.72:1 is fine).
 
 ## Content location
 
 Skills carry **no self-rated percentage** — that system was removed deliberately, so adding a competency never requires inventing a number. Don't reintroduce it.
 
-Section content is hardcoded **inside its component**, not in a shared data file: `PROJECTS` in `main/Projects.tsx`, `CATEGORIES` in `main/Skills.tsx`, `STATS`/`STACK`/`SOCIALS` in `sub/HeroContent.tsx`, `EMAIL`/`LINKS` in `main/Footer.tsx`. The old `src/constants/index.ts` and `utils/motion.ts` were deleted along with the components that used them.
+Projects, skills, settings and the journey (`experiences`, admin tab « Parcours », migration `drizzle/0005_parcours.sql`, which also inserts the six stops from the CV) come from the **database**. Section copy (titles, intros) is hardcoded **inside its component**, not in a shared data file. Older note: `PROJECTS` in `main/Projects.tsx`, `CATEGORIES` in `main/Skills.tsx`, `STATS`/`STACK`/`SOCIALS` in `sub/HeroContent.tsx`, `EMAIL`/`LINKS` in `main/Footer.tsx`. The old `src/constants/index.ts` and `utils/motion.ts` were deleted along with the components that used them.
 
 **`hero_stats` is what is orphaned now** (`5+ Projets`, `3+ Années`, `2 Domaines`). The chronograph took that row: two of the three stats duplicated it and `3+ Années` openly contradicted it. The table, the rows and the admin tab are untouched, so that tab currently edits content the site does not render — and `sub/AnimatedCounter.tsx` has no caller left. Decide: give the stats a home elsewhere, or delete all three (tab, table, component).
 

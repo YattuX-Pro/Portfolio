@@ -23,7 +23,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
   return (
     <>
       <SectionHeader
-        num="03"
+        num="04"
         label="Contact"
         title="Travaillons ensemble."
         intro="Analyste développeur, ouvert aux opportunités full-time et freelance. Le plus simple reste un e-mail."
