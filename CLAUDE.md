@@ -27,17 +27,24 @@ One route. `src/app/page.tsx` renders `PortfolioApp`, a `"use client"` component
 ```
 layout.tsx  → fonts + globals.css, no visual chrome
 page.tsx    → PortfolioApp
-              ├─ NavBar        (fixed, z-50, own scroll-spy)
+              ├─ NavBar        (fixed, z-50, own scroll-spy, voyage Route at its foot)
               └─ main
-                 ├─ section id="home"     → Hero → HeroContent
-                 ├─ WaveRule              (the one divider, below the hero)
-                 ├─ section id="parcours" → Journey   (01, hidden when the table is empty)
-                 ├─ section id="projects" → Projects  (02)
-                 ├─ section id="skills"   → Skills    (03)
-                 └─ section id="footer"   → Footer    (04, Contact)
+                 ├─ Escale id="home"     → Hero → HeroContent   (departure)
+                 ├─ Crossing             (sea + ship, to Parcours)
+                 ├─ Escale id="parcours" → Journey   (01, hidden with its crossing when the table is empty)
+                 ├─ Crossing
+                 ├─ Escale id="projects" → Projects  (02)
+                 ├─ Crossing
+                 ├─ Escale id="skills"   → Skills    (03)
+                 ├─ Crossing
+                 └─ Escale id="footer"   → Footer    (04, Contact)
 ```
 
-The order tells a story: where I come from, what I shipped, with what, then contact. Navigation is `document.getElementById(id).scrollIntoView()` against those section ids — there is no router. Adding or renaming a section means updating both `PortfolioApp`'s JSX **and** `NAV_LINKS` in `src/components/main/NavBar.tsx`, which derives its scroll-spy `SECTION_IDS` from that array (plus `home`, tracked without a link: the monogram already goes back up).
+The order tells a story: where I come from, what I shipped, with what, then contact. **The page is a voyage** (the owner's request): the hero is the departure, each section an *escale* (port of call), and between two escales a *crossing* where a ship sails over a layered sea, tied to scroll (see "The voyage" below).
+
+The escales are listed ONCE, in `ESCALES` (`src/components/voyage/config.ts`): the NavBar takes its links from it (and derives its scroll-spy `SECTION_IDS`, plus `home`, tracked without a link — the monogram already goes back up), and `PortfolioApp` renders a crossing + an escale per entry from its `content` map. Adding or renaming a section means updating `ESCALES` **and** that map. Escales are full width (the crossings run edge to edge); the centered `max-w-6xl` container lives inside each `Escale`, not around the page.
+
+Navigation is plain anchors (`<a href="#projects">`) whose click is taken over to close the mobile panel, `replaceState` the hash and call `scrollIntoView()` **without** `behavior`: `scroll-behavior: smooth` is set on `<html>` in `globals.css` and drops to `auto` under reduced motion. There is no router.
 
 ## The three systems to respect
 
@@ -85,9 +92,12 @@ It exports:
   - the compass beside the seniority counter (`sub/CompassDial.tsx`): ±3° around −4°, a sine with a ~10 s period, via `useTime` + `useTransform`.
   - the message bottle in the Contact header (`Floating` in `SectionHeader.tsx`, `float: true`): ±6 px bob and ±3° roll around −8°, same `useTime` pattern. The only one outside the hero.
   
+  - the ship's pitch and swell in each crossing (`voyage/Crossing.tsx`): ±1.1° and ±3 px, a ~4 s period, plus the sea's slow idle drift. Its rAF loop runs **only while that crossing is on screen** (`useInView`).
+
   `HeroBackdrop` (two drifting veils) was removed when the wheel arrived. Every item on this list stops under reduced motion via `useReducedMotion()` (see the three layers below). Do not add another.
 - **One exception, and it is not decorative:** `sub/ExperienceCounter.tsx` re-renders forever, because a live readout that stops is a broken clock. Its budget: one `setState` every 60 ms (the hundredths field needs it; nothing else on the site does), driven by `requestAnimationFrame` (which the browser suspends on a hidden tab — `setInterval` does not), in a **leaf** component so the tick never re-renders the rest of the hero. Nothing moves, nothing transforms: only digit glyphs change. Don't copy this pattern for anything that isn't reading a clock.
-- Still banned: parallax, tilt-on-hover, scroll-driven cameras, bounce, typewriter effects, and rotation anywhere outside the list above.
+- **Scroll-linked motion and parallax are allowed in the voyage, and only there** (the owner's request): the crossings (sea planes, ship), the fade of the escale being left (`Escale`), and the Route under the navbar. Everything is derived from scroll position, so it is reversible and a direct jump lands in the right state — nothing to "replay". No pinning, no scroll-snap, no scroll-jacking: the native scroll stays in charge.
+- Still banned: parallax or scroll-linked motion outside the voyage, tilt-on-hover, bounce, typewriter effects, and rotation anywhere outside the list above (the ship's pitch counts as part of it, kept within ±5° because the illustration is a flat profile).
 
 **Prefer Framer over CSS for hover on animated elements.** A `hover:-translate-y-0.5` class gets overwritten by the inline transform Framer writes during a reveal. And if the cursor leaves mid-motion, Framer returns the element cleanly where a CSS transition jolts.
 
@@ -97,9 +107,9 @@ It exports:
 
 1. `globals.css` — the media query only neutralizes `animation-duration`/`transition-duration`, i.e. CSS animations.
 2. `MotionRoot.tsx` (`MotionConfig reducedMotion="user"`, wrapping the whole public site) — Framer rewrites inline `transform`/`opacity` every frame and never sees that media query.
-3. `useReducedMotion()` **in the component** — required whenever motion does not come from a declarative prop: the rAF loop in `HeroOrbit` and the `useTime` sways in `CompassDial` and `SectionHeader` never go through a declarative prop, and the wheel's infinite rotation in `HeroCaptain` would keep turning. Scroll-linked `MotionValue` bindings (the NavBar progress line) are bindings rather than animations, so they need `motion-reduce:hidden` instead.
+3. `useReducedMotion()` **in the component** — required whenever motion does not come from a declarative prop: the rAF loop in `HeroOrbit` and the `useTime` sways in `CompassDial` and `SectionHeader` never go through a declarative prop, and the wheel's infinite rotation in `HeroCaptain` would keep turning. Scroll-linked `MotionValue` bindings are bindings rather than animations, so `MotionConfig` never touches them either: `Crossing` and `Escale` drop their bindings when `useReducedMotion()` is true (static sea, ship centered), and the Route under the navbar uses `motion-reduce:hidden`.
 
-**Navbar offset.** Every `<section>` carries `scroll-mt-20`. The navbar is fixed at 64 px, so without it `scrollIntoView` tucks each section title behind the bar.
+**Navbar offset.** Every `<section>` (`Escale`) carries `scroll-mt-20`. The navbar is fixed at 64 px, so without it `scrollIntoView` tucks each section title behind the bar.
 
 ### 3. Typography — one family, three roles
 
@@ -132,7 +142,13 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
   - Two phases: a 1.8 s count-up from 0 on mount (every field spins), then the live tick at 50 ms — the last rank is tenths, which change every 100 ms. State **must** start at 0: the hero is prerendered, so a value read from `Date.now()` at render time is a guaranteed hydration mismatch. Month names (used only by the `sr-only` sentence) are a hardcoded French array rather than `Intl`, because that string is server-rendered then hydrated and two ICU builds disagreeing on it is enough to fail hydration.
   - The readout is `aria-hidden` with an `sr-only` sentence beside it: tenths changing 20×/s is noise to a screen reader, and an `aria-live` there would announce every one of them.
 - `sub/ProjectImage.tsx` — progressive de-blur on load. Sets `filter` **inline** on purpose: Tailwind's `blur-*` routes through `--tw-blur`, declared `@property { syntax: "*" }`, which animates discretely and cannot interpolate; and written as an arbitrary class the minifier collapsed `blur(0px)` to `blur()`.
-- `WaveRule.tsx` — the swell line, the only divider left: once below the hero, once above the footer credits. A 1.5 px stroke in `--line-strong`, decorative and `aria-hidden`. The wavelength is **fixed** (the path is drawn in pixels over 2400 px and the SVG crops it, no `viewBox`) so the waves keep their shape on every screen width. It enters with a left-to-right `clip-path` wipe, not `scaleX`, which would squash the waves mid-animation. It replaced `FlagRule`, the tricolor bar, removed from the screens at the owner's request.
+- `WaveRule.tsx` — the swell line, now only above the footer credits (the crossings replaced the one below the hero). A 1.5 px stroke in `--line-strong`, decorative and `aria-hidden`. The wavelength is **fixed** (the path is drawn in pixels over 2400 px and the SVG crops it, no `viewBox`) so the waves keep their shape on every screen width. It enters with a left-to-right `clip-path` wipe, not `scaleX`, which would squash the waves mid-animation. It replaced `FlagRule`, the tricolor bar, removed from the screens at the owner's request.
+- **The voyage — `src/components/voyage/`.** Four files, one job each:
+  - `config.ts` — `ESCALES` (id, nav label, `cap` subtitle shown on the horizon of the crossing that leads there), `VOYAGE` (ship course, depth scale, pitch, swell, heel, spring, wake, leave-fade, mobile multiplier) and `SEA` (the sea planes, horizon to shore). **Every motion setting lives here**; tune intensity there, not in the components.
+  - `Crossing.tsx` — a full-width band between two escales, the ship's reserved space (`overflow-hidden`: it can never cover text, a card or a button). Local progress (`useScroll` on the band) drives the ship's course, depth and pitch through a spring; global `scrollY` drives the sea's horizontal flow, so the swell continues from one crossing to the next. Sea planes are drawn in `--line`/`--line-strong` like `WaveRule` (fixed wavelength, shifted modulo it); the last one is filled with `--bg` and becomes the shore of the next escale. No React render per frame: MotionValues only, like `HeroOrbit`. Each plane is its own `SeaLayer` component so its hooks are never called in a loop.
+  - `Escale.tsx` — a full-width `<section>`; its content fades and lifts slightly while its bottom crosses the top third of the screen (the reader is already looking at the sea).
+  - `Route.tsx` — the global progress at the foot of the navbar: dashed route, red travelled part (the old reading line's `scaleX`), one port per escale placed where its anchor lands (re-measured on every document resize), and an ink ship glyph. Ports and glyph share a track inset by the glyph's half-width.
+  - The ship is `public/pirate/navire.png`: an **original** galleon generated with Codex (not the film's Black Pearl, whose name and design are Disney's), its white background removed with a custom pass (white → alpha everywhere, rigging gaps included, with the white un-mixed from a 2 px edge band — no halo on the dark theme).
 - `SectionHeader.tsx` — mono number + label + title + optional intro + optional illustration. Every section below the hero uses it; the numbers (`01`–`04`) are manual, so renumber if you reorder sections. A pirate illustration passes `display: { mobile, desktop }` (shown at every width, under the text on a phone), an optional fixed `tilt`, and `float` for the bottle.
 - `main/Journey.tsx` — the Parcours section, a ship's log: one row per `experiences` row, the stop number derived from the order (`Escale 06 · en cours` … `Port de départ`), never stored. Square marker: brand red for the current job, ink for a job, flag green for training (a graphic, so 3.72:1 is fine).
 
