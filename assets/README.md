@@ -71,6 +71,17 @@ en WebP à la bonne largeur.
 | `bouteille.png` | 640 px | section Contact |
 | `stack/*.png` | 200 px | icônes en orbite autour du capitaine |
 | `navire.png` | 1000 px | traversées entre les escales (`voyage/Crossing.tsx`) |
+| `mer-nuit.jpg` | 1536 px | décor plein écran des traversées, mode sombre |
+| `mer-aube.jpg` | 1536 px | décor plein écran des traversées, mode clair |
+
+Les deux décors de mer sont la MÊME composition, générée d'un seul prompt
+avec le navire joint en référence : horizon droit à 49 % de la hauteur, astre
+à 58,6 % / 20,5 % (repris par `SUN` et `HORIZON` dans `Crossing.tsx` pour le
+halo et les reflets), aucun navire ni terre. L'astre est placé près du centre
+pour rester dans le cadre d'un téléphone en portrait, où `object-cover` ne
+garde qu'un tiers de la largeur. Le haut du ciel est presque à la couleur de
+la page (noir la nuit, crème à l'aube) pour que le fondu du voile soit
+invisible. Exportés en JPEG qualité 82 (`sips`), sans transparence.
 
 Le navire est un galion **original** — pas le Black Pearl du film, dont le nom
 et le dessin appartiennent à Disney. Il a été généré sur fond blanc (le
