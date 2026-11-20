@@ -70,6 +70,15 @@ en WebP à la bonne largeur.
 | `sabres.png` | 480 px | section Expertise |
 | `bouteille.png` | 640 px | section Contact |
 | `stack/*.png` | 200 px | icônes en orbite autour du capitaine |
+| `navire.png` | 1000 px | traversées entre les escales (`voyage/Crossing.tsx`) |
+
+Le navire est un galion **original** — pas le Black Pearl du film, dont le nom
+et le dessin appartiennent à Disney. Il a été généré sur fond blanc (le
+capitaine joint en référence de style), puis détouré autrement que les autres :
+le détourage par sujet de macOS laissait du fond blanc entre les cordages. Le
+blanc devient transparent partout, trous du gréement compris, et dans une
+bande de 2 px autour du fond l'alpha vient de l'écart au blanc, la couleur en
+étant « démélangée » — sans quoi un liseré clair apparaît en mode sombre.
 
 Les six icônes de `stack/` reprennent des logos de marques (.NET, C#, Angular,
 PostgreSQL, React, Docker) en version pirate. La plupart des chartes de marque
