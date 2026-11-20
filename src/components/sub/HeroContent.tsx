@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { HiArrowRight, HiDownload } from "react-icons/hi";
@@ -14,7 +13,7 @@ import {
   revealItem,
 } from "@/components/Reveal";
 import ExperienceCounter from "@/components/sub/ExperienceCounter";
-import StackPanel from "@/components/sub/StackPanel";
+import HeroCaptain from "@/components/sub/HeroCaptain";
 import HeroBackdrop from "@/components/sub/HeroBackdrop";
 import type { SiteData } from "@/lib/db/queries";
 
@@ -27,7 +26,7 @@ export default function HeroContent({
   data: SiteData;
   onNavigate?: (id: string) => void;
 }) {
-  const { settings, stack } = data;
+  const { settings } = data;
 
   const socials: Social[] = [
     settings?.githubUrl && { href: settings.githubUrl, label: "GitHub", icon: FaGithub },
@@ -39,16 +38,21 @@ export default function HeroContent({
   ].filter(Boolean) as Social[];
 
   return (
-    /* `relative` : ancre le fond décoratif, qui est en absolu. */
-    <div className="relative w-full grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-16 items-start">
+    /* `relative` : ancre le fond décoratif, qui est en absolu.
+       `lg:items-stretch` : la colonne du capitaine prend la hauteur du texte
+       d'en face, et le texte se centre verticalement dans la sienne. */
+    <div className="relative w-full grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-10 lg:items-stretch">
       <HeroBackdrop />
 
-      {/* ── Colonne principale ───────────────────────────────────────── */}
+      {/* ── Colonne principale ───────────────────────────────────────────
+          PREMIÈRE dans le DOM, même si le capitaine passe au-dessus sur
+          mobile (`order-2`) : un lecteur d'écran et la touche Tab
+          rencontrent le nom et les boutons avant l'illustration. */}
       <motion.div
         variants={revealGroup}
         initial="hidden"
         animate="visible"
-        className="lg:col-span-7 xl:col-span-7"
+        className="order-2 flex flex-col justify-center lg:order-1 lg:col-span-7"
       >
         {/* Eyebrow */}
         <motion.p variants={revealItem} className="meta flex items-center gap-2.5">
@@ -190,78 +194,23 @@ export default function HeroContent({
         </motion.div>
       </motion.div>
 
-      {/* ── Colonne droite — stack signée .NET, puis le chronographe ─────
+      {/* ── Colonne droite — le capitaine ─────────────────────────────────
           `initial/animate` plutôt qu'un enfant de `revealGroup` : la colonne
           n'appartient pas à la série de gauche, elle entre une fois, avec son
-          propre retard. Le conteneur (voile, arrondis, gouttière) vit dans
-          `StackPanel` : ici il ne reste que le placement en grille.
+          propre retard. Le conteneur (voile, arrondi, hauteur) vit dans
+          `HeroCaptain` : ici il ne reste que le placement en grille.
 
-          La condition porte sur les DEUX contenus depuis que le chronographe
-          est là : elle ne testait que la stack, et une base sans stack aurait
-          escamoté le dessin avec elle. */}
-      {stack.length > 0 || settings?.experienceStartAt ? (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: DURATION, ease: EASE, delay: 0.32 }}
-          className="lg:col-span-4 lg:col-start-9"
-        >
-          {stack.length > 0 ? <StackPanel rows={stack} /> : null}
-
-          {/* ── Le chronographe ────────────────────────────────────────────
-              Il comble le seul vide franc de la page : la colonne droite
-              s'arrêtait après le tableau de stack (~470px) pendant que la
-              colonne gauche descendait jusqu'à ~790px, et le trou tombait
-              exactement en face du relevé d'ancienneté. Le dessin lui répond,
-              c'est pour ça qu'il est lié à `experienceStartAt` et pas à la
-              stack : sans compteur en face, il n'illustre plus rien.
-
-              `hidden lg:flex` comme `StackPanel` : la colonne entière est
-              absente sous 1024px, où le compteur a rejoint la colonne
-              principale.
-
-              `pr-6` reprend la gouttière interne de `StackPanel`, sinon le
-              dessin dépasse de l'axe droit que tiennent le logotype `.NET` et
-              les valeurs de la liste.
-
-              Retard de 0,5 s : après la colonne (0,32) et après le compteur
-              d'en face, pour que le regard aille d'abord au relevé.
-
-              Le fichier est recadré au ras de son encre (marge de 1,5% dans
-              `assets/normalise.py`, contre 8% pour les marques de section) :
-              le logotype `.NET` et les six valeurs de la liste, juste
-              au-dessus, forment un axe au fer à droite, et une marge cuite
-              dans le PNG aurait décalé le dessin de cet axe sans qu'aucune
-              règle CSS ne puisse le rattraper. */}
-          {settings?.experienceStartAt ? (
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: DURATION, ease: EASE, delay: 0.5 }}
-              className="hidden lg:flex justify-end pr-6 mt-14"
-            >
-              {/* Deux fichiers permutés en CSS — même mécanique et mêmes
-                  raisons que les marques de section, voir `SectionHeader`. */}
-              <Image
-                src="/illustrations/timer.png"
-                alt=""
-                width={334}
-                height={375}
-                sizes="152px"
-                className="w-[152px] h-auto dark:hidden"
-              />
-              <Image
-                src="/illustrations/timer-dark.png"
-                alt=""
-                width={334}
-                height={375}
-                sizes="152px"
-                className="w-[152px] h-auto hidden dark:block"
-              />
-            </motion.div>
-          ) : null}
-        </motion.div>
-      ) : null}
+          Elle remplace `StackPanel` et le dessin du chronographe : la stack
+          principale tourne désormais autour du capitaine, et la boussole
+          répond au compteur d'ancienneté dans la colonne principale. */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: DURATION, ease: EASE, delay: 0.32 }}
+        className="order-1 lg:order-2 lg:col-span-5"
+      >
+        <HeroCaptain />
+      </motion.div>
     </div>
   );
 }
