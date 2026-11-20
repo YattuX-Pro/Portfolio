@@ -104,9 +104,12 @@ function pad2(n: number) {
 
 export default function ExperienceCounter({
   startAt,
+  dial,
   className = "",
 }: {
   startAt: Date;
+  /** L'instrument posé à côté du relevé (la boussole du hero). */
+  dial?: ReactNode;
   className?: string;
 }) {
   /* `new Date(...)` autour de la prop : la valeur traverse la frontière
@@ -219,12 +222,39 @@ export default function ExperienceCounter({
   ];
 
   return (
-    /* `containerType: "inline-size"` : c'est cette racine qui sert d'unité au
-       corps du relevé (voir le `cqw` plus bas). Posé en style inline et pas en
-       classe `@container` pour rester à côté du `fontSize` qui s'en sert —
-       séparés, on retire l'un sans comprendre qu'on casse l'autre. */
-    <div className={className} style={{ containerType: "inline-size" }}>
-      <p className="meta">Années d&apos;expérience</p>
+    /* ── La grille ─────────────────────────────────────────────────────────
+       Trois zones : le libellé, le relevé, l'instrument (`dial`).
+
+       Sur téléphone, l'instrument se range À CÔTÉ DU LIBELLÉ et le relevé
+       passe seul en dessous, sur toute la largeur. C'est ce qui règle le
+       chevauchement de la première version : le relevé mesure ~320 px et la
+       boussole ~110, les deux ne tenaient pas sur une ligne de 350 px.
+
+       À partir de 640 px, l'instrument reprend la droite et s'étend sur les
+       deux lignes ; le libellé se cale en bas de la sienne et le relevé en
+       haut de la sienne, pour qu'ils restent serrés l'un contre l'autre. */
+    <div
+      className={`grid gap-x-4 gap-y-4 ${
+        dial
+          ? "grid-cols-[auto_minmax(0,1fr)] items-center [grid-template-areas:'dial_label'_'readout_readout'] sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-6 sm:[grid-template-areas:'label_dial'_'readout_dial']"
+          : "[grid-template-areas:'label'_'readout']"
+      } ${className}`}
+    >
+      {/* L'année vient de la date d'entrée : « en mer depuis » ne peut pas
+          contredire le relevé qu'il annonce. */}
+      <p className="meta [grid-area:label] sm:self-end">
+        Années d&apos;expérience · en mer depuis {new Date(startMs).getUTCFullYear()}
+      </p>
+
+      {dial ? <div className="[grid-area:dial]">{dial}</div> : null}
+
+      {/* `containerType: "inline-size"` : c'est CETTE cellule qui sert
+          d'unité au corps du relevé (voir le `cqw` plus bas), et non la
+          racine, qui inclut maintenant la largeur de l'instrument. Posé en
+          style inline et pas en classe `@container` pour rester à côté du
+          `fontSize` qui s'en sert — séparés, on retire l'un sans comprendre
+          qu'on casse l'autre. */}
+      <div className="min-w-0 [grid-area:readout] sm:self-start" style={{ containerType: "inline-size" }}>
 
       {/* ── L'afficheur ──────────────────────────────────────────────────
           `flex-nowrap` + `whitespace-nowrap` : la suite ne se replie jamais,
@@ -273,7 +303,7 @@ export default function ExperienceCounter({
         variants={dialGroup}
         initial="hidden"
         animate={ready ? "visible" : "hidden"}
-        className="mt-4 flex flex-nowrap items-baseline gap-x-[0.28em] whitespace-nowrap"
+        className="flex flex-nowrap items-baseline gap-x-[0.28em] whitespace-nowrap"
         style={{ fontSize: "min(68px, 10.4cqw)" }}
       >
         {groups.map((g) => (
@@ -291,6 +321,7 @@ export default function ExperienceCounter({
           </motion.span>
         ))}
       </motion.div>
+      </div>
 
       <span className="sr-only">
         Expérience professionnelle continue depuis le{" "}

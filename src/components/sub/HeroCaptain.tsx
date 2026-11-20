@@ -24,8 +24,10 @@ const WHEEL_TURN_S = 90;
 
    HAUTEUR : 380 px sous 1024 px, où la colonne passe au-dessus du texte —
    assez pour un buste lisible sans repousser le nom sous la ligne de
-   flottaison. Au-delà, au moins 620 px, et la colonne s'étire sur la hauteur
-   du texte d'en face (`lg:items-stretch` côté hero).
+   flottaison. Au-delà, 620 px FIXES, centrés en face du texte. Étirée sur la
+   hauteur du texte, la colonne grandissait avec lui : l'avatar, posé sur le
+   bas, descendait, et la barre, calée en haut, restait seule au-dessus d'un
+   vide.
 
    LE BAS EST FONDU, pas coupé : `mask-image` rend l'avatar progressivement
    transparent sur son dernier tiers. Coupé net au bord de la colonne, il
@@ -52,7 +54,7 @@ export default function HeroCaptain() {
   const reduced = useReducedMotion();
 
   return (
-    <div className="relative h-[380px] overflow-hidden rounded-t-[2rem] bg-[radial-gradient(130%_95%_at_100%_0%,var(--brand-veil)_0%,transparent_80%)] lg:h-full lg:min-h-[620px]">
+    <div className="relative h-[380px] overflow-hidden rounded-t-[2rem] bg-[radial-gradient(130%_95%_at_100%_0%,var(--brand-veil)_0%,transparent_80%)] lg:h-[620px]">
       {/* ── La barre ───────────────────────────────────────────────────────
           Largeur plafonnée à 310 px sous 1024 px : la colonne y fait 380 px
           de haut mais peut atteindre 700 px de large sur tablette, et 88 %

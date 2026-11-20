@@ -13,6 +13,7 @@ import {
   revealItem,
 } from "@/components/Reveal";
 import ExperienceCounter from "@/components/sub/ExperienceCounter";
+import CompassDial from "@/components/sub/CompassDial";
 import HeroCaptain from "@/components/sub/HeroCaptain";
 import type { SiteData } from "@/lib/db/queries";
 
@@ -37,9 +38,9 @@ export default function HeroContent({
   ].filter(Boolean) as Social[];
 
   return (
-    /* `lg:items-stretch` : la colonne du capitaine prend la hauteur du texte
-       d'en face, et le texte se centre verticalement dans la sienne. */
-    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-10 lg:items-stretch">
+    /* `lg:items-center` : la colonne du capitaine a une hauteur fixe (voir
+       `HeroCaptain`) et se centre en face du texte. */
+    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-10 lg:items-center">
 
       {/* ── Colonne principale ───────────────────────────────────────────
           PREMIÈRE dans le DOM, même si le capitaine passe au-dessus sur
@@ -49,7 +50,7 @@ export default function HeroContent({
         variants={revealGroup}
         initial="hidden"
         animate="visible"
-        className="order-2 flex flex-col justify-center lg:order-1 lg:col-span-7"
+        className="order-2 lg:order-1 lg:col-span-7"
       >
         {/* Eyebrow */}
         <motion.p variants={revealItem} className="meta flex items-center gap-2.5">
@@ -128,65 +129,45 @@ export default function HeroContent({
           ) : null}
         </motion.div>
 
-        {/* ── Bas de hero : le chronographe ────────────────────────────
+        {/* ── Bas de hero : le chronographe et sa boussole ──────────────
             Prend la place de la rangée de chiffres (« 5+ Projets, 3+ Années,
             2 Domaines »), qui vivait ici. Deux d'entre eux faisaient doublon
-            avec ce relevé — « 3+ ANNÉES » le contredisait même ouvertement —
-            et il fallait toute la largeur de la colonne pour tenir la suite
-            sur une seule ligne. Les lignes restent en base et dans l'admin.
+            avec ce relevé — « 3+ ANNÉES » le contredisait même ouvertement.
 
-            Les réseaux sociaux gardent leur place en bout de ligne, alignés
-            sur le TITRE et non sur le relevé : `items-start`, sinon les deux
-            boutons de 44px se centraient sur un bloc deux fois plus haut et
-            descendaient sous les chiffres.
+            La boussole (`CompassDial`) est passée au compteur comme
+            instrument : c'est `ExperienceCounter` qui les dispose, parce que
+            sur téléphone la boussole se range à côté de SON libellé et que
+            seul lui connaît ses lignes.
 
-            `min-w-0` sur le compteur : il contient une ligne en
-            `whitespace-nowrap`, et un enfant flex refuse par défaut de passer
-            sous sa largeur de contenu. Sans lui, une suite trop longue aurait
-            poussé les icônes hors du cadre au lieu de rester dans sa boîte.
-
-            SOUS 640px, `basis-full` donne la ligne entière au compteur et les
-            réseaux passent dessous. C'est ce qui débloque sa taille : tant
-            qu'il partageait la rangée avec deux boutons de 44px, il devait
-            rester petit pour leur laisser la place, et un relevé de 28px de
-            haut coincé dans un coin ne se lit pas comme un afficheur. Sur
-            téléphone il occupe maintenant toute la largeur utile — c'est le
-            premier chiffre qu'on voit sous le CV.
-
-            `grow basis-0` au-dessus : le compteur prend TOUT le reste de la
-            rangée au lieu de se dimensionner sur ses chiffres. Ce n'est pas
-            cosmétique — son corps est en `cqw`, donc calculé sur sa propre
-            boîte : tant qu'il se réglait sur son contenu, la boîte dépendait
-            du texte qui dépendait de la boîte, et le chiffre s'effondrait. */}
+            Les réseaux sociaux passent sur la ligne suivante : la droite de
+            la rangée appartient désormais à la boussole. */}
         <motion.div
           variants={revealItem}
           className="mt-12 sm:mt-14 pt-6 border-t border-line"
         >
-          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-6">
-            {settings?.experienceStartAt ? (
-              <ExperienceCounter
-                startAt={settings.experienceStartAt}
-                className="min-w-0 grow basis-full sm:basis-0"
-              />
-            ) : null}
+          {settings?.experienceStartAt ? (
+            <ExperienceCounter
+              startAt={settings.experienceStartAt}
+              dial={<CompassDial />}
+            />
+          ) : null}
 
-            <div className="flex shrink-0 items-center gap-1 -ml-2.5 sm:ml-0 -mr-2.5">
-              {socials.map(({ href, label, icon: Icon }) => (
-                <motion.a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  whileHover={HOVER_LIFT}
-                  whileTap={TAP_PRESS}
-                  transition={INTERACTION_TRANSITION}
-                  className="inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-brand hover:bg-brand-soft transition-colors duration-200 cursor-pointer"
-                >
-                  <Icon size={18} aria-hidden />
-                </motion.a>
-              ))}
-            </div>
+          <div className="mt-4 -ml-2.5 flex items-center gap-1">
+            {socials.map(({ href, label, icon: Icon }) => (
+              <motion.a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                whileHover={HOVER_LIFT}
+                whileTap={TAP_PRESS}
+                transition={INTERACTION_TRANSITION}
+                className="inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-brand hover:bg-brand-soft transition-colors duration-200 cursor-pointer"
+              >
+                <Icon size={18} aria-hidden />
+              </motion.a>
+            ))}
           </div>
         </motion.div>
       </motion.div>
