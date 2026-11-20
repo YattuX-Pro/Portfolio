@@ -8,8 +8,6 @@ import {
   skillCategories,
   skillItems,
   siteSettings,
-  heroStats,
-  heroStack,
 } from "../src/lib/db/schema";
 
 /* Reprend le contenu jusqu'ici codé en dur dans les composants.
@@ -34,21 +32,6 @@ const SETTINGS = {
   linkedinUrl: "https://www.linkedin.com/in/aboubacar-tidiane-yattara-5608b6232/",
   cvUrl: "/cv/CV_Yattara_Aboubacar.pdf",
 };
-
-const STATS = [
-  { value: "5+", label: "Projets", position: 0 },
-  { value: "3+", label: "Années", position: 1 },
-  { value: "2", label: "Domaines", position: 2 },
-];
-
-const STACK = [
-  { groupLabel: "Back-end", items: ".NET · FastAPI", position: 0 },
-  { groupLabel: "Front-end", items: "Angular · Next.js", position: 1 },
-  { groupLabel: "Langages", items: "TypeScript · Python", position: 2 },
-  { groupLabel: "Données", items: "PostgreSQL · Redis · RabbitMQ", position: 3 },
-  { groupLabel: "DevOps", items: "Docker · GitLab CI/CD", position: 4 },
-  { groupLabel: "Méthode", items: "Agile Scrum", position: 5 },
-];
 
 const CATEGORIES = [
   { label: "Back-end", accent: "flag-red", position: 0, items: [".NET", "FastAPI"] },
@@ -150,14 +133,10 @@ async function main() {
     await db.delete(skillItems);
     await db.delete(skillCategories);
     await db.delete(projects);
-    await db.delete(heroStats);
-    await db.delete(heroStack);
     await db.delete(siteSettings);
   }
 
   await db.insert(siteSettings).values(SETTINGS);
-  await db.insert(heroStats).values(STATS);
-  await db.insert(heroStack).values(STACK);
   await db.insert(projects).values(PROJECTS);
 
   for (const cat of CATEGORIES) {
@@ -176,8 +155,7 @@ async function main() {
   }
 
   console.log(
-    `Seed terminé : ${PROJECTS.length} projets, ${CATEGORIES.length} catégories, ` +
-      `${STATS.length} stats, ${STACK.length} lignes de stack.`,
+    `Seed terminé : ${PROJECTS.length} projets, ${CATEGORIES.length} catégories.`,
   );
 }
 

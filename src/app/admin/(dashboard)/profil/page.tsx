@@ -1,4 +1,4 @@
-import { getSettings, getHeroStats, getHeroStack } from "@/lib/db/queries";
+import { getSettings } from "@/lib/db/queries";
 import { isStorageKey, publicObjectUrl } from "@/lib/storage";
 import TabbedPage from "@/components/admin/TabbedPage";
 import {
@@ -9,18 +9,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import SettingsForm from "./SettingsForm";
-import ListEditor from "./ListEditor";
-import { addStat, deleteStat, addStackRow, deleteStackRow } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProfilePage() {
-  /* Trois lectures indépendantes : en parallèle, jamais en cascade. */
-  const [settings, stats, stack] = await Promise.all([
-    getSettings(),
-    getHeroStats(),
-    getHeroStack(),
-  ]);
+  const settings = await getSettings();
 
   /* La base ne garde qu'une clé de stockage ; l'URL est reconstruite ici,
      côté serveur, parce que l'endpoint vit dans l'environnement. Le
@@ -52,80 +45,6 @@ export default async function AdminProfilePage() {
               </CardHeader>
               <CardContent>
                 <SettingsForm settings={settings} cvHref={cvHref} />
-              </CardContent>
-            </Card>
-          ),
-        },
-        {
-          value: "chiffres",
-          label: "Chiffres du hero",
-          content: (
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle>Chiffres du hero</CardTitle>
-                <CardDescription>
-                  {stats.length} entrée{stats.length > 1 ? "s" : ""} affichée
-                  {stats.length > 1 ? "s" : ""} sous la bio.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ListEditor
-                  rows={stats.map((s) => ({
-                    id: s.id,
-                    left: s.value,
-                    right: s.label,
-                  }))}
-                  fields={{
-                    left: { name: "value", label: "Chiffre", placeholder: "5+" },
-                    right: {
-                      name: "label",
-                      label: "Libellé",
-                      placeholder: "Projets",
-                    },
-                  }}
-                  addAction={addStat}
-                  deleteAction={deleteStat}
-                  emptyLabel="Aucun chiffre affiché dans le hero."
-                />
-              </CardContent>
-            </Card>
-          ),
-        },
-        {
-          value: "stack",
-          label: "Stack principale",
-          content: (
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle>Stack principale</CardTitle>
-                <CardDescription>
-                  Colonne visible à partir de 1024 px, à droite du hero. Vide,
-                  la colonne disparaît.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ListEditor
-                  rows={stack.map((s) => ({
-                    id: s.id,
-                    left: s.groupLabel,
-                    right: s.items,
-                  }))}
-                  fields={{
-                    left: {
-                      name: "groupLabel",
-                      label: "Groupe",
-                      placeholder: "Back-end",
-                    },
-                    right: {
-                      name: "items",
-                      label: "Contenu",
-                      placeholder: ".NET · FastAPI",
-                    },
-                  }}
-                  addAction={addStackRow}
-                  deleteAction={deleteStackRow}
-                  emptyLabel="Aucune ligne : la colonne est masquée sur le site."
-                />
               </CardContent>
             </Card>
           ),

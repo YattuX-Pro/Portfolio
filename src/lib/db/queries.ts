@@ -7,8 +7,6 @@ import {
   skillCategories,
   skillItems,
   siteSettings,
-  heroStats,
-  heroStack,
   experiences,
 } from "./schema";
 
@@ -31,14 +29,6 @@ export const getPublicSettings = cache(async () => {
   if (!row || !isStorageKey(row.cvUrl)) return row;
   return { ...row, cvUrl: publicObjectUrl(row.cvUrl) };
 });
-
-export const getHeroStats = cache(async () =>
-  db.select().from(heroStats).orderBy(asc(heroStats.position)),
-);
-
-export const getHeroStack = cache(async () =>
-  db.select().from(heroStack).orderBy(asc(heroStack.position)),
-);
 
 /* Le journal de bord, du plus récent au plus ancien. */
 export const getExperiences = cache(async () =>
@@ -94,15 +84,13 @@ export const getSkills = cache(async () => {
 
 /* Tout ce dont la page publique a besoin, en parallèle. */
 export const getSiteData = cache(async () => {
-  const [settings, stats, stack, projectList, skills, journey] = await Promise.all([
+  const [settings, projectList, skills, journey] = await Promise.all([
     getPublicSettings(),
-    getHeroStats(),
-    getHeroStack(),
     getPublishedProjects(),
     getSkills(),
     getExperiences(),
   ]);
-  return { settings, stats, stack, projects: projectList, skills, journey };
+  return { settings, projects: projectList, skills, journey };
 });
 
 export type SiteData = Awaited<ReturnType<typeof getSiteData>>;

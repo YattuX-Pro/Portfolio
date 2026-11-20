@@ -145,7 +145,17 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/* Les 3 chiffres du bas de hero (5+ Projets, 3+ Années…). */
+/* ─── Tables orphelines : `hero_stats` et `hero_stack` ──────────────────
+   Plus rien ne les lit ni ne les écrit : le chronographe a pris la place des
+   chiffres du hero, et la stack principale tourne désormais autour du
+   capitaine. Leur code (requêtes, onglets de l'admin, composants) est parti.
+
+   Les définitions restent ICI exprès, le temps du déploiement : la version
+   en ligne lit encore ces tables. Les retirer maintenant ferait générer à
+   `db:generate` un DROP TABLE, que `db:migrate` appliquerait en même temps
+   que la migration du parcours — avant que le nouveau code soit en ligne.
+   Une fois la refonte déployée : supprimer ces deux définitions, puis
+   `npm run db:generate` et `npm run db:migrate`. */
 export const heroStats = pgTable("hero_stats", {
   id: serial("id").primaryKey(),
   value: text("value").notNull(),
@@ -153,7 +163,6 @@ export const heroStats = pgTable("hero_stats", {
   position: integer("position").notNull().default(0),
 });
 
-/* La colonne « Stack principale » de la sidebar du hero. */
 export const heroStack = pgTable("hero_stack", {
   id: serial("id").primaryKey(),
   groupLabel: text("group_label").notNull(),
@@ -166,6 +175,4 @@ export type NewProject = typeof projects.$inferInsert;
 export type SkillCategory = typeof skillCategories.$inferSelect;
 export type SkillItem = typeof skillItems.$inferSelect;
 export type SiteSettings = typeof siteSettings.$inferSelect;
-export type HeroStat = typeof heroStats.$inferSelect;
-export type HeroStackRow = typeof heroStack.$inferSelect;
 export type Experience = typeof experiences.$inferSelect;

@@ -51,8 +51,6 @@ async function main() {
     /* skill_items part en cascade avec skill_categories. */
     await to.query("delete from skill_categories");
     await to.query("delete from projects");
-    await to.query("delete from hero_stats");
-    await to.query("delete from hero_stack");
     await to.query("delete from site_settings");
   }
 
@@ -78,22 +76,6 @@ async function main() {
         s.linkedin_url,
         s.cv_url,
       ],
-    );
-  }
-
-  const stats = await from.query("select * from hero_stats order by position");
-  for (const r of stats.rows) {
-    await to.query(
-      "insert into hero_stats (value, label, position) values ($1,$2,$3)",
-      [r.value, r.label, r.position],
-    );
-  }
-
-  const stack = await from.query("select * from hero_stack order by position");
-  for (const r of stack.rows) {
-    await to.query(
-      "insert into hero_stack (group_label, items, position) values ($1,$2,$3)",
-      [r.group_label, r.items, r.position],
     );
   }
 
@@ -145,7 +127,7 @@ async function main() {
 
   console.log(
     `Copié : ${projects.rowCount} projets, ${cats.rowCount} catégories, ` +
-      `${itemCount} compétences, ${stats.rowCount} stats, ${stack.rowCount} lignes de stack.`,
+      `${itemCount} compétences.`,
   );
 }
 
