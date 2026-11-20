@@ -73,6 +73,14 @@
      l'accent change. C'est le prix de la robustesse ici. */
   --brand-veil: rgb(206 17 38 / 0.12);
 
+  /* Ombre portée des illustrations pirates (capitaine, barre, boussole,
+     icônes du stack). Ce n'est pas une couleur d'interface : elle n'existe
+     que dans un `drop-shadow()`, qui suit la silhouette détourée là où un
+     `box-shadow` dessinerait un rectangle. Elle change avec le thème : à 18 %
+     l'encre suffit sur le crème, il faut du noir à 45 % pour qu'une ombre se
+     lise encore sur l'anthracite. */
+  --shadow: rgb(26 26 24 / 0.18);
+
   /* Le rôle « display » existe toujours, mais il est servi par Plex Sans :
      la hiérarchie vient de la graisse et de l'approche, pas d'une 2e fonte. */
   --font-display: var(--font-sans);
@@ -184,6 +192,8 @@
   /* Le voile du hero suit le rouge éclairci, et descend à 10% : sur un fond
      sombre, une teinte à 12% se voit davantage que sur du crème. */
   --brand-veil: rgb(242 69 90 / 0.1);
+
+  --shadow: rgb(0 0 0 / 0.45);
 }
 
 /* ─── Thème sombre de l'ADMINISTRATION ───────────────────────────────────

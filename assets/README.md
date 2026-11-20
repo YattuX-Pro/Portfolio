@@ -38,3 +38,35 @@ python3 -m venv /tmp/venv && /tmp/venv/bin/pip install pillow numpy scipy
 
 Toute nouvelle illustration doit passer par là avant `public/` : c'est ce qui
 garantit qu'il n'y a toujours qu'**un seul rouge** sur le site.
+
+## Illustrations pirates — `public/pirate/`
+
+Elles ne passent **pas** par `normalise.py`, et c'est voulu. Le script est fait
+pour des dessins au trait : il recolore les rouges et les verts sur les tokens
+et ramène l'encre sur `#1A1A18`. Ces illustrations-ci sont peintes, en couleurs
+naturelles (bois, laiton, cordage) ; passées au script, elles perdraient tout
+leur modelé. La règle qui les encadre est donc l'inverse : leurs couleurs
+restent DANS l'illustration et ne deviennent jamais des couleurs d'interface —
+l'accent du site reste le seul rouge des boutons, liens et focus.
+
+Les originaux (1 à 4 Mo chacun, ~30 Mo au total) ne sont pas versionnés : ils
+sont sortis du générateur d'images de Codex, détourés sur fond transparent. Les
+fichiers de `public/pirate/` en sont des réductions à environ deux fois leur
+taille d'affichage, faites avec `sips -Z <px>` ; `next/image` les sert ensuite
+en WebP à la bonne largeur.
+
+| fichier | largeur | emploi |
+|---|---|---|
+| `capitaine.png` | 833 px | hero, colonne droite |
+| `barre.png` | 800 px | hero, derrière le capitaine, en rotation lente |
+| `boussole.png` | 420 px | hero, cadran à côté du compteur d'ancienneté |
+| `carte.png` | 720 px | section Parcours |
+| `coffre.png` | 640 px | section Projets |
+| `sabres.png` | 480 px | section Expertise |
+| `bouteille.png` | 640 px | section Contact |
+| `stack/*.png` | 200 px | icônes en orbite autour du capitaine |
+
+Les six icônes de `stack/` reprennent des logos de marques (.NET, C#, Angular,
+PostgreSQL, React, Docker) en version pirate. La plupart des chartes de marque
+interdisent de modifier un logo : pour un portfolio personnel le risque est
+faible, mais c'est à garder en tête.
