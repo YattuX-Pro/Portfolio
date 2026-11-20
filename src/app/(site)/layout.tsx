@@ -52,19 +52,20 @@ export default function RootLayout({
       {/* La classe `site` porte les règles réservées au public : anneau de
           focus rouge, sélection de texte. L'admin ne les hérite pas. */}
       <body className="site bg-bg text-ink font-sans antialiased">
-        {/* `defaultTheme="light"` avec `enableSystem` : un visiteur qui n'a
-            jamais choisi arrive en CLAIR, pas selon les réglages de sa
-            machine. C'est délibéré — le parti pris du site est éditorial et
-            clair, et c'est cette version-là qui doit être vue par défaut. Le
-            réglage « système » reste accessible, il n'est simplement pas le
-            point de départ. Même configuration que la console d'admin.
+        {/* `defaultTheme="dark"` avec `enableSystem` : un visiteur qui n'a
+            jamais choisi arrive en SOMBRE, pas selon les réglages de sa
+            machine. Choix du propriétaire depuis le thème pirate — la barre,
+            le capitaine et les icônes en orbite ressortent mieux sur le fond
+            sombre. Le réglage « système » reste accessible, il n'est
+            simplement pas le point de départ. La console d'admin, elle,
+            démarre toujours en clair.
 
             `disableTransitionOnChange` : sans lui, les `transition-colors`
             posées un peu partout se déclenchent toutes ensemble à la bascule
             et la page fond pendant 200ms au lieu de changer d'état. */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
