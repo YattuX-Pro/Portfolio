@@ -35,19 +35,27 @@ const WAVE_PATH = (() => {
   return d;
 })();
 
+/* Le `clip-path` est posé sur le SVG et le déclencheur sur son conteneur, et
+   pas les deux sur le même élément : un élément rogné à largeur nulle n'a
+   plus de surface visible, l'IntersectionObserver ne le voyait donc jamais
+   entrer dans le champ — la houle du pied de page restait invisible. */
+const sweep = {
+  hidden: { clipPath: "inset(0 100% 0 0)" },
+  visible: { clipPath: "inset(0 0% 0 0)", transition: { duration: DURATION, ease: EASE } },
+};
+
 export default function WaveRule({ className = "" }: { className?: string }) {
   return (
     <motion.div
       aria-hidden
       className={className}
-      initial={{ clipPath: "inset(0 100% 0 0)" }}
-      whileInView={{ clipPath: "inset(0 0% 0 0)" }}
+      initial="hidden"
+      whileInView="visible"
       viewport={{ once: true, amount: 0.6 }}
-      transition={{ duration: DURATION, ease: EASE }}
     >
-      <svg width="100%" height={MID * 2} className="block">
+      <motion.svg variants={sweep} width="100%" height={MID * 2} className="block">
         <path d={WAVE_PATH} fill="none" strokeWidth={1.5} className="stroke-line-strong" />
-      </svg>
+      </motion.svg>
     </motion.div>
   );
 }
