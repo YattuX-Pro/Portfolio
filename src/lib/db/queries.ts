@@ -9,6 +9,7 @@ import {
   siteSettings,
   heroStats,
   heroStack,
+  experiences,
 } from "./schema";
 
 /* `cache()` déduplique par requête : si plusieurs composants serveur
@@ -37,6 +38,11 @@ export const getHeroStats = cache(async () =>
 
 export const getHeroStack = cache(async () =>
   db.select().from(heroStack).orderBy(asc(heroStack.position)),
+);
+
+/* Le journal de bord, du plus récent au plus ancien. */
+export const getExperiences = cache(async () =>
+  db.select().from(experiences).orderBy(asc(experiences.position)),
 );
 
 /* Une clé de stockage devient une URL publique au moment du rendu.
@@ -88,14 +94,15 @@ export const getSkills = cache(async () => {
 
 /* Tout ce dont la page publique a besoin, en parallèle. */
 export const getSiteData = cache(async () => {
-  const [settings, stats, stack, projectList, skills] = await Promise.all([
+  const [settings, stats, stack, projectList, skills, journey] = await Promise.all([
     getPublicSettings(),
     getHeroStats(),
     getHeroStack(),
     getPublishedProjects(),
     getSkills(),
+    getExperiences(),
   ]);
-  return { settings, stats, stack, projects: projectList, skills };
+  return { settings, stats, stack, projects: projectList, skills, journey };
 });
 
 export type SiteData = Awaited<ReturnType<typeof getSiteData>>;

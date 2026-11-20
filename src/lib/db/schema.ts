@@ -93,6 +93,30 @@ export const skillItemsRelations = relations(skillItems, ({ one }) => ({
   }),
 }));
 
+/* ─── Parcours ──────────────────────────────────────────────────────────
+   Le « journal de bord » du site : postes et formations, du plus récent au
+   plus ancien (`position` croissante). Le numéro d'escale affiché n'est PAS
+   stocké : il se déduit de l'ordre, sinon chaque ajout obligerait à
+   renuméroter toutes les lignes à la main. */
+export const experiences = pgTable("experiences", {
+  id: serial("id").primaryKey(),
+  /* Texte et non dates : « Nov. 2025 — aujourd'hui », « Mai — août 2022 ».
+     Même raison que `projects.year` : une période se lit, elle ne se
+     calcule pas, et deux colonnes de dates auraient imposé un format. */
+  period: text("period").notNull(),
+  title: text("title").notNull(),
+  organization: text("organization").notNull(),
+  /* Une phrase sur ce qui y a été fait. Facultative. */
+  summary: text("summary"),
+  /* `work` ou `education` : la couleur du repère sur le site (encre pour
+     un poste, vert pour une formation). Un nom et non une couleur, comme
+     `skillCategories.accent`. */
+  kind: text("kind").notNull().default("work"),
+  /* Le poste en cours : repère rouge et mention « en cours ». */
+  current: boolean("current").notNull().default(false),
+  position: integer("position").notNull().default(0),
+});
+
 /* ─── Réglages du site ──────────────────────────────────────────────────
    Ligne unique (id = 1). Colonnes typées plutôt qu'un magasin clé/valeur :
    les champs sont connus, autant garder la sécurité de typage de Drizzle. */
@@ -144,3 +168,4 @@ export type SkillItem = typeof skillItems.$inferSelect;
 export type SiteSettings = typeof siteSettings.$inferSelect;
 export type HeroStat = typeof heroStats.$inferSelect;
 export type HeroStackRow = typeof heroStack.$inferSelect;
+export type Experience = typeof experiences.$inferSelect;
