@@ -1,16 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { DURATION, EASE, fadeInDown } from "@/components/Reveal";
 import ThemeToggle from "@/components/sub/ThemeToggle";
-import Route from "@/components/voyage/Route";
-import { ESCALES } from "@/components/voyage/config";
 
-/* Les escales du voyage, dans l'ordre du récit (`voyage/config.ts`). Plus
-   de lien « Accueil » : le monogramme y ramène déjà, et quatre liens
-   tiennent mieux qu'un menu de cinq dont le premier ne fait que remonter. */
-const NAV_LINKS = ESCALES;
+/* L'ordre du récit, comme dans `PortfolioApp`. Plus de lien « Accueil » :
+   le monogramme y ramène déjà, et quatre liens tiennent mieux qu'un menu de
+   cinq dont le premier ne fait que remonter. */
+const NAV_LINKS = [
+  { id: "parcours", label: "Parcours" },
+  { id: "projects", label: "Projets" },
+  { id: "skills", label: "Expertise" },
+  { id: "footer", label: "Contact" },
+] as const;
 
 /* Le hero reste suivi par le scroll spy même sans lien : sans lui, le
    premier lien serait marqué actif dès le haut de page. */
@@ -24,6 +27,10 @@ export default function NavBar() {
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  /* Avancement de la lecture, 0 → 1. Lu directement par le style : pas de
+     state, donc pas de rendu React à chaque pixel de scroll. */
+  const { scrollYProgress } = useScroll();
 
   /* Scroll spy + état « scrollé » du header */
   useEffect(() => {
@@ -98,17 +105,9 @@ export default function NavBar() {
     };
   }, [open]);
 
-  /* Les liens sont de vraies ancres (`href="#projects"`) : copiables,
-     ouvrables dans un onglet, et fonctionnels sans JavaScript. Le clic est
-     repris pour refermer le panneau mobile avant de partir, et l'adresse
-     prend l'ancre sans ajouter d'entrée d'historique. Pas de `behavior` :
-     `scroll-behavior` est en CSS sur <html>, `auto` sous mouvement réduit.
-     La scène maritime n'a rien à « rejouer » : elle découle de la position
-     du scroll, elle est donc juste à l'arrivée. */
   const scrollTo = useCallback((id: string) => {
     setOpen(false);
-    history.replaceState(null, "", id === "home" ? location.pathname : `#${id}`);
-    document.getElementById(id)?.scrollIntoView();
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
   return (
@@ -143,8 +142,20 @@ export default function NavBar() {
           : "bg-bg/90 border-b border-transparent"
       }`}
     >
-      {/* La route du voyage : progression globale, ports, navire. */}
-      <Route activeId={activeId} />
+      {/* Avancement de la lecture. `scaleX` + `origin-left` : le filet se
+          dessine de gauche à droite, sans quoi il grandirait depuis son
+          centre. Aucune courbe d'easing en jeu, la
+          valeur suit le scroll au pixel. Décoratif, donc aria-hidden : le
+          lecteur d'écran a déjà la structure en titres. */}
+      <motion.span
+        aria-hidden
+        style={{ scaleX: scrollYProgress }}
+        /* `motion-reduce:hidden` : le filet est lié au scroll, pas à une
+           animation — MotionConfig ne peut donc pas le neutraliser. Comme il
+           est purement décoratif, on le retire simplement pour qui demande
+           moins de mouvement. */
+        className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-brand motion-reduce:hidden"
+      />
 
       <div className="max-w-6xl mx-auto px-5 sm:px-10 h-16 flex items-center justify-between gap-4">
         {/* Monogramme */}
@@ -165,15 +176,11 @@ export default function NavBar() {
           {NAV_LINKS.map((link) => {
             const isActive = activeId === link.id;
             return (
-              <a
+              <button
                 key={link.id}
-                href={`#${link.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollTo(link.id);
-                }}
-                aria-current={isActive ? "location" : undefined}
-                className={`relative inline-flex items-center px-3 h-11 text-[14px] transition-colors duration-200 cursor-pointer ${
+                onClick={() => scrollTo(link.id)}
+                aria-current={isActive ? "true" : undefined}
+                className={`relative px-3 h-11 text-[14px] transition-colors duration-200 cursor-pointer ${
                   isActive ? "text-ink" : "text-ink-muted hover:text-ink"
                 }`}
               >
@@ -191,7 +198,7 @@ export default function NavBar() {
                     transition={{ duration: DURATION, ease: EASE }}
                   />
                 ) : null}
-              </a>
+              </button>
             );
           })}
         </nav>
@@ -252,13 +259,9 @@ export default function NavBar() {
                   const isActive = activeId === link.id;
                   return (
                     <li key={link.id} className="border-b border-line">
-                      <a
-                        href={`#${link.id}`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          scrollTo(link.id);
-                        }}
-                        aria-current={isActive ? "location" : undefined}
+                      <button
+                        onClick={() => scrollTo(link.id)}
+                        aria-current={isActive ? "true" : undefined}
                         className={`w-full text-left flex items-center gap-3 py-5 text-[22px] font-medium tracking-[-0.02em] transition-colors duration-200 cursor-pointer ${
                           isActive ? "text-brand" : "text-ink"
                         }`}
@@ -267,7 +270,7 @@ export default function NavBar() {
                           {String(NAV_LINKS.indexOf(link) + 1).padStart(2, "0")}
                         </span>
                         {link.label}
-                      </a>
+                      </button>
                     </li>
                   );
                 })}
