@@ -1,6 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { motion, useReducedMotion } from "framer-motion";
+
+/* Un tour complet en 90 s, soit 4° par seconde : assez lent pour qu'on
+   perçoive que la barre vit sans que l'œil puisse suivre une poignée. */
+const WHEEL_TURN_S = 90;
 
 /* ══════════════════════════════════════════════════════════════════════════
    LE CAPITAINE — colonne droite du hero, au-dessus du texte sur mobile.
@@ -32,13 +37,51 @@ import Image from "next/image";
 
    `preload` : sur mobile, c'est la première image de la page, donc le
    candidat LCP. (`priority` est déprécié depuis Next 16.)
+
+   LA BARRE DU NAVIRE tourne derrière lui, comme un halo : entière, en
+   couleurs, ses poignées dépassant autour du chapeau et des épaules. À 10 %
+   d'opacité, première version, elle ne donnait qu'une tache beige
+   méconnaissable sur le crème. Elle remplace `HeroBackdrop` comme animation
+   décorative du hero.
    ══════════════════════════════════════════════════════════════════════════ */
 
 export default function HeroCaptain() {
+  /* `useReducedMotion` en plus de `MotionRoot` : une boucle infinie n'est
+     pas neutralisée par `MotionConfig`, elle tournerait encore. */
+  const reduced = useReducedMotion();
+
   return (
     <div className="relative h-[380px] overflow-hidden rounded-t-[2rem] bg-[radial-gradient(130%_95%_at_100%_0%,var(--brand-veil)_0%,transparent_80%)] lg:h-full lg:min-h-[620px]">
-      {/* `z-[2]` : la barre passe dessous (commit suivant), les icônes en
-          orbite passent devant ou derrière selon leur position. */}
+      {/* ── La barre ───────────────────────────────────────────────────────
+          Largeur plafonnée à 310 px sous 1024 px : la colonne y fait 380 px
+          de haut mais peut atteindre 700 px de large sur tablette, et 88 %
+          de cette largeur aurait donné une barre plus haute que la colonne.
+
+          `x: "-50%"` en style Framer plutôt qu'une classe `-translate-x-1/2` :
+          la rotation est un transform écrit par Framer, qui aurait écrasé
+          celui de la classe et décentré la barre.
+
+          Rotation linéaire, seule exception à la courbe unique du site :
+          une rotation continue n'a ni départ ni arrivée, une courbe d'easing
+          y ferait accélérer et freiner la barre à chaque tour. */}
+      <motion.div
+        aria-hidden
+        className="absolute left-1/2 top-1.5 z-0 aspect-square w-[min(86%,310px)] opacity-100 dark:opacity-90 lg:top-2.5 lg:w-[88%]"
+        style={{ x: "-50%", filter: "drop-shadow(0 16px 24px var(--shadow))" }}
+        animate={reduced ? undefined : { rotate: 360 }}
+        transition={{ duration: WHEEL_TURN_S, ease: "linear", repeat: Infinity }}
+      >
+        <Image
+          src="/pirate/barre.png"
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 400px, 310px"
+          className="object-contain"
+        />
+      </motion.div>
+
+      {/* `z-[2]` : la barre passe dessous, les icônes en orbite passent
+          devant ou derrière selon leur position. */}
       <div className="absolute inset-x-0 bottom-0 top-3 z-[2] lg:top-4">
         <Image
           src="/pirate/capitaine.png"

@@ -14,7 +14,6 @@ import {
 } from "@/components/Reveal";
 import ExperienceCounter from "@/components/sub/ExperienceCounter";
 import HeroCaptain from "@/components/sub/HeroCaptain";
-import HeroBackdrop from "@/components/sub/HeroBackdrop";
 import type { SiteData } from "@/lib/db/queries";
 
 type Social = { href: string; label: string; icon: typeof FaGithub };
@@ -38,11 +37,9 @@ export default function HeroContent({
   ].filter(Boolean) as Social[];
 
   return (
-    /* `relative` : ancre le fond décoratif, qui est en absolu.
-       `lg:items-stretch` : la colonne du capitaine prend la hauteur du texte
+    /* `lg:items-stretch` : la colonne du capitaine prend la hauteur du texte
        d'en face, et le texte se centre verticalement dans la sienne. */
-    <div className="relative w-full grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-10 lg:items-stretch">
-      <HeroBackdrop />
+    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-10 lg:items-stretch">
 
       {/* ── Colonne principale ───────────────────────────────────────────
           PREMIÈRE dans le DOM, même si le capitaine passe au-dessus sur
