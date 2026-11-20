@@ -93,8 +93,15 @@ export default function HeroContent({
           {settings?.heroBio}
         </motion.p>
 
-        {/* CTA */}
-        <motion.div variants={revealItem} className="mt-9 flex flex-wrap items-center gap-3">
+        {/* CTA — LES DEUX BOUTONS TIENNENT SUR UNE LIGNE, MÊME SUR TÉLÉPHONE.
+            Sur 350 px utiles, chacun en reçoit 171 : à 15 px de corps et
+            20 px de marge, « Voir mes projets » et « Télécharger le CV »
+            passaient sur deux lignes à l'intérieur de leur bouton. Sous 640
+            px le corps descend à 14 px, la marge à 12 et l'écart à 8, et le
+            texte ne se coupe plus (`whitespace-nowrap`). Sous 375 px les
+            icônes disparaissent : c'est ce qui fait encore tenir les deux
+            libellés sur un écran de 360. */}
+        <motion.div variants={revealItem} className="mt-9 flex flex-nowrap items-center gap-2 sm:flex-wrap sm:gap-3">
           {/* `motion.button` plutôt qu'un `hover:` CSS : le survol et l'appui
               partagent les presets du site, et Framer ramène proprement
               l'élément à sa position même si le curseur sort en plein
@@ -104,13 +111,13 @@ export default function HeroContent({
             whileHover={HOVER_LIFT}
             whileTap={TAP_PRESS}
             transition={INTERACTION_TRANSITION}
-            className="group inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md bg-brand text-brand-on text-[15px] font-medium hover:bg-brand-hover transition-colors duration-200 cursor-pointer"
+            className="group inline-flex flex-1 sm:flex-none justify-center items-center gap-1.5 sm:gap-2 h-12 px-3 sm:px-5 whitespace-nowrap rounded-md bg-brand text-brand-on text-[14px] sm:text-[15px] font-medium hover:bg-brand-hover transition-colors duration-200 cursor-pointer"
           >
             Voir mes projets
             <HiArrowRight
               size={15}
               aria-hidden
-              className="transition-transform duration-200 group-hover:translate-x-0.5"
+              className="transition-transform duration-200 group-hover:translate-x-0.5 max-[374px]:hidden"
             />
           </motion.button>
 
@@ -121,9 +128,9 @@ export default function HeroContent({
               whileHover={HOVER_LIFT}
               whileTap={TAP_PRESS}
               transition={INTERACTION_TRANSITION}
-              className="inline-flex flex-1 sm:flex-none justify-center items-center gap-2 h-12 px-5 rounded-md border border-line-strong text-ink text-[15px] font-medium hover:border-ink hover:bg-surface transition-colors duration-200 cursor-pointer"
+              className="inline-flex flex-1 sm:flex-none justify-center items-center gap-1.5 sm:gap-2 h-12 px-3 sm:px-5 whitespace-nowrap rounded-md border border-line-strong text-ink text-[14px] sm:text-[15px] font-medium hover:border-ink hover:bg-surface transition-colors duration-200 cursor-pointer"
             >
-              <HiDownload size={15} aria-hidden />
+              <HiDownload size={15} aria-hidden className="max-[374px]:hidden" />
               Télécharger le CV
             </motion.a>
           ) : null}
