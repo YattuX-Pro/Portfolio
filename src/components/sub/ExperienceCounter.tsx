@@ -105,11 +105,14 @@ function pad2(n: number) {
 export default function ExperienceCounter({
   startAt,
   dial,
+  children,
   className = "",
 }: {
   startAt: Date;
   /** L'instrument posé à côté du relevé (la boussole du hero). */
   dial?: ReactNode;
+  /** Rangé sous le relevé, à côté de l'instrument (les réseaux du hero). */
+  children?: ReactNode;
   className?: string;
 }) {
   /* `new Date(...)` autour de la prop : la valeur traverse la frontière
@@ -232,12 +235,17 @@ export default function ExperienceCounter({
 
        À partir de 640 px, l'instrument reprend la droite et s'étend sur les
        deux lignes ; le libellé se cale en bas de la sienne et le relevé en
-       haut de la sienne, pour qu'ils restent serrés l'un contre l'autre. */
+       haut de la sienne, pour qu'ils restent serrés l'un contre l'autre.
+
+       Une troisième ligne, `extra`, reçoit `children` sous le relevé. À
+       partir de 640 px l'instrument s'étend aussi sur elle : il est plus haut
+       que libellé + relevé, et `extra` occupe ce vide au lieu d'allonger le
+       bloc. */
     <div
-      className={`grid gap-x-4 gap-y-4 ${
+      className={`grid gap-x-4 gap-y-4 lg:gap-y-3 ${
         dial
-          ? "grid-cols-[auto_minmax(0,1fr)] items-center [grid-template-areas:'dial_label'_'readout_readout'] sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-6 sm:[grid-template-areas:'label_dial'_'readout_dial']"
-          : "[grid-template-areas:'label'_'readout']"
+          ? "grid-cols-[auto_minmax(0,1fr)] items-center [grid-template-areas:'dial_label'_'readout_readout'_'extra_extra'] sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-6 sm:[grid-template-areas:'label_dial'_'readout_dial'_'extra_dial']"
+          : "[grid-template-areas:'label'_'readout'_'extra']"
       } ${className}`}
     >
       {/* L'année vient de la date d'entrée : « en mer depuis » ne peut pas
@@ -322,6 +330,8 @@ export default function ExperienceCounter({
         ))}
       </motion.div>
       </div>
+
+      {children ? <div className="[grid-area:extra]">{children}</div> : null}
 
       <span className="sr-only">
         Expérience professionnelle continue depuis le{" "}

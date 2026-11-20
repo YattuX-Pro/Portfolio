@@ -37,6 +37,26 @@ export default function HeroContent({
     },
   ].filter(Boolean) as Social[];
 
+  const socialLinks = (
+    <div className="-ml-2.5 flex items-center gap-1">
+      {socials.map(({ href, label, icon: Icon }) => (
+        <motion.a
+          key={label}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={label}
+          whileHover={HOVER_LIFT}
+          whileTap={TAP_PRESS}
+          transition={INTERACTION_TRANSITION}
+          className="inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-brand hover:bg-brand-soft transition-colors duration-200 cursor-pointer"
+        >
+          <Icon size={18} aria-hidden />
+        </motion.a>
+      ))}
+    </div>
+  );
+
   return (
     /* `lg:items-center` : la colonne du capitaine a une hauteur fixe (voir
        `HeroCaptain`) et se centre en face du texte. */
@@ -73,9 +93,19 @@ export default function HeroContent({
             groupe, donc hérite du stagger de 60ms sans nouvelle courbe ni
             nouvelle durée. `block` : deux lignes de bloc remplacent le <br>,
             que le fondu aurait laissé sauter d'un coup. */}
+        {/* ── LE HERO TIENT DANS L'ÉCRAN, en desktop ──────────────────────
+            À partir de 1024 px, tout le hero — nom, boutons, chronographe —
+            doit se lire sans défiler. Sur un portable (1366×768, ~660 px
+            utiles une fois le navigateur ouvert) il en faisait 850. Le corps
+            du titre et les marges verticales suivent donc la HAUTEUR de
+            l'écran (`svh`), plafonnés à leurs valeurs d'origine : un grand
+            écran ne voit aucun changement. Le `9svh` du titre est sans effet
+            sur un téléphone en portrait, où `9vw` est toujours plus petit.
+            Sous 1024 px, texte et capitaine s'empilent et le hero défile :
+            ces réglages ne s'y appliquent pas (`lg:`). */}
         <h1
-          className="font-display font-semibold mt-6 leading-[0.95] tracking-[-0.035em] text-ink"
-          style={{ fontSize: "clamp(30px, 9vw, 92px)" }}
+          className="font-display font-semibold mt-6 lg:mt-[clamp(12px,2.5svh,24px)] leading-[0.95] tracking-[-0.035em] text-ink"
+          style={{ fontSize: "clamp(30px, min(9vw, 9svh), 92px)" }}
         >
           <motion.span variants={revealItem} className="block">
             Aboubacar Tidiane
@@ -88,7 +118,7 @@ export default function HeroContent({
         {/* Bio */}
         <motion.p
           variants={revealItem}
-          className="mt-8 max-w-prose text-[18px] leading-[1.7] text-ink-muted"
+          className="mt-8 lg:mt-[clamp(12px,3svh,32px)] max-w-prose text-[18px] leading-[1.7] text-ink-muted"
         >
           {settings?.heroBio}
         </motion.p>
@@ -101,7 +131,7 @@ export default function HeroContent({
             texte ne se coupe plus (`whitespace-nowrap`). Sous 375 px les
             icônes disparaissent : c'est ce qui fait encore tenir les deux
             libellés sur un écran de 360. */}
-        <motion.div variants={revealItem} className="mt-9 flex flex-nowrap items-center gap-2 sm:flex-wrap sm:gap-3">
+        <motion.div variants={revealItem} className="mt-9 lg:mt-[clamp(16px,3svh,36px)] flex flex-nowrap items-center gap-2 sm:flex-wrap sm:gap-3">
           {/* `motion.button` plutôt qu'un `hover:` CSS : le survol et l'appui
               partagent les presets du site, et Framer ramène proprement
               l'élément à sa position même si le curseur sort en plein
@@ -146,36 +176,21 @@ export default function HeroContent({
             sur téléphone la boussole se range à côté de SON libellé et que
             seul lui connaît ses lignes.
 
-            Les réseaux sociaux passent sur la ligne suivante : la droite de
-            la rangée appartient désormais à la boussole. */}
+            Les réseaux sociaux passent SOUS LE RELEVÉ, à gauche de la
+            boussole : elle est plus haute que libellé + relevé, et la place
+            libre à côté d'elle les accueille. Rangés sous le bloc, ils
+            ajoutaient 60 px au hero pour rien. */}
         <motion.div
           variants={revealItem}
-          className="mt-12 sm:mt-14 pt-6 border-t border-line"
+          className="mt-12 sm:mt-14 lg:mt-[clamp(16px,3.5svh,56px)] pt-6 lg:pt-[clamp(12px,2.5svh,24px)] border-t border-line"
         >
           {settings?.experienceStartAt ? (
-            <ExperienceCounter
-              startAt={settings.experienceStartAt}
-              dial={<CompassDial />}
-            />
-          ) : null}
-
-          <div className="mt-4 -ml-2.5 flex items-center gap-1">
-            {socials.map(({ href, label, icon: Icon }) => (
-              <motion.a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                whileHover={HOVER_LIFT}
-                whileTap={TAP_PRESS}
-                transition={INTERACTION_TRANSITION}
-                className="inline-flex items-center justify-center h-11 w-11 rounded-md text-ink-muted hover:text-brand hover:bg-brand-soft transition-colors duration-200 cursor-pointer"
-              >
-                <Icon size={18} aria-hidden />
-              </motion.a>
-            ))}
-          </div>
+            <ExperienceCounter startAt={settings.experienceStartAt} dial={<CompassDial />}>
+              {socialLinks}
+            </ExperienceCounter>
+          ) : (
+            socialLinks
+          )}
         </motion.div>
       </motion.div>
 

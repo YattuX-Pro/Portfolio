@@ -54,7 +54,10 @@ export default function HeroCaptain() {
   const reduced = useReducedMotion();
 
   return (
-    <div className="relative h-[380px] overflow-hidden rounded-t-[2rem] bg-[radial-gradient(130%_95%_at_100%_0%,var(--brand-veil)_0%,transparent_80%)] lg:h-[620px]">
+    /* `min(620px, 100svh − 7rem)` en desktop : la navbar (4rem) et le
+       padding de la section (2 × 1,5rem, `PortfolioApp`) retirés de l'écran.
+       Sur un portable de 660 px utiles, 620 px fixes dépassaient l'écran. */
+    <div className="relative h-[380px] overflow-hidden rounded-t-[2rem] bg-[radial-gradient(130%_95%_at_100%_0%,var(--brand-veil)_0%,transparent_80%)] lg:h-[min(620px,calc(100svh-7rem))]">
       {/* ── La barre ───────────────────────────────────────────────────────
           Largeur plafonnée à 310 px sous 1024 px : la colonne y fait 380 px
           de haut mais peut atteindre 700 px de large sur tablette, et 88 %

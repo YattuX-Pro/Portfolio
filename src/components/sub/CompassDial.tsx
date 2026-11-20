@@ -33,7 +33,11 @@ export default function CompassDial({ className = "" }: { className?: string }) 
 
   return (
     <figure aria-hidden className={`m-0 flex flex-col items-center gap-2.5 ${className}`}>
-      <div className="relative flex size-[112px] items-center justify-center sm:size-[168px]">
+      {/* En desktop le cadran suit la hauteur d'écran (16svh, 168 px au
+          plus) : c'est l'élément le plus haut du bas du hero, qui doit tenir
+          dans l'écran (voir HeroContent). La boussole garde ses proportions
+          dans le cadran (`w-[93%]`, soit 104/112 et 156/168). */}
+      <div className="relative flex size-[112px] items-center justify-center sm:size-[168px] lg:size-[min(168px,16svh)]">
         <svg viewBox="0 0 100 100" className="absolute inset-0 size-full overflow-visible">
           <circle cx="50" cy="50" r="49" strokeWidth="0.8" className="fill-surface stroke-line-strong" />
           <circle cx="50" cy="50" r="36" fill="var(--brand-veil)" />
@@ -59,7 +63,7 @@ export default function CompassDial({ className = "" }: { className?: string }) 
         </svg>
 
         <motion.div
-          className="relative w-[104px] sm:w-[156px]"
+          className="relative w-[93%]"
           style={{
             rotate: reduced ? -4 : sway,
             filter: "drop-shadow(0 14px 18px var(--shadow))",

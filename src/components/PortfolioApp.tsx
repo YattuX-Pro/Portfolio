@@ -31,9 +31,14 @@ export default function PortfolioApp({ data }: { data: SiteData }) {
               sous elle et le titre disparaissait derrière. `scroll-margin-top`
               est ce que la navigation par ancre respecte — 80px laissent la
               hauteur du bandeau plus une respiration. */}
+          {/* `lg:py-6` : en desktop le hero tient dans l'écran (voir
+              HeroContent), et le contenu est de toute façon centré dans les
+              100svh — 96 px de marge n'y servaient qu'à le faire déborder.
+              La colonne du capitaine retire ces 2 × 1,5rem de sa hauteur
+              (`HeroCaptain`) : changer l'un, c'est changer l'autre. */}
           <section
             id="home"
-            className="min-h-[calc(100svh-4rem)] flex items-center py-14 sm:py-20 lg:py-24 scroll-mt-20"
+            className="min-h-[calc(100svh-4rem)] flex items-center py-14 sm:py-20 lg:py-6 scroll-mt-20"
           >
             <Hero data={data} onNavigate={scrollTo} />
           </section>
