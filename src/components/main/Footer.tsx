@@ -5,7 +5,7 @@ import { HiEnvelope, HiArrowUpRight } from "react-icons/hi2";
 import { motion } from "framer-motion";
 import Reveal, { HOVER_LIFT, INTERACTION_TRANSITION, TAP_PRESS } from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
-import FlagRule from "@/components/FlagRule";
+import WaveRule from "@/components/WaveRule";
 import type { SiteSettings } from "@/lib/db/schema";
 
 type Link = { href: string; label: string; icon: typeof FaGithub };
@@ -49,10 +49,6 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
           </motion.a>
         </Reveal>
       ) : null}
-
-      <Reveal delay={0.06}>
-        <FlagRule className="mt-8" thickness={6} width={92} />
-      </Reveal>
 
       {/* ── Liens + CV ───────────────────────────────────────────────────
           LA RANGÉE TIENT SUR UNE LIGNE JUSQU'À 360px. Elle passait à deux dès
@@ -124,8 +120,10 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
       {/* Mentions */}
       {/* `preset="in"` : fondu sans déplacement. Sur un bloc pleine largeur
           en bas de page, une translation verticale se lit comme un à-coup. */}
+      {/* La houle ferme la page, comme elle ouvre les sections sous le hero. */}
+      <WaveRule className="mt-20" />
       <Reveal delay={0.18} preset="in">
-        <div className="mt-20 pt-6 border-t border-line flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
           <p className="meta">© {new Date().getFullYear()} Aboubacar Tidiane Yattara</p>
           <p className="meta">.Net / Angular</p>
         </div>

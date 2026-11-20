@@ -1,6 +1,5 @@
 "use client";
 
-import FlagRule from "@/components/FlagRule";
 import type { SiteData } from "@/lib/db/queries";
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -49,7 +48,6 @@ export default function StackPanel({
       className={`hidden lg:block lg:pt-3 lg:pr-6 lg:rounded-t-[2rem] lg:bg-[radial-gradient(130%_95%_at_100%_0%,var(--brand-veil)_0%,transparent_80%)] ${className}`}
     >
       <p className="meta">Stack principale</p>
-      <FlagRule className="mt-3 mb-1" thickness={3} width={26} delay={0.4} />
 
       {/* Le logotype.
 

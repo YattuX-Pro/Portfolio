@@ -138,8 +138,8 @@ export default function NavBar() {
       }`}
     >
       {/* Avancement de la lecture. `scaleX` + `origin-left` : le filet se
-          dessine de gauche à droite — même mécanique que FlagRule, sans quoi
-          il grandirait depuis son centre. Aucune courbe d'easing en jeu, la
+          dessine de gauche à droite, sans quoi il grandirait depuis son
+          centre. Aucune courbe d'easing en jeu, la
           valeur suit le scroll au pixel. Décoratif, donc aria-hidden : le
           lecteur d'écran a déjà la structure en titres. */}
       <motion.span

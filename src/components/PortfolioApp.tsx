@@ -6,7 +6,7 @@ import Hero from "@/components/main/Hero";
 import Skills from "@/components/main/Skills";
 import Projects from "@/components/main/Projects";
 import Footer from "@/components/main/Footer";
-import FlagRule from "@/components/FlagRule";
+import WaveRule from "@/components/WaveRule";
 import MotionRoot from "@/components/MotionRoot";
 import type { SiteData } from "@/lib/db/queries";
 
@@ -37,19 +37,18 @@ export default function PortfolioApp({ data }: { data: SiteData }) {
             <Hero data={data} onNavigate={scrollTo} />
           </section>
 
-          <FlagRule className="mx-auto justify-center" thickness={6} width={72} />
+          {/* Une seule houle, à la sortie du hero : entre les sections, c'est
+              l'espace qui sépare. Trois filets identiques à la suite
+              devenaient un motif répétitif au lieu d'un repère. */}
+          <WaveRule />
 
           <section id="skills" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
             <Skills skills={data.skills} method={data.settings?.method ?? null} />
           </section>
 
-          <FlagRule className="mx-auto justify-center" thickness={6} width={72} />
-
           <section id="projects" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
             <Projects projects={data.projects} />
           </section>
-
-          <FlagRule className="mx-auto justify-center" thickness={6} width={72} />
 
           <section id="footer" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
             <Footer settings={data.settings} />

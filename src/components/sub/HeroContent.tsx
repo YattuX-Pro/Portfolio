@@ -13,7 +13,6 @@ import {
   revealGroup,
   revealItem,
 } from "@/components/Reveal";
-import FlagRule from "@/components/FlagRule";
 import ExperienceCounter from "@/components/sub/ExperienceCounter";
 import StackPanel from "@/components/sub/StackPanel";
 import HeroBackdrop from "@/components/sub/HeroBackdrop";
@@ -83,11 +82,6 @@ export default function HeroContent({
             Yattara<span className="text-brand">.</span>
           </motion.span>
         </h1>
-
-        {/* Filet tricolore — Guinée */}
-        <motion.div variants={revealItem}>
-          <FlagRule className="mt-8" thickness={6} width={92} delay={0.15} />
-        </motion.div>
 
         {/* Bio */}
         <motion.p

@@ -30,11 +30,9 @@ page.tsx    → PortfolioApp
               ├─ NavBar        (fixed, z-50, own scroll-spy)
               └─ main
                  ├─ section id="home"     → Hero → HeroContent
-                 ├─ FlagRule              (tricolor divider)
+                 ├─ WaveRule              (the one divider, below the hero)
                  ├─ section id="skills"   → Skills
-                 ├─ FlagRule
                  ├─ section id="projects" → Projects
-                 ├─ FlagRule
                  └─ section id="footer"   → Footer
 ```
 
@@ -56,7 +54,7 @@ The palette is a warm off-white neutral plus **one** interactive accent (`--acce
 
 **Contrast is load-bearing here, not decorative.** The flag's yellow (`#FCD116`) measures **1.41:1** on the cream background and the official green (`#009460`) measures **3.72:1**. Consequences, already enforced in the code:
 
-- Yellow appears **only** inside `FlagRule`, which is `aria-hidden` and conveys nothing. It must never carry text, an icon, or an informative graphic.
+- Yellow appears **nowhere on the public site**. It used to live only in `FlagRule`, the tricolor bar, which was removed from the screens at the owner's request and replaced by `WaveRule`. The admin sidebar keeps its `aria-hidden` tricolor stripe. Yellow must never carry text, an icon, or an informative graphic.
 - Green **fails** the 4.5:1 bar for text (it clears 3:1, so it is fine for graphics). `--flag-green-ink` (`#00713F`, 5.85:1) exists for green text.
 - `--muted` was deliberately darkened to `#55524C` (7.45:1) after the first pass read as too faint. Don't lighten it back.
 
@@ -126,9 +124,9 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
   - The date is read and written in **UTC end to end** (`parseUtcDatetime` in the profile action, `toDatetimeLocal` in the form, `getUTC*` in the component). `datetime-local` sends a zoneless string: parsed without an explicit `Z` it lands in the *server's* zone, so the same save from localhost and from Vercel stored two different instants, and each re-save shifted the date again. Guinea is UTC+0, so UTC is also the true signing hour.
   - Two phases: a 1.8 s count-up from 0 on mount (every field spins), then the live tick at 50 ms — the last rank is tenths, which change every 100 ms. State **must** start at 0: the hero is prerendered, so a value read from `Date.now()` at render time is a guaranteed hydration mismatch. Month names (used only by the `sr-only` sentence) are a hardcoded French array rather than `Intl`, because that string is server-rendered then hydrated and two ICU builds disagreeing on it is enough to fail hydration.
   - The readout is `aria-hidden` with an `sr-only` sentence beside it: tenths changing 20×/s is noise to a screen reader, and an `aria-live` there would announce every one of them.
-- `sub/StackPanel.tsx` — the hero's right column (`hidden lg:block`, as it always was). Renders `hero_stack` from the DB under a display-size **`.NET` wordmark whose leading dot is `text-brand`** — the same red dot as `Yattara.` in the h1, a few centimetres away. That repetition is the whole idea: it ties the name to the technology without a sentence, and it is what keeps the wordmark from reading as a logo dropped onto the page. Right-aligned so it heads the column of `dd` values. It owns the column's container treatment: the `--brand-veil` radial anchored top-right, `lg:rounded-t-[2rem]`, the `lg:pr-6` gutter, the tricolor rule.
+- `sub/StackPanel.tsx` — the hero's right column (`hidden lg:block`, as it always was). Renders `hero_stack` from the DB under a display-size **`.NET` wordmark whose leading dot is `text-brand`** — the same red dot as `Yattara.` in the h1, a few centimetres away. That repetition is the whole idea: it ties the name to the technology without a sentence, and it is what keeps the wordmark from reading as a logo dropped onto the page. Right-aligned so it heads the column of `dd` values. It owns the column's container treatment: the `--brand-veil` radial anchored top-right, `lg:rounded-t-[2rem]`, the `lg:pr-6` gutter.
 - `sub/ProjectImage.tsx` — progressive de-blur on load. Sets `filter` **inline** on purpose: Tailwind's `blur-*` routes through `--tw-blur`, declared `@property { syntax: "*" }`, which animates discretely and cannot interpolate; and written as an arbitrary class the minifier collapsed `blur(0px)` to `blur()`.
-- `FlagRule.tsx` — the tricolor bar (red → yellow → green, Guinea's order). Decorative and `aria-hidden`. Parameterized by `thickness`, `width`, `delay`. Used under the hero title and as the section divider.
+- `WaveRule.tsx` — the swell line, the only divider left: once below the hero, once above the footer credits. A 1.5 px stroke in `--line-strong`, decorative and `aria-hidden`. The wavelength is **fixed** (the path is drawn in pixels over 2400 px and the SVG crops it, no `viewBox`) so the waves keep their shape on every screen width. It enters with a left-to-right `clip-path` wipe, not `scaleX`, which would squash the waves mid-animation. It replaced `FlagRule`, the tricolor bar, removed from the screens at the owner's request.
 - `SectionHeader.tsx` — mono number + label + title + optional intro. Every section below the hero uses it; the numbers (`01`, `02`, `03`) are manual, so renumber if you reorder sections.
 
 ## Content location
@@ -147,7 +145,7 @@ Images and the CV live in `public/` and are referenced by absolute path (`/next.
 
 - **`react-icons` v5 mixes Heroicons generations.** `react-icons/hi` is v1 (`HiMail`, `HiExternalLink`), `react-icons/hi2` is v2 (`HiEnvelope`, `HiArrowUpRight`). A wrong-generation name imports as `undefined` and fails at render, not at typecheck. Verify with `node -e 'console.log(typeof require("react-icons/hi2").HiEnvelope)'`.
 - **Framer Motion v12 types `ease` as a tuple.** Import `EASE` from `Reveal.tsx` rather than writing a bare array literal, which fails typecheck under `strict`.
-- **`scaleX` animations need `origin-left`**, otherwise bars grow from the center. `FlagRule` depends on this.
+- **`scaleX` animations need `origin-left`**, otherwise bars grow from the center. The NavBar reading-progress line depends on this.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

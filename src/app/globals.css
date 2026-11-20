@@ -162,9 +162,9 @@
 
    LES COULEURS DU DRAPEAU NE BOUGENT PAS. Vérifié sur le fond sombre :
    rouge 3.25:1, vert 4.71:1, jaune très au-dessus. Toutes franchissent le
-   seuil de 3:1 des éléments graphiques, et `FlagRule` est de toute façon
-   décoratif et `aria-hidden`. Un drapeau dont on change les couleurs selon
-   le thème n'est plus un drapeau.
+   seuil de 3:1 des éléments graphiques, et le liseré de la console qui les
+   porte est décoratif et `aria-hidden`. Un drapeau dont on change les
+   couleurs selon le thème n'est plus un drapeau.
    -------------------------------------------------------------------------- */
 .dark {
   /* Indique au navigateur de peindre en sombre ce qu'il dessine lui-même :
