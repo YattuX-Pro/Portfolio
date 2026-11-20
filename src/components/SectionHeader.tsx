@@ -14,14 +14,10 @@ import Reveal from "@/components/Reveal";
     chargement, sinon la page saute à l'arrivée de chaque image. */
 export type SectionIllustration = {
   src: string;
-  /** Variante à encre claire, pour le mode sombre (dessins au trait). */
-  srcDark?: string;
   width: number;
   height: number;
-  /** Illustrations pirates : largeur d'affichage sur téléphone puis à partir
-      de 768 px. Présente, elle rend l'image visible à TOUTES les largeurs,
-      sous le texte sur téléphone. */
-  display?: { mobile: number; desktop: number };
+  /** Largeur d'affichage sur téléphone, puis à partir de 768 px. */
+  display: { mobile: number; desktop: number };
   /** Inclinaison fixe, en degrés : une carte posée de biais sur la table. */
   tilt?: number;
   /** Flotte sur l'eau (la bouteille). */
@@ -55,6 +51,17 @@ export default function SectionHeader({
   intro?: string;
   illustration?: SectionIllustration;
 }) {
+  const image = illustration ? (
+    <Image
+      src={illustration.src}
+      alt=""
+      width={illustration.width}
+      height={illustration.height}
+      sizes={`(min-width: 768px) ${illustration.display.desktop}px, ${illustration.display.mobile}px`}
+      className="h-auto w-full"
+    />
+  ) : null;
+
   return (
     <header className="mb-12 sm:mb-14">
       {/* La grille n'existe QUE s'il y a une illustration : sans elle, l'en-tête
@@ -91,12 +98,15 @@ export default function SectionHeader({
         </div>
 
         {/* ── L'illustration ────────────────────────────────────────────────
-            `hidden md:flex` : elle ne descend pas sous 768px. Ce n'est pas de
-            l'économie de bande passante, c'est le cadrage — sous cette
-            largeur il n'y a plus de « côté droit » à remplir, l'image
-            passerait au-dessus du titre et retarderait la seule chose qu'on
-            vient lire. Le vide qu'elle comble n'existe qu'à partir du moment
-            où le texte cesse d'occuper la ligne entière.
+            Une peinture pirate (carte, coffre, sabres, bouteille). Elle reste
+            sur téléphone : c'est elle qui porte le thème. Elle y passe SOUS
+            le texte (ordre du DOM), donc ne retarde pas ce qu'on vient lire.
+
+            Peinte en couleurs naturelles, elle n'a pas de variante sombre —
+            les anciens dessins au trait en avaient une, à l'encre claire.
+            L'ombre portée suit sa silhouette, et `--shadow` change avec le
+            thème. `max-w-full` : 340 px de carte dans une colonne de 4/12 qui
+            peut en faire moins.
 
             `alt=""` et rien d'autre : elle ne porte aucune information que le
             titre ne dise déjà. Un texte alternatif ici ferait lire deux fois
@@ -104,16 +114,7 @@ export default function SectionHeader({
 
             Le retard de 0,18 s la fait entrer APRÈS le titre et son intro
             (0 / 0,06 / 0,12) : elle ponctue la phrase, elle ne l'annonce pas. */}
-        {illustration?.display ? (
-          /* ── Illustration pirate ─────────────────────────────────────────
-              Contrairement aux dessins au trait plus bas, elle reste sur
-              téléphone : c'est elle qui porte le thème. Elle y passe SOUS le
-              texte (ordre du DOM), donc ne retarde pas ce qu'on vient lire.
-
-              Peinte en couleurs naturelles, elle n'a pas de variante sombre.
-              L'ombre portée suit sa silhouette et `--shadow` change avec le
-              thème. `max-w-full` : 340 px de carte dans une colonne de 4/12
-              qui peut en faire moins. */
+        {illustration ? (
           <div className="flex md:col-span-4 md:justify-end">
             <Reveal preset="in" delay={0.18}>
               <div
@@ -127,65 +128,8 @@ export default function SectionHeader({
                 }
                 className="w-(--illus-m) max-w-full md:w-(--illus-d)"
               >
-                {illustration.float ? (
-                  <Floating>
-                    <Image
-                      src={illustration.src}
-                      alt=""
-                      width={illustration.width}
-                      height={illustration.height}
-                      sizes={`(min-width: 768px) ${illustration.display.desktop}px, ${illustration.display.mobile}px`}
-                      className="h-auto w-full"
-                    />
-                  </Floating>
-                ) : (
-                  <Image
-                    src={illustration.src}
-                    alt=""
-                    width={illustration.width}
-                    height={illustration.height}
-                    sizes={`(min-width: 768px) ${illustration.display.desktop}px, ${illustration.display.mobile}px`}
-                    className="h-auto w-full"
-                  />
-                )}
+                {illustration.float ? <Floating>{image}</Floating> : image}
               </div>
-            </Reveal>
-          </div>
-        ) : illustration?.srcDark ? (
-          <div className="hidden md:col-span-4 md:flex md:justify-end">
-            <Reveal preset="in" delay={0.18}>
-              {/* DEUX fichiers, permutés par `dark:` et non par un état React.
-
-                  Les illustrations sont de l'encre sombre sur fond
-                  transparent : sur l'anthracite du mode sombre il ne resterait
-                  que le rouge flottant dans le noir. La variante `-dark` est
-                  le même dessin à l'encre claire (`assets/normalise.py`).
-
-                  Permuter la `src` selon le thème aurait demandé un état
-                  client, donc un rendu serveur qui ignore le thème et une
-                  image fausse pendant l'hydratation. En CSS, `.dark` est déjà
-                  sur <html> avant le premier rendu, et rien ne clignote.
-
-                  Le fichier caché n'est PAS téléchargé : `next/image` pose
-                  `loading="lazy"`, et une image en `display:none` n'entre
-                  jamais dans le viewport. Le second thème ne coûte donc rien
-                  à qui ne l'utilise pas. */}
-              <Image
-                src={illustration.src}
-                alt=""
-                width={illustration.width}
-                height={illustration.height}
-                sizes="180px"
-                className="w-[180px] h-auto dark:hidden"
-              />
-              <Image
-                src={illustration.srcDark}
-                alt=""
-                width={illustration.width}
-                height={illustration.height}
-                sizes="180px"
-                className="w-[180px] h-auto hidden dark:block"
-              />
             </Reveal>
           </div>
         ) : null}

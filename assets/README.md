@@ -4,7 +4,12 @@ Rien ici n'est servi : `public/` est publié tel quel par Next, `assets/` non.
 Les originaux y vivaient au départ et pesaient 2,2 Mo de fichiers jamais
 demandés par la page.
 
-## Illustrations
+## Illustrations au trait (retirées)
+
+> Retirées du site avec le thème pirate : `public/illustrations/` n'existe
+> plus et `SectionHeader` ne sait plus permuter deux fichiers selon le thème.
+> Les sources et `normalise.py` restent ici pour mémoire.
+
 
 `illustrations/` garde les PNG **tels que sortis du générateur**, sous leur nom
 d'origine — les noms sont trompeurs (trois sur quatre s'appellent « Stopwatch »

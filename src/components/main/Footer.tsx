@@ -26,10 +26,14 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
         num="04"
         label="Contact"
         title="Travaillons ensemble."
-        intro="Analyste développeur, ouvert aux opportunités full-time et freelance. Le plus simple reste un e-mail."
-        illustration={{ src: "/illustrations/contact.png",
-          srcDark: "/illustrations/contact-dark.png",
-          width: 418, height: 418 }}
+        intro="Un projet à mener à bon port ? Analyste développeur, ouvert aux opportunités full-time et freelance. Pas besoin de bouteille à la mer : un e-mail suffit."
+        illustration={{
+          src: "/pirate/bouteille.png",
+          width: 640,
+          height: 426,
+          display: { mobile: 200, desktop: 300 },
+          float: true,
+        }}
       />
 
       {/* E-mail — l'élément principal de la section */}
@@ -125,7 +129,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
       <Reveal delay={0.18} preset="in">
         <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
           <p className="meta">© {new Date().getFullYear()} Aboubacar Tidiane Yattara</p>
-          <p className="meta">.Net / Angular</p>
+          <p className="meta">.NET / Angular · cap au nord</p>
         </div>
       </Reveal>
     </>

@@ -55,10 +55,13 @@ export default function Skills({
         num="03"
         label="Expertise"
         title="Ce que je construis, et avec quoi."
-        intro="Une base back-end .NET et FastAPI, un front Angular et Next.js, et l'outillage DevOps qui va avec pour livrer, sécuriser et maintenir en production."
-        illustration={{ src: "/illustrations/stack.png",
-          srcDark: "/illustrations/stack-dark.png",
-          width: 374, height: 374 }}
+        intro="Mon arsenal : une base back-end .NET et FastAPI, un front Angular et Next.js, et l'outillage DevOps qui va avec pour livrer, sécuriser et maintenir en production."
+        illustration={{
+          src: "/pirate/sabres.png",
+          width: 480,
+          height: 480,
+          display: { mobile: 140, desktop: 220 },
+        }}
       />
 
       <div className="border-t border-line">
