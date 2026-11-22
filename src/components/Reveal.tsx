@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import type { Transition, Variants } from "framer-motion";
 
@@ -21,11 +22,14 @@ import type { Transition, Variants } from "framer-motion";
 export const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 /** Révélations au scroll et à l'entrée de page. */
-export const DURATION = 0.55;
+export const DURATION = 0.42;
 /** Micro-interactions (survol, appui). Doit rester perceptiblement immédiat. */
 export const DURATION_FAST = 0.22;
 /** Décalage entre deux frères. */
-export const STAGGER = 0.06;
+export const STAGGER = 0.035;
+
+/** Course latérale des révélations, en px. */
+export const SLIDE = 40;
 
 const base: Transition = { duration: DURATION, ease: EASE };
 
@@ -34,15 +38,15 @@ const base: Transition = { duration: DURATION, ease: EASE };
    légèrement d'une section à l'autre sans changer de langage : même courbe,
    même durée, seule l'amorce diffère. */
 
-/** L'entrée par défaut : fondu + 16px vers le haut. */
+/** Entrée discrète : fondu + 8px vers le haut. */
 export const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 8 },
   visible: { opacity: 1, y: 0, transition: base },
 };
 
 /** Depuis le haut. Pour ce qui descend dans la page (la navbar). */
 export const fadeInDown: Variants = {
-  hidden: { opacity: 0, y: -10 },
+  hidden: { opacity: 0, y: -6 },
   visible: { opacity: 1, y: 0, transition: base },
 };
 
@@ -53,11 +57,10 @@ export const fadeIn: Variants = {
   visible: { opacity: 1, transition: base },
 };
 
-/** Fondu + très léger agrandissement. 0.98 et pas moins : au-delà, l'élément
-    « saute » au lieu de se poser. Réservé aux objets encadrés (cartes). */
+/** Les cartes suivent la même entrée que les autres blocs, sans effet de zoom. */
 export const scaleIn: Variants = {
-  hidden: { opacity: 0, y: 24, scale: 0.98 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: base },
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: base },
 };
 
 /** Parent d'une série : décale ses enfants. */
@@ -71,7 +74,12 @@ export const staggerItem = fadeInUp;
 
 /* Noms historiques, conservés parce que plusieurs composants les importent.
    Renommer aurait touché sept fichiers pour zéro gain fonctionnel. */
-export const revealItem = fadeInUp;
+/** Série du hero : colonne de gauche, donc depuis la gauche — même geste que
+    les révélations au scroll, sans mesure puisque la place est connue. */
+export const revealItem: Variants = {
+  hidden: { opacity: 0, x: -SLIDE },
+  visible: { opacity: 1, x: 0, transition: base },
+};
 export const revealGroup = staggerContainer;
 
 /* ── Micro-interactions ────────────────────────────────────────────────────
@@ -106,6 +114,9 @@ const PRESETS: Record<RevealPreset, Variants> = {
  * élément au-dessus de la ligne de flottaison attendrait un scroll qui ne
  * viendra jamais.
  *
+ * Au scroll, le preset ne joue plus : tous les blocs glissent depuis leur
+ * côté avec un fondu. Il ne sert qu'aux entrées `immediate`.
+ *
  * `once: true` partout : une animation qui se rejoue à chaque passage devient
  * du bruit dès la seconde lecture.
  */
@@ -124,18 +135,51 @@ export default function Reveal({
 }) {
   const variants = PRESETS[preset];
 
+  /* Au scroll, le bloc arrive du côté où il se trouve : moitié gauche de
+     l'écran → depuis la gauche, moitié droite → depuis la droite. Le côté
+     est mesuré à l'entrée dans l'écran (le serveur ne connaît pas la mise en page), et
+     porté par des keyframes `x: [départ, 0]` : l'état `hidden` reste un
+     simple fondu, identique au rendu serveur, donc pas d'écart d'hydratation.
+     Un bloc centré (pleine largeur, mobile) part de la gauche. */
+  const ref = useRef<HTMLDivElement>(null);
+  if (immediate) {
+    return (
+      <motion.div
+        className={className}
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: variants.hidden,
+          visible: {
+            ...(variants.visible as object),
+            transition: { ...base, delay },
+          },
+        }}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
+      ref={ref}
       className={className}
       initial="hidden"
-      {...(immediate
-        ? { animate: "visible" }
-        : { whileInView: "visible", viewport: { once: true, amount: 0.2 } })}
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
       variants={{
-        hidden: variants.hidden,
-        visible: {
-          ...(variants.visible as object),
-          transition: { ...base, delay },
+        hidden: { opacity: 0 },
+        /* Variant en fonction : résolu à l'entrée dans l'écran, c'est là
+           que le côté est mesuré. */
+        visible: () => {
+          const r = ref.current?.getBoundingClientRect();
+          const right = r ? r.left + r.width / 2 > window.innerWidth / 2 + 1 : false;
+          return {
+            opacity: 1,
+            x: [right ? SLIDE : -SLIDE, 0],
+            transition: { ...base, delay },
+          };
         },
       }}
     >

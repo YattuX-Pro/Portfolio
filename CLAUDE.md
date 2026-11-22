@@ -67,16 +67,16 @@ If a request would put yellow on text, say so rather than shipping it.
 
 It exports:
 
-- **Constants** — `EASE` (`[0.16, 1, 0.3, 1]`, the site's only curve), `DURATION` (0.55 s, reveals), `DURATION_FAST` (0.22 s, micro-interactions), `STAGGER` (0.06 s).
+- **Constants** — `EASE` (`[0.16, 1, 0.3, 1]`, the site's only curve), `DURATION` (0.42 s, reveals), `DURATION_FAST` (0.22 s, micro-interactions), `STAGGER` (0.035 s).
 - **Variants** — `fadeInUp` (the default), `fadeInDown`, `fadeIn`, `scaleIn`, `staggerContainer`, `staggerItem`. `revealItem`/`revealGroup` are kept as aliases because existing components import them.
 - **Interaction presets** — `HOVER_LIFT` (`y: -2, scale: 1.01`), `TAP_PRESS` (`scale: 0.98`), `INTERACTION_TRANSITION`.
-- **The component** — `<Reveal preset="up" | "down" | "in" | "scale">`, `once: true`, `immediate` for above-the-fold content.
+- **The component** — `<Reveal preset="up" | "down" | "in" | "scale">`, `once: true`, `immediate` for above-the-fold content. **Scroll reveals slide in sideways with a fade (the owner's request):** `Reveal` measures its own position when it enters the viewport and comes from the left (left half of the viewport) or the right (right half), `SLIDE` px; the `preset` only applies to `immediate` entries.
 
 **Import the constants — never retype the numbers.** `Skills.tsx` once had `0.55` and `0.05` written by hand and ran its stagger at 50 ms while the rest of the site ran at 60 ms.
 
 **Direction (updated — the owner asked for a livelier, more premium feel).** Earlier passes banned every scale transform and any decorative background. That is no longer the rule. What IS the rule:
 
-- One curve everywhere (`EASE`). Reveals at 0.55 s, hovers at 0.22 s. No second easing curve — with one exception: **continuous** motion (the wheel's rotation) runs `linear`, because it has no start or end and an eased curve would make it speed up and brake on every turn.
+- One curve everywhere (`EASE`). Reveals at 0.42 s, hovers at 0.22 s. No second easing curve — with one exception: **continuous** motion (the wheel's rotation) runs `linear`, because it has no start or end and an eased curve would make it speed up and brake on every turn.
 - Hover lift and press are the shared presets, and they are *tiny*: −2 px and 1.01. Project images zoom to 1.03, never past 1.05.
 - `scaleIn` is reserved for framed objects (project cards). Text blocks use `fadeInUp` or `fadeIn`.
 - **Pirate theme (the owner's request): decorative continuous animation now has a fixed list, and nothing goes beyond it.** The theme is carried by the illustrations, and these are the only ones that move forever:

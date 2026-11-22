@@ -6,6 +6,7 @@ import Reveal, {
   EASE,
   HOVER_LIFT,
   INTERACTION_TRANSITION,
+  SLIDE,
   STAGGER,
 } from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
@@ -89,8 +90,9 @@ export default function Skills({
               {cat.items.map((item, i) => (
                 <motion.li
                   key={item.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  /* Colonne de droite : les pastilles arrivent de la droite. */
+                  initial={{ opacity: 0, x: SLIDE }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
                   /* Durée et cadence lues depuis la spec, plus recopiées :
                      0.55 et 0.05 étaient écrits à la main ici, ce qui faisait

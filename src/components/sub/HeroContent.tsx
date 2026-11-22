@@ -9,6 +9,7 @@ import {
   HOVER_LIFT,
   INTERACTION_TRANSITION,
   TAP_PRESS,
+  SLIDE,
   revealGroup,
   revealItem,
 } from "@/components/Reveal";
@@ -204,8 +205,9 @@ export default function HeroContent({
           principale tourne désormais autour du capitaine, et la boussole
           répond au compteur d'ancienneté dans la colonne principale. */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
+        /* Colonne de droite : depuis la droite, comme au scroll. */
+        initial={{ opacity: 0, x: SLIDE }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ duration: DURATION, ease: EASE, delay: 0.32 }}
         className="order-1 lg:order-2 lg:col-span-5"
       >
