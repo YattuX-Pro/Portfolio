@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    /* AVIF d'abord : à qualité égale, environ moitié moins d'octets que le
+       WebP sur les illustrations peintes (capitaine, barre). Sur une
+       connexion lente, ce sont elles qui retardent le hero. */
+    formats: ["image/avif", "image/webp"],
     /* Les images de projets téléversées sont servies par le stockage objet
        Neon. Sans cette autorisation, next/image refuse de les optimiser.
 

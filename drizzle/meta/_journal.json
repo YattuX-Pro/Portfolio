@@ -43,6 +43,13 @@
       "when": 1795188110748,
       "tag": "0005_parcours",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795350762773,
+      "tag": "0006_freezing_blade",
+      "breakpoints": true
     }
   ]
 }

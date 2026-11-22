@@ -12,7 +12,7 @@ const WHEEL_TURN_S = 90;
    LE CAPITAINE — colonne droite du hero, au-dessus du texte sur mobile.
 
    Il prend la place de `StackPanel` (le logotype `.NET` et la liste
-   `hero_stack`). C'est le cœur du thème pirate : un avatar peint, détouré,
+   `hero_stack`, table supprimée depuis). C'est le cœur du thème pirate : un avatar peint, détouré,
    posé sur le bas de la colonne.
 
    LE CONTENEUR garde le traitement de l'ancienne colonne : le voile
