@@ -35,6 +35,22 @@ function parseStack(raw: string): string[] {
     .slice(0, 12);
 }
 
+/* Les trois groupes du site. Toute autre valeur retombe sur « personal ». */
+const KINDS = ["personal", "employer", "client"] as const;
+function parseKind(raw: FormDataEntryValue | null): (typeof KINDS)[number] {
+  const v = String(raw ?? "");
+  return (KINDS as readonly string[]).includes(v) ? (v as (typeof KINDS)[number]) : "personal";
+}
+
+/* Un repère par ligne, « Libellé : valeur ». Les lignes vides sautent. */
+function parseFacts(raw: string): string[] {
+  return raw
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 6);
+}
+
 /** Vide -> null, pour ne pas stocker de chaînes vides en base. */
 function orNull(v: FormDataEntryValue | null): string | null {
   const s = String(v ?? "").trim();
@@ -66,6 +82,15 @@ async function readForm(formData: FormData) {
     }
   }
 
+  /* La capture mobile suit la même règle : un fichier l'emporte sur le champ. */
+  const mobileUpload = formData.get("imageMobileFile");
+  let imageMobileUrl = orNull(formData.get("imageMobileUrl"));
+  if (!uploadError && mobileUpload instanceof File && mobileUpload.size > 0) {
+    const res = await uploadImage(mobileUpload, `${slug || "sans-slug"}-mobile`);
+    if ("error" in res) uploadError = res.error;
+    else imageMobileUrl = res.value;
+  }
+
   return {
     uploadError,
     title,
@@ -83,6 +108,14 @@ async function readForm(formData: FormData) {
     githubUrl: orNull(formData.get("githubUrl")),
     stack: parseStack(String(formData.get("stack") ?? "")),
     published: formData.get("published") === "on",
+    /* Présentation sur le site : groupe, contexte, apport, distinction,
+       repères et capture mobile du projet phare. */
+    kind: parseKind(formData.get("kind")),
+    context: orNull(formData.get("context")),
+    contribution: orNull(formData.get("contribution")),
+    award: orNull(formData.get("award")),
+    facts: parseFacts(String(formData.get("facts") ?? "")),
+    imageMobileUrl,
   };
 }
 
@@ -170,10 +203,12 @@ export async function deleteProject(formData: FormData) {
   /* Retire l'objet du bucket avant la ligne, sinon la clé est perdue et
      l'image reste orpheline pour toujours. */
   const [row] = await db
-    .select({ imageUrl: projects.imageUrl })
+    .select({ imageUrl: projects.imageUrl, imageMobileUrl: projects.imageMobileUrl })
     .from(projects)
     .where(eq(projects.id, id));
-  if (row?.imageUrl && isStorageKey(row.imageUrl)) await deleteObject(row.imageUrl);
+  for (const key of [row?.imageUrl, row?.imageMobileUrl]) {
+    if (key && isStorageKey(key)) await deleteObject(key);
+  }
 
   await db.delete(projects).where(eq(projects.id, id));
   revalidatePath("/");

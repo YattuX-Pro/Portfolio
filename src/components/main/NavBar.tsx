@@ -9,9 +9,9 @@ import ThemeToggle from "@/components/sub/ThemeToggle";
    le monogramme y ramène déjà, et quatre liens tiennent mieux qu'un menu de
    cinq dont le premier ne fait que remonter. */
 const NAV_LINKS = [
-  { id: "parcours", label: "Parcours" },
   { id: "projects", label: "Projets" },
   { id: "skills", label: "Expertise" },
+  { id: "parcours", label: "Parcours" },
   { id: "footer", label: "Contact" },
 ] as const;
 

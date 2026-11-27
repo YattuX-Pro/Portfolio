@@ -29,9 +29,9 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aboubacar Tidiane Yattara — Analyste Développeur",
+  title: "Aboubacar Tidiane Yattara — Développeur .NET · Lead Dev",
   description:
-    "Portfolio d'Aboubacar Tidiane Yattara, analyste développeur. .NET, FastAPI, Angular, Next.js.",
+    "Développeur backend .NET et full-stack Angular, Lead Dev chez Netsen Group. C#, ASP.NET Core, Angular, SQL Server.",
 };
 
 export default function RootLayout({

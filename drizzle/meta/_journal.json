@@ -50,6 +50,13 @@
       "when": 1795350762773,
       "tag": "0006_freezing_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795764384127,
+      "tag": "0007_projets_vitrine",
+      "breakpoints": true
     }
   ]
 }

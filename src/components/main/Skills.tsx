@@ -10,7 +10,7 @@ import Reveal, {
   STAGGER,
 } from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
-import { TechGlyph } from "@/lib/tech-icons";
+import { TechGlyph, techIcon } from "@/lib/tech-icons";
 import type { SkillGroup } from "@/lib/db/queries";
 
 /* La base stocke un NOM de token, jamais un hexadécimal : la palette reste
@@ -53,10 +53,10 @@ export default function Skills({
   return (
     <>
       <SectionHeader
-        num="03"
+        num="02"
         label="Expertise"
         title="Ce que je construis, et avec quoi."
-        intro="Mon arsenal : une base back-end .NET et FastAPI, un front Angular et Next.js, et l'outillage DevOps qui va avec pour livrer, sécuriser et maintenir en production."
+        intro="Une base backend .NET (C#, ASP.NET Core) et SQL Server, un front Angular, et l'outillage pour livrer et maintenir en production."
         illustration={{
           src: "/pirate/sabres.png",
           width: 480,
@@ -113,19 +113,22 @@ export default function Skills({
                      animations, le relèvement aurait donc duré les 550ms de
                      la révélation au lieu des 220ms d'une micro-interaction. */
                   whileHover={{ ...HOVER_LIFT, transition: INTERACTION_TRANSITION }}
-                  className="group inline-flex items-center gap-2 rounded-lg border border-line bg-surface py-2 pl-2.5 pr-3.5 transition-colors duration-200 hover:border-line-strong"
+                  className="group inline-flex items-center gap-2 rounded-lg border border-line bg-surface py-2 pl-3.5 pr-3.5 has-[svg]:pl-2.5 transition-colors duration-200 hover:border-line-strong"
                 >
                   {/* Le glyphe passe du gris chaud à l'encre au survol. Il
                       reste MONOCHROME : quinze logos aux couleurs de marque
                       auraient introduit quinze couleurs dans une charte qui
                       n'en compte qu'une, et la grille aurait viré au nuage de
                       badges. */}
-                  <span
-                    aria-hidden
-                    className="flex size-[18px] shrink-0 items-center justify-center text-ink-muted transition-colors duration-200 group-hover:text-ink"
-                  >
-                    <TechGlyph slug={item.icon} className="size-[17px]" />
-                  </span>
+                  {/* Sans glyphe (« Code review »…), pas de case vide. */}
+                  {techIcon(item.icon) ? (
+                    <span
+                      aria-hidden
+                      className="flex size-[18px] shrink-0 items-center justify-center text-ink-muted transition-colors duration-200 group-hover:text-ink"
+                    >
+                      <TechGlyph slug={item.icon} className="size-[17px]" />
+                    </span>
+                  ) : null}
                   <span className="text-[14px] font-medium leading-none text-ink">
                     {item.label}
                   </span>

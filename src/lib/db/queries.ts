@@ -38,12 +38,13 @@ export const getExperiences = cache(async () =>
 /* Une clé de stockage devient une URL publique au moment du rendu.
    La base ne garde que la clé : l'endpoint dépend de la branche Neon et le
    figer en colonne casserait les images au premier changement de branche. */
-function resolveImages<T extends { imageUrl: string | null }>(rows: T[]): T[] {
-  return rows.map((row) =>
-    isStorageKey(row.imageUrl)
-      ? { ...row, imageUrl: publicObjectUrl(row.imageUrl) }
-      : row,
-  );
+function resolveImages<T extends { imageUrl: string | null; imageMobileUrl: string | null }>(rows: T[]): T[] {
+  const resolve = (v: string | null) => (isStorageKey(v) ? publicObjectUrl(v) : v);
+  return rows.map((row) => ({
+    ...row,
+    imageUrl: resolve(row.imageUrl),
+    imageMobileUrl: resolve(row.imageMobileUrl),
+  }));
 }
 
 export const getPublishedProjects = cache(async () =>

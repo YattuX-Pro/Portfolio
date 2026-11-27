@@ -138,7 +138,7 @@ export default function ProjectSheet({
                       className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-brand px-5 text-[15px] font-medium text-brand-on transition-colors duration-200 hover:bg-brand-hover sm:flex-none"
                     >
                       <HiExternalLink size={16} aria-hidden />
-                      Voir la démo
+                      Voir le site
                     </a>
                   ) : null}
 

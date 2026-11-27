@@ -31,13 +31,13 @@ page.tsx    → PortfolioApp
               └─ main
                  ├─ section id="home"     → Hero → HeroContent
                  ├─ WaveRule              (the one divider, below the hero)
-                 ├─ section id="parcours" → Journey   (01, hidden when the table is empty)
-                 ├─ section id="projects" → Projects  (02)
-                 ├─ section id="skills"   → Skills    (03)
+                 ├─ section id="projects" → Projects  (01)
+                 ├─ section id="skills"   → Skills    (02, « Expertise »)
+                 ├─ section id="parcours" → Journey   (03, hidden when the table is empty)
                  └─ section id="footer"   → Footer    (04, Contact)
 ```
 
-The order tells a story: where I come from, what I shipped, with what, then contact. Navigation is `document.getElementById(id).scrollIntoView()` against those section ids — there is no router. Adding or renaming a section means updating both `PortfolioApp`'s JSX **and** `NAV_LINKS` in `src/components/main/NavBar.tsx`, which derives its scroll-spy `SECTION_IDS` from that array (plus `home`, tracked without a link: the monogram already goes back up).
+The order tells a story aimed at recruiters (the owner targets Senior/Lead Backend .NET and Full-stack .NET/Angular roles): what I shipped, with what, then where I come from — the CV already tells the path — then contact. Navigation is `document.getElementById(id).scrollIntoView()` against those section ids — there is no router. Adding or renaming a section means updating both `PortfolioApp`'s JSX **and** `NAV_LINKS` in `src/components/main/NavBar.tsx`, which derives its scroll-spy `SECTION_IDS` from that array (plus `home`, tracked without a link: the monogram already goes back up).
 
 ## The three systems to respect
 
@@ -134,6 +134,7 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
 - `sub/ProjectImage.tsx` — progressive de-blur on load. Sets `filter` **inline** on purpose: Tailwind's `blur-*` routes through `--tw-blur`, declared `@property { syntax: "*" }`, which animates discretely and cannot interpolate; and written as an arbitrary class the minifier collapsed `blur(0px)` to `blur()`.
 - `WaveRule.tsx` — the swell line, the only divider left: once below the hero, once above the footer credits. A 1.5 px stroke in `--line-strong`, decorative and `aria-hidden`. The wavelength is **fixed** (the path is drawn in pixels over 2400 px and the SVG crops it, no `viewBox`) so the waves keep their shape on every screen width. It enters with a left-to-right `clip-path` wipe, not `scaleX`, which would squash the waves mid-animation. It replaced `FlagRule`, the tricolor bar, removed from the screens at the owner's request.
 - `SectionHeader.tsx` — mono number + label + title + optional intro + optional illustration. Every section below the hero uses it; the numbers (`01`–`04`) are manual, so renumber if you reorder sections. A pirate illustration passes `display: { mobile, desktop }` (shown at every width, under the text on a phone), an optional fixed `tilt`, and `float` for the bottle.
+- `main/Projects.tsx` — the first published project is the **featured** one (NmaPhoto): a centered poster on desktop (screenshot in a `BrowserFrame` pinned on the treasure map `/pirate/carte.png`, the award as a red wax `Seal`, a `facts` grid below), a phone on the map on mobile (`imageMobileUrl`, falling back to `imageUrl`). The rest are alternating showcases grouped by `kind`: `employer` (« Réalisés chez Netsen Group »), `client`, then `personal`; numbering is continuous across groups. The intro never states a project count — it changes. Screenshots live in `public/projets/*.webp`.
 - `main/Journey.tsx` — the Parcours section, a ship's log: one row per `experiences` row, the stop number derived from the order (`Escale 06 · en cours` … `Port de départ`), never stored. Square marker: brand red for the current job, ink for a job, flag green for training (a graphic, so 3.72:1 is fine).
 
 ## Content location
@@ -141,6 +142,8 @@ An earlier pass used Instrument Serif for titles and was rejected as too faint �
 Skills carry **no self-rated percentage** — that system was removed deliberately, so adding a competency never requires inventing a number. Don't reintroduce it.
 
 Projects, skills, settings and the journey (`experiences`, admin tab « Parcours », migration `drizzle/0005_parcours.sql`, which also inserts the six stops from the CV) come from the **database**. Section copy (titles, intros) is hardcoded **inside its component**, not in a shared data file. Older note: `PROJECTS` in `main/Projects.tsx`, `CATEGORIES` in `main/Skills.tsx`, `STATS`/`STACK`/`SOCIALS` in `sub/HeroContent.tsx`, `EMAIL`/`LINKS` in `main/Footer.tsx`. The old `src/constants/index.ts` and `utils/motion.ts` were deleted along with the components that used them.
+
+Projects carry `kind` (`personal` | `employer` | `client`), `context`, `contribution`, `award`, `facts` (`"Libellé : valeur"`, one per line in the admin form) and `imageMobileUrl` — migration `drizzle/0007_projets_vitrine.sql`. **Run it before deploying the code**: the public query selects those columns, so the page 500s against an un-migrated database. `scripts/refonte-maroc.ts` writes the matching content (hero, journey summaries, skills, the five projects; old projects are unpublished, never deleted). It refuses a non-local `DATABASE_URL` without `REFONTE_CONFIRM=1`. Facts and metrics in that content are the owner's own — never invent user counts or performance figures.
 
 `hero_stats` and `hero_stack` are gone: the chronograph took the stats row and the captain's orbit took the stack column, and migration `drizzle/0006_freezing_blade.sql` dropped both tables once the redesign was deployed.
 

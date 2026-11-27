@@ -33,7 +33,7 @@ export default function Journey({ steps }: { steps: Experience[] }) {
   return (
     <>
       <SectionHeader
-        num="01"
+        num="03"
         label="Parcours"
         title="De junior à Lead Dev en vingt-six mois."
         intro="Mon journal de bord : trois escales chez Netsen Group, après un stage chez eMsanté et une traversée depuis l'instrumentation."

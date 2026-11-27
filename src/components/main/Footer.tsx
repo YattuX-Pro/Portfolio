@@ -26,7 +26,7 @@ export default function Footer({ settings }: { settings: SiteSettings | null }) 
         num="04"
         label="Contact"
         title="Travaillons ensemble."
-        intro="Un projet à mener à bon port ? Analyste développeur, ouvert aux opportunités full-time et freelance. Pas besoin de bouteille à la mer : un e-mail suffit."
+        intro="Je cherche un poste de développeur backend .NET, full-stack .NET / Angular ou lead backend. Pas besoin de bouteille à la mer : un e-mail suffit."
         illustration={{
           src: "/pirate/bouteille.png",
           width: 640,

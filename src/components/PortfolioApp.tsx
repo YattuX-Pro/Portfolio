@@ -48,16 +48,10 @@ export default function PortfolioApp({ data }: { data: SiteData }) {
               devenaient un motif répétitif au lieu d'un repère. */}
           <WaveRule />
 
-          {/* Ordre du récit : d'où je viens (Parcours), ce que j'ai livré
-              (Projets), avec quoi (Expertise), puis le contact. Sans étape en
-              base, la section Parcours disparaît plutôt que d'afficher un
-              journal vide. */}
-          {data.journey.length > 0 ? (
-            <section id="parcours" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
-              <Journey steps={data.journey} />
-            </section>
-          ) : null}
-
+          {/* Ordre du récit : ce que j'ai livré (Projets), avec quoi
+              (Expertise), d'où je viens (Parcours, en dernier : le CV raconte
+              déjà le parcours), puis le contact. Sans étape en base, la section
+              Parcours disparaît plutôt que d'afficher un journal vide. */}
           <section id="projects" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
             <Projects projects={data.projects} />
           </section>
@@ -65,6 +59,12 @@ export default function PortfolioApp({ data }: { data: SiteData }) {
           <section id="skills" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
             <Skills skills={data.skills} method={data.settings?.method ?? null} />
           </section>
+
+          {data.journey.length > 0 ? (
+            <section id="parcours" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
+              <Journey steps={data.journey} />
+            </section>
+          ) : null}
 
           <section id="footer" className="py-20 sm:py-24 lg:py-32 scroll-mt-20">
             <Footer settings={data.settings} />

@@ -45,6 +45,29 @@ export const projects = pgTable(
        s'étale rarement sur une année pile. */
     year: text("year"),
 
+    /* ── Présentation sur le site ──────────────────────────────────────
+       Le premier projet publié (position la plus basse) est le projet phare ;
+       les suivants sont groupés par `kind` sous un intertitre. */
+
+    /* `personal` (produit à moi), `employer` (réalisé pour un employeur,
+       Netsen Group), `client` (réalisé pour un client, en freelance). Un nom
+       et non un libellé : l'intertitre vit dans Projects.tsx. */
+    kind: text("kind").notNull().default("personal"),
+    /* La ligne de contexte au-dessus du titre : le client ou le cadre
+       (« Ministère de l'Élevage », « Produit personnel »…). */
+    context: text("context"),
+    /* Ce que j'y ai fait, en une ou deux phrases : affiché sous la
+       description, dans la vitrine. */
+    contribution: text("contribution"),
+    /* Une distinction (« 3e prix ANSUTEN ») : le sceau du projet phare. */
+    award: text("award"),
+    /* Les repères du projet phare, un par entrée, au format
+       « Libellé : valeur » (« Utilisation : Des milliers de personnes »). */
+    facts: text("facts").array().notNull().default([]),
+    /* Capture de la version mobile, pour le téléphone du projet phare.
+       Même règle que imageUrl : clé de stockage ou chemin /public. */
+    imageMobileUrl: text("image_mobile_url"),
+
     /* Tags de stack, dans l'ordre voulu. */
     stack: text("stack").array().notNull().default([]),
     demoUrl: text("demo_url"),

@@ -78,6 +78,73 @@ export default function ProjectForm({
           />
         </Field>
 
+        {/* ── Présentation sur le site ──────────────────────────────────
+            Le premier projet publié est le projet phare ; les autres sont
+            groupés sous un intertitre selon leur type. */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="kind">Type</FieldLabel>
+            <select
+              id="kind"
+              name="kind"
+              defaultValue={project?.kind ?? "personal"}
+              className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+            >
+              <option value="personal">Projet personnel</option>
+              <option value="employer">Réalisé chez Netsen Group</option>
+              <option value="client">Pour un client (freelance)</option>
+            </select>
+            <FieldDescription>Choisit le groupe du projet sur le site.</FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="context">Contexte</FieldLabel>
+            <Input
+              id="context"
+              name="context"
+              placeholder="Ministère de l'Élevage"
+              defaultValue={project?.context ?? ""}
+            />
+            <FieldDescription>Le client ou le cadre, au-dessus du titre.</FieldDescription>
+          </Field>
+        </div>
+
+        <Field>
+          <FieldLabel htmlFor="contribution">Mon apport</FieldLabel>
+          <Textarea
+            id="contribution"
+            name="contribution"
+            rows={2}
+            placeholder="Ce que j'y ai fait, en une ou deux phrases."
+            defaultValue={project?.contribution ?? ""}
+          />
+        </Field>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="award">Distinction</FieldLabel>
+            <Input
+              id="award"
+              name="award"
+              placeholder="3e prix ANSUTEN"
+              defaultValue={project?.award ?? ""}
+            />
+            <FieldDescription>Le sceau du projet phare. Facultatif.</FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="facts">Repères</FieldLabel>
+            <Textarea
+              id="facts"
+              name="facts"
+              rows={3}
+              placeholder={"Utilisation : Des milliers de personnes\nDistinction : 3e prix ANSUTEN"}
+              defaultValue={project?.facts.join("\n")}
+            />
+            <FieldDescription>Projet phare : un par ligne, « Libellé : valeur ».</FieldDescription>
+          </Field>
+        </div>
+
         {/* ── Étude de cas ─────────────────────────────────────────────
             Ce que le panneau de détail affiche sur le site. Tout est
             facultatif : une section vide ne s'affiche simplement pas. */}
@@ -172,6 +239,27 @@ export default function ProjectForm({
         </Field>
 
         <Field>
+          <FieldLabel htmlFor="imageMobileFile">Capture mobile (projet phare)</FieldLabel>
+          <Input
+            id="imageMobileFile"
+            name="imageMobileFile"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+          />
+          <Input
+            id="imageMobileUrl"
+            name="imageMobileUrl"
+            aria-label="Ou adresse de la capture mobile"
+            placeholder="/projets/nmaphoto-mobile.webp"
+            defaultValue={project?.imageMobileUrl ?? ""}
+          />
+          <FieldDescription>
+            Affichée dans un téléphone sur mobile. Un fichier choisi remplace
+            l&apos;adresse. Vide = la capture principale est utilisée.
+          </FieldDescription>
+        </Field>
+
+        <Field>
           <FieldLabel htmlFor="githubUrl">Code source</FieldLabel>
           <Input
             id="githubUrl"
@@ -183,7 +271,7 @@ export default function ProjectForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="demoUrl">Démo</FieldLabel>
+          <FieldLabel htmlFor="demoUrl">Site en ligne</FieldLabel>
           <Input
             id="demoUrl"
             name="demoUrl"
